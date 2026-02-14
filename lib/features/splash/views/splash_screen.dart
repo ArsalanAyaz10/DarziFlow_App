@@ -1,3 +1,4 @@
+import 'package:dariziflow_app/core/theme/app_theme.dart';
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/utils/fonts.dart';
 import 'package:dariziflow_app/core/widgets/bgcircles.dart';
@@ -5,6 +6,7 @@ import 'package:dariziflow_app/features/splash/controller/splash_controller.dart
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/src/simple/get_view.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get_state_manager/src/simple/get_widget_cache.dart';
 
 class SplashScreen extends GetView<SplashController> {
   const SplashScreen({super.key});
@@ -31,12 +33,25 @@ class SplashScreen extends GetView<SplashController> {
                 child: Column(
                   children: [
                     const Spacer(),
-                    Center(
-                      child: SvgPicture.asset(
-                        'assets/images/splash.svg',
-                        width: 200.0,
-                        height: 200.0,
-                      ),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/images/splash.svg',
+                          width: 150.0,
+                          height: 150.0,
+                        ),
+                        const SizedBox(height: 25),
+                        Text(
+                          "PRECISION IN PRODUCTION",
+                          style: TextStyle(
+                            fontFamily: AppFonts.outfit,
+                            fontSize: 14,
+                            color: AppColors.black,
+                            fontWeight: FontWeight.w300,
+                          ),
+                        ),
+                      ],
                     ),
                     const Spacer(),
                     Padding(
@@ -77,20 +92,149 @@ class SplashScreen extends GetView<SplashController> {
                 ),
               ),
 
-              // PAGE 2
+              // PAGE 2 HERE
+              // PAGE 2: Welcome/Onboarding Content
               SafeArea(
-                child: Form(
-                  autovalidateMode: AutovalidateMode.always,
-                  canPop: true,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: Column(
                     children: [
+                      const Spacer(flex: 2),
+                      // Central Icon Container
                       Container(
+                        width: 90,
+                        height: 90,
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          backgroundBlendMode: BlendMode.color,
+                          color: AppColors.primaryGreen.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: SvgPicture.asset(
+                          'assets/images/Layer.svg',
+                          fit: BoxFit.contain,
                         ),
                       ),
-                      const Spacer(),
-                      Container(),
+                      const SizedBox(height: 40),
+                      // App Name/Branding
+                      RichText(
+                        text: TextSpan(
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontFamily: AppFonts.outfit,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.black,
+                          ),
+                          children: const [
+                            TextSpan(text: "Darzi"),
+                            TextSpan(
+                              text: "Flow",
+                              style: TextStyle(color: AppColors.primaryGreen),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        "Manage your workflow with precision.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontFamily: AppFonts.outfit,
+                          color: AppColors.grey,
+                        ),
+                      ),
+                      const Spacer(flex: 3),
+
+                      Column(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () => controller.navigateToSignUp(),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryGreen,
+                              minimumSize: const Size(double.infinity, 56),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Text(
+                                  "Sign Up",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                SizedBox(width: 8),
+                                Icon(
+                                  Icons.arrow_forward,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          // Login Button
+                          OutlinedButton(
+                            onPressed: () => controller.navigateToLogin(),
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: const Size(double.infinity, 56),
+                              side: const BorderSide(
+                                color: AppColors.primaryGreen,
+                                width: 2,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  "Login ",
+                                  style: TextStyle(
+                                    color: AppColors.primaryGreen,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.arrow_forward,
+                                  color: AppColors.primaryGreen,
+                                  size: 20,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 30),
+                      // Footer Terms
+                      RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.grey,
+                            fontFamily: AppFonts.outfit,
+                          ),
+                          children: const [
+                            TextSpan(text: "By continuing, you agree to our "),
+                            TextSpan(
+                              text: "Terms of Service",
+                              style: TextStyle(
+                                color: AppColors.primaryGreen,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
