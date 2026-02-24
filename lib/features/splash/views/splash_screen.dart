@@ -4,6 +4,8 @@ import 'package:dariziflow_app/core/utils/fonts.dart';
 import 'package:dariziflow_app/core/widgets/bgcircles.dart';
 import 'package:dariziflow_app/features/splash/controller/splash_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_state_manager/src/simple/get_view.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get_state_manager/src/simple/get_widget_cache.dart';
@@ -148,7 +150,7 @@ class SplashScreen extends GetView<SplashController> {
                       Column(
                         children: [
                           ElevatedButton(
-                            onPressed: () => controller.navigateToSignUp(),
+                            onPressed: () => Get.toNamed('/signup'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primaryGreen,
                               minimumSize: const Size(double.infinity, 56),
@@ -180,7 +182,7 @@ class SplashScreen extends GetView<SplashController> {
                           const SizedBox(height: 12),
                           // Login Button
                           OutlinedButton(
-                            onPressed: () => controller.navigateToLogin(),
+                            onPressed: () => Get.toNamed('/login'),
                             style: OutlinedButton.styleFrom(
                               minimumSize: const Size(double.infinity, 56),
                               side: const BorderSide(
