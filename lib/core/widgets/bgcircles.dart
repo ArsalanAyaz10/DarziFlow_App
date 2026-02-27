@@ -21,11 +21,9 @@ class BackgroundCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Determine the size based on screen width
     final double size = MediaQuery.of(context).size.width * sizeMultiplier;
 
     return Positioned(
-      // If the value is provided, we multiply it by screen width to keep it responsive
       top: top != null ? MediaQuery.of(context).size.width * top! : null,
       left: left != null ? MediaQuery.of(context).size.width * left! : null,
       bottom: bottom != null ? MediaQuery.of(context).size.width * bottom! : null,
@@ -34,7 +32,7 @@ class BackgroundCircle extends StatelessWidget {
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color: AppColors.primaryGreen.withOpacity(opacity),
+          color: AppColors.primaryGreen.withValues(alpha: opacity),
           shape: BoxShape.circle,
         ),
       ),

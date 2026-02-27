@@ -1,21 +1,41 @@
 name: Build
+
 on:
   push:
     branches:
       - main
   pull_request:
     types: [opened, synchronize, reopened]
+
 jobs:
   sonarqube:
     name: SonarQube
     runs-on: windows-latest
+
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      # The analysis requires to retrieve dependencies and build successfully
-      - name: Build
-        run: <mark><commands_to_build_your_project></mark>
+          fetch-depth: 0
+
+      # Install Flutter
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      # Install dependencies
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Static analysis
+      - name: Run analyzer
+        run: flutter analyze
+
+      # Run tests (will pass even if you have no tests)
+      - name: Run tests
+        run: flutter test
+
+      # SonarCloud scan
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
