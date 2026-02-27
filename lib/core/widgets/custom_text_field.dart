@@ -48,19 +48,19 @@ class CustomTextField extends StatelessWidget {
             fillColor: const Color(0xFFF1F4F8),
             hintText: hint,
             hintStyle: TextStyle(
-              color: AppColors.grey.withOpacity(0.6),
+              color: AppColors.grey.withValues(alpha: 0.6),
               fontSize: 14,
             ),
             prefixIcon: Icon(
               icon,
-              color: AppColors.grey.withOpacity(0.8),
+              color: AppColors.grey.withValues(alpha: 0.8),
               size: 18,
             ),
             suffixIcon: suffixIcon != null
                 ? IconButton(
                     icon: Icon(
                       suffixIcon,
-                      color: AppColors.grey.withOpacity(0.8),
+                      color: AppColors.grey.withValues(alpha: 0.8),
                       size: 18,
                     ),
                     onPressed: onSuffixTap,
@@ -80,7 +80,10 @@ class CustomTextField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.primaryGreen, width: 1),
+              borderSide: const BorderSide(
+                color: AppColors.primaryGreen,
+                width: 1,
+              ),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -102,7 +105,7 @@ class CustomTextField extends StatelessWidget {
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.bold,
-            color: AppColors.black.withOpacity(0.7),
+            color: AppColors.black.withValues(alpha: 0.7),
             letterSpacing: 1.1,
           ),
         ),

@@ -1,6 +1,4 @@
-import 'dart:ui';
-
-import 'package:dariziflow_app/features/dept_head/repository/department_repository.dart';
+import 'package:dariziflow_app/features/dept_head/repositories/department_repository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -66,19 +64,17 @@ class DeptHeadController extends GetxController {
     errorMessage.value = '';
 
     try {
-      // Load user info first since it doesn't depend on departmentId
       await loadUserInfo();
-      
-      // Then load overview which will set departmentId
+
       await fetchOverview();
-      
-      // Finally load activities using the departmentId
+
       if (departmentId.value.isNotEmpty) {
         await _loadActivities();
       } else {
-        print("Warning: departmentId is empty, cannot load activities");
+        if (kDebugMode) {
+          print("Warning: departmentId is empty, cannot load activities");
+        }
       }
-      
     } catch (e) {
       errorMessage.value = 'Failed to load dashboard data';
       if (kDebugMode) {
@@ -99,11 +95,10 @@ class DeptHeadController extends GetxController {
     try {
       await loadUserInfo();
       await fetchOverview(forceRefresh: true);
-      
+
       if (departmentId.value.isNotEmpty) {
         await _loadActivities(forceRefresh: true);
       }
-      
     } catch (e) {
       errorMessage.value = 'Failed to refresh dashboard';
       if (kDebugMode) {
@@ -122,7 +117,9 @@ class DeptHeadController extends GetxController {
       formattedUserRole.value = _formatRole(rawRole);
       userRole.value = rawRole;
     } catch (e) {
-      print("Error loading user info: $e");
+      if (kDebugMode) {
+        print("Error loading user info: $e");
+      }
     }
   }
 
@@ -147,12 +144,11 @@ class DeptHeadController extends GetxController {
 
     try {
       final data = await repository.fetchOverview();
-      
+
       if (kDebugMode) {
         print("Overview data received: $data");
       }
 
-      // Extract department info
       final dept = data['department'] ?? {};
       departmentName.value = dept['name'] ?? 'Department';
       deptStatus.value = dept['status'] ?? 'Unknown';
@@ -160,10 +156,9 @@ class DeptHeadController extends GetxController {
 
       // Extract chart data
       final chart = data['chartData'] ?? {};
-      
-      // Try to get orders from different possible locations in the response
+
       List<dynamic> orders = [];
-      
+
       if (data['orders'] != null) {
         orders = data['orders'] as List;
       } else if (data['recentOrders'] != null) {
@@ -176,7 +171,6 @@ class DeptHeadController extends GetxController {
         print("Found ${orders.length} orders");
       }
 
-      // Calculate metrics even if orders are empty (will show zeros)
       _calculateMetrics(orders, chart);
 
       _lastOverviewFetch = DateTime.now();
@@ -184,7 +178,6 @@ class DeptHeadController extends GetxController {
       if (kDebugMode) {
         print("Overview Error: $e");
       }
-      // Don't rethrow - we want to continue even if overview fails
     }
   }
 
@@ -203,17 +196,15 @@ class DeptHeadController extends GetxController {
     int overdueCount = 0;
     int pendingCheckpointCount = 0;
 
-    // If we have chart data, use it as base
     if (chart.isNotEmpty) {
       total = chart['totalOrders'] ?? 0;
       inProgress = (chart['inProgress'] ?? 0) + (chart['pending'] ?? 0);
       completed = chart['completed'] ?? 0;
     }
 
-    // Process each order for detailed metrics
     for (var order in orders) {
-      total++; // Increment total for each order found
-      
+      total++;
+
       final orderStatus = order['overallStatus'] ?? '';
       if (orderStatus == 'COMPLETED') {
         completed++;
@@ -221,23 +212,23 @@ class DeptHeadController extends GetxController {
         inProgress++;
       }
 
-      // Process workflow data
       final workflow = order['workflow'] as List? ?? [];
-      
+
       for (var deptWorkflow in workflow) {
-        // Check if this workflow section belongs to current department
-        final deptId = deptWorkflow['departmentId']?['\$oid'] ?? 
-                      deptWorkflow['departmentId']?.toString() ?? '';
-        
+        final deptId =
+            deptWorkflow['departmentId']?['\$oid'] ??
+            deptWorkflow['departmentId']?.toString() ??
+            '';
+
         if (deptId == departmentId.value || departmentId.value.isEmpty) {
           final operations = deptWorkflow['operations'] as List? ?? [];
-          
+
           for (var op in operations) {
             final checkpoints = op['checkpoints'] as List? ?? [];
-            
+
             for (var checkpoint in checkpoints) {
               totalCheckpointCount++;
-              
+
               final status = checkpoint['status'] ?? 'PENDING';
               if (status == 'COMPLETED' || status == 'APPROVED') {
                 completedCheckpointCount++;
@@ -326,7 +317,9 @@ class DeptHeadController extends GetxController {
     queueSize.value = pendingCheckpointCount.toString();
 
     if (kDebugMode) {
-      print("Metrics calculated - Total Orders: $total, Checkpoints: $totalCheckpointCount, Activities: ${processedActivities.length}");
+      print(
+        "Metrics calculated - Total Orders: $total, Checkpoints: $totalCheckpointCount, Activities: ${processedActivities.length}",
+      );
     }
   }
 
@@ -374,7 +367,9 @@ class DeptHeadController extends GetxController {
 
   Future<void> _loadActivities({bool forceRefresh = false}) async {
     if (departmentId.value.isEmpty) {
-      print("Cannot load activities: departmentId is empty");
+      if (kDebugMode) {
+        print("Cannot load activities: departmentId is empty");
+      }
       return;
     }
 
@@ -411,7 +406,7 @@ class DeptHeadController extends GetxController {
       final orderName = order['orderName'] ?? 'Unknown Order';
       final orderUniqueId = order['orderUniqueId'] ?? '';
       final orderId = order['_id'] ?? '';
-      
+
       // Truncate uniqueId safely
       String displayId = orderUniqueId;
       if (orderUniqueId.length > 6) {
@@ -438,7 +433,8 @@ class DeptHeadController extends GetxController {
             } else if (action == 'APPROVE') {
               message = '$checkpointName approved';
             } else if (action == 'REJECT') {
-              message = '$checkpointName rejected${comment.isNotEmpty ? ': $comment' : ''}';
+              message =
+                  '$checkpointName rejected${comment.isNotEmpty ? ': $comment' : ''}';
             } else {
               message = '$checkpointName ${action.toLowerCase()}d';
             }
@@ -465,7 +461,7 @@ class DeptHeadController extends GetxController {
     });
 
     processedActivities.value = processed;
-    
+
     if (kDebugMode) {
       print("Processed ${processed.length} activities");
     }

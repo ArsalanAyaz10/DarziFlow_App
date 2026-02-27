@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:dariziflow_app/core/utils/colors.dart';
-import 'package:dariziflow_app/core/utils/fonts.dart';
 
 class CustomDropdown<T> extends StatelessWidget {
   final T? value;
@@ -39,11 +38,11 @@ class CustomDropdown<T> extends StatelessWidget {
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButtonFormField<T>(
-              value: value,
+              initialValue: value,
               hint: Text(
                 hint,
                 style: TextStyle(
-                  color: AppColors.grey.withOpacity(0.6),
+                  color: AppColors.grey.withValues(alpha: 0.6),
                   fontSize: 14,
                 ),
               ),
@@ -51,7 +50,7 @@ class CustomDropdown<T> extends StatelessWidget {
               decoration: InputDecoration(
                 prefixIcon: Icon(
                   prefixIcon,
-                  color: AppColors.grey.withOpacity(0.8),
+                  color: AppColors.grey.withValues(alpha: 0.8),
                 ),
                 prefixIconConstraints: const BoxConstraints(minWidth: 40),
                 border: InputBorder.none,
@@ -77,7 +76,7 @@ class CustomDropdown<T> extends StatelessWidget {
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.bold,
-            color: AppColors.black.withOpacity(0.7),
+            color: AppColors.black.withValues(alpha: 0.7),
             letterSpacing: 1.1,
           ),
         ),

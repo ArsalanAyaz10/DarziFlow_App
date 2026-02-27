@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../repositories/auth_repository.dart';
@@ -33,7 +32,6 @@ class SignupController extends GetxController {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
 
-    // For client invite, password can be empty
     if (selectedRole.value != UserRole.client && password.isEmpty) {
       Get.snackbar("Error", "Password is required for QC and Supervisor");
       return;
