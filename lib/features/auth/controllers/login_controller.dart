@@ -10,7 +10,7 @@ class LoginController extends GetxController {
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-
+   final formKey = GlobalKey<FormState>();
   var isPasswordVisible = false.obs;
   var isLoading = false.obs;
 
