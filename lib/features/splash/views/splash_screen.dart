@@ -1,4 +1,3 @@
-import 'package:dariziflow_app/core/theme/app_theme.dart';
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/utils/fonts.dart';
 import 'package:dariziflow_app/core/widgets/bgcircles.dart';
@@ -8,7 +7,6 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_state_manager/src/simple/get_view.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:get/get_state_manager/src/simple/get_widget_cache.dart';
 
 class SplashScreen extends GetView<SplashController> {
   const SplashScreen({super.key});
@@ -94,7 +92,6 @@ class SplashScreen extends GetView<SplashController> {
                 ),
               ),
 
-              // PAGE 2 HERE
               // PAGE 2: Welcome/Onboarding Content
               SafeArea(
                 child: Padding(

@@ -1,4 +1,7 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
+import 'package:dariziflow_app/core/widgets/bottom_nav_bar.dart';
+import 'package:dariziflow_app/core/widgets/error_view.dart';
+import 'package:dariziflow_app/core/widgets/status_badge.dart';
 import 'package:dariziflow_app/features/dept_head/controllers/deptHeadController.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,11 +14,14 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
     return Scaffold(
       backgroundColor: AppColors.lightGrey,
       body: Obx(() {
-        // Show full screen loader only on first load
-        if (controller.isLoading.value && 
+        if (controller.isLoading.value &&
             controller.processedActivities.isEmpty) {
-          return const Center(
-            child: CircularProgressIndicator(),
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (controller.errorMessage.value.isNotEmpty) {
+          return ErrorView(
+            message: controller.errorMessage.value,
+            onRetry: controller.refreshDashboard,
           );
         }
 
@@ -49,86 +55,57 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
                 ),
               ),
             ),
-            _buildBottomNavigationBar(),
+            const BottomNavBar(currentIndex: 0),
           ],
         );
       }),
     );
   }
 
-  Widget _buildErrorWidget() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
-          const SizedBox(height: 16),
-          Text(
-            controller.errorMessage.value,
-            style: const TextStyle(fontSize: 16),
+  Widget _buildAppBar() {
+    return Obx(
+      () => AppBar(
+        backgroundColor: AppColors.transparent,
+        elevation: 0,
+        leading: const Padding(
+          padding: EdgeInsets.only(left: 10),
+          child: CircleAvatar(
+            backgroundColor: AppColors.grey,
+            child: Icon(Icons.person, color: AppColors.white),
           ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: controller.refreshDashboard,
-            child: const Text('Retry'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      leading: const Padding(
-        padding: EdgeInsets.only(left: 10),
-        child: CircleAvatar(
-          backgroundColor: Colors.grey,
-          child: Icon(Icons.person, color: Colors.white),
         ),
-      ),
-      title: Obx(
-        () => Column(
+        title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               controller.userRole.value,
-              style: TextStyle(
-                color: Colors.black,
+              style: const TextStyle(
+                color: AppColors.black,
                 fontSize: 9,
                 fontWeight: FontWeight.bold,
               ),
             ),
             Text(
               controller.userName.value,
-              style: TextStyle(
-                color: Colors.black,
+              style: const TextStyle(
+                color: AppColors.black,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.search, color: AppColors.black),
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.notifications_none, color: AppColors.black),
+          ),
+        ],
       ),
-      actions: [
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(
-            Icons.search,
-            color: Colors.black54,
-            semanticLabel: "Search User",
-          ),
-        ),
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(
-            Icons.notifications_none,
-            color: Colors.black54,
-            semanticLabel: "Notifications",
-          ),
-        ),
-      ],
     );
   }
 
@@ -143,28 +120,11 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
                 : controller.departmentName.value,
             style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              children: [
-                const CircleAvatar(radius: 4, backgroundColor: Colors.green),
-                const SizedBox(width: 5),
-                Text(
-                  controller.deptStatus.value.isEmpty
-                      ? "Unknown Status"
-                      : controller.deptStatus.value,
-                  style: const TextStyle(
-                    color: Colors.green,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
+          StatusBadge(
+            status: controller.deptStatus.value.isEmpty
+                ? "Unknown Status"
+                : controller.deptStatus.value,
+            color: AppColors.primaryGreen,
           ),
         ],
       ),
@@ -172,32 +132,41 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
   }
 
   Widget _buildStatCards() {
-    return Row(
-      children: [
-        _statTile(
-          "Total Orders",
-          controller.totalOrders.value.toString(),
-          "+12%",
-          Colors.green,
-        ),
-        const SizedBox(width: 15),
-        _statTile(
-          "In Progress",
-          controller.inProgressOrders.value.toString(),
-          "Queue: 18",
-          Colors.blueGrey,
-        ),
-      ],
-    );
+    return Obx(() {
+      return Row(
+        children: [
+          _buildStatTile(
+            "Total Orders",
+            controller.totalOrders.value.toString(),
+            controller.ordersTrend.value,
+            AppColors.primaryGreen,
+          ),
+          const SizedBox(width: 15),
+          _buildStatTile(
+            "In Progress",
+            controller.inProgressOrders.value.toString(),
+            "Queue: ${controller.pendingCheckpoints.value}",
+            AppColors.blueGrey,
+            trendIcon: Icons.hourglass_empty,
+          ),
+        ],
+      );
+    });
   }
 
-  Widget _statTile(String label, String value, String subText, Color color) {
+  Widget _buildStatTile(
+    String label,
+    String value,
+    String subText,
+    Color color, {
+    IconData? trendIcon,
+  }) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(15),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: Colors.grey.shade200),
         ),
         child: Column(
@@ -205,21 +174,34 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
           children: [
             Text(
               label,
-              style: const TextStyle(color: Colors.black54, fontSize: 14),
+              style: const TextStyle(color: Colors.black54, fontSize: 13),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             Text(
               value,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 5),
-            Text(
-              subText,
-              style: TextStyle(
-                color: color,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(
+                  trendIcon ??
+                      (subText.startsWith('+')
+                          ? Icons.trending_up
+                          : Icons.trending_down),
+                  size: 14,
+                  color: color,
+                ),
+                const SizedBox(width: 2),
+                Text(
+                  subText,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -231,83 +213,148 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
     return Obx(
       () => Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(25),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: const Color(0xFF4CAF50),
-          borderRadius: BorderRadius.circular(25),
+          gradient: LinearGradient(
+            colors: [AppColors.primaryGreen, const Color(0xFF4CAF50)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
               color: Colors.green.withOpacity(0.3),
               blurRadius: 10,
-              offset: const Offset(0, 5),
+              offset: const Offset(0, 4),
             ),
           ],
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Column(
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  "Overall Performance",
-                  style: TextStyle(color: Colors.white60, fontSize: 14),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Department Performance",
+                      style: TextStyle(color: Colors.white70, fontSize: 13),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      "Efficiency Score",
+                      style: TextStyle(
+                        color: AppColors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.black.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        "Quality: ${controller.qualityScore.value}%",
+                        style: const TextStyle(
+                          color: AppColors.white,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                const Text(
-                  "Efficiency\nScore",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    height: 1.1,
-                  ),
-                ),
-                const SizedBox(height: 15),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Text(
-                    "Daily Target: 92%",
-                    style: TextStyle(color: Colors.white, fontSize: 12),
-                  ),
-                ),
+                _buildScoreCircle(),
               ],
             ),
-            Stack(
-              alignment: Alignment.center,
+            const SizedBox(height: 15),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                SizedBox(
-                  height: 100,
-                  width: 100,
-                  child: CircularProgressIndicator(
-                    value: controller.efficiencyScore.value / 100,
-                    strokeWidth: 10,
-                    backgroundColor: Colors.white.withOpacity(0.2),
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      Colors.white,
-                    ),
-                  ),
+                _buildMetricItem(
+                  "Checkpoints",
+                  "${controller.completedCheckpoints.value}/${controller.totalCheckpoints.value}",
+                  Icons.task_alt,
                 ),
-                Text(
-                  "${controller.efficiencyScore.value}%",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                _buildMetricItem(
+                  "Quality",
+                  "${controller.qualityScore.value}%",
+                  Icons.star,
+                ),
+                _buildMetricItem(
+                  "Overdue",
+                  "${controller.overdueTasks.value}",
+                  Icons.warning_amber,
                 ),
               ],
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildScoreCircle() {
+    return Obx(
+      () => Stack(
+        alignment: Alignment.center,
+        children: [
+          SizedBox(
+            height: 70,
+            width: 70,
+            child: CircularProgressIndicator(
+              value: controller.efficiencyScore.value / 100,
+              strokeWidth: 6,
+              backgroundColor: AppColors.white.withOpacity(0.2),
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "${controller.efficiencyScore.value}",
+                style: const TextStyle(
+                  color: AppColors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Text(
+                "%",
+                style: TextStyle(color: Colors.white70, fontSize: 10),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetricItem(String label, String value, IconData icon) {
+    return Column(
+      children: [
+        Icon(icon, color: Colors.white70, size: 16),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            color: AppColors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          label,
+          style: const TextStyle(color: Colors.white70, fontSize: 10),
+        ),
+      ],
     );
   }
 
@@ -320,11 +367,11 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         GestureDetector(
-          onTap: () => controller.navigateToFullActivityList(),
+          onTap: controller.navigateToFullActivityList,
           child: const Text(
             "VIEW ALL",
             style: TextStyle(
-              color: Colors.green,
+              color: AppColors.primaryGreen,
               fontWeight: FontWeight.bold,
               fontSize: 12,
             ),
@@ -372,8 +419,8 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
           final timeAgo = controller.formatTimeAgo(actedAt);
           final message = controller.formatReadableMessage(action, checkpoint);
 
-          return _activityCard(
-            orderId: activity['orderId'],
+          return _buildActivityCard(
+            orderId: activity['orderId'] ?? '',
             title: orderName,
             message: message,
             action: action,
@@ -384,7 +431,7 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
     });
   }
 
-  Widget _activityCard({
+  Widget _buildActivityCard({
     required String orderId,
     required String title,
     required String message,
@@ -392,16 +439,14 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
     required String timeAgo,
   }) {
     final color = _getActionColor(action);
-    final icon = controller.getActionIcon(action);
+    final icon = _getActionIcon(action);
 
     return GestureDetector(
-      onTap: () {
-        Get.toNamed("/order-details", arguments: orderId);
-      },
+      onTap: () => Get.toNamed("/order-details", arguments: orderId),
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(15),
         ),
         child: ListTile(
@@ -421,7 +466,7 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
           subtitle: Text(message, style: TextStyle(color: color)),
           trailing: Text(
             timeAgo,
-            style: const TextStyle(color: Colors.grey, fontSize: 12),
+            style: const TextStyle(color: AppColors.grey, fontSize: 12),
           ),
         ),
       ),
@@ -431,80 +476,26 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
   Color _getActionColor(String action) {
     switch (action) {
       case 'APPROVE':
-        return Colors.green;
+        return AppColors.primaryGreen;
       case 'REJECT':
-        return Colors.red;
+        return AppColors.error;
       case 'SUBMIT':
-        return Colors.blue;
+        return AppColors.primaryBlue;
       default:
-        return Colors.grey;
+        return AppColors.grey;
     }
   }
 
-  Widget _buildBottomNavigationBar() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.green,
-        unselectedItemColor: Colors.grey,
-        currentIndex: 0,
-        onTap: (index) {
-          // Handle navigation
-          switch (index) {
-            case 0: // Dashboard
-              break;
-            case 1: // Orders
-              Get.toNamed('/orders');
-              break;
-            case 2: // Workflows
-              Get.toNamed('/workflows');
-              break;
-            case 3: // Messages
-              Get.toNamed('/messages');
-              break;
-            case 4: // Profile
-              Get.toNamed('/profile');
-              break;
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard_outlined),
-            activeIcon: Icon(Icons.dashboard),
-            label: 'Dashboard',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_bag_outlined),
-            activeIcon: Icon(Icons.shopping_bag),
-            label: 'Orders',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_tree_outlined),
-            activeIcon: Icon(Icons.account_tree),
-            label: 'Workflows',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.message_outlined),
-            activeIcon: Icon(Icons.message),
-            label: 'Messages',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-      ),
-    );
+  IconData _getActionIcon(String action) {
+    switch (action) {
+      case 'APPROVE':
+        return Icons.check_circle_outline;
+      case 'REJECT':
+        return Icons.cancel_outlined;
+      case 'SUBMIT':
+        return Icons.send_outlined;
+      default:
+        return Icons.fiber_manual_record;
+    }
   }
 }

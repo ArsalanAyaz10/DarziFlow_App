@@ -38,6 +38,4 @@ Future<void> _initServices() async {
     AuthService(authRepository: authRepository, apiService: apiService),
     permanent: true,
   );
-
-  print("All Services Initialized!");
 }
