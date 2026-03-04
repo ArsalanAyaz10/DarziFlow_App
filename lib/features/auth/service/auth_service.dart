@@ -1,4 +1,4 @@
-import 'package:dariziflow_app/core/services/api_service.dart';
+import 'package:dariziflow_app/data/services/api_service.dart';
 import 'package:dariziflow_app/features/auth/repositories/auth_repository.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';

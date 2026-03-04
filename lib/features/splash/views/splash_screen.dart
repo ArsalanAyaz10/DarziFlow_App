@@ -62,7 +62,9 @@ class SplashScreen extends GetView<SplashController> {
                             width: 120,
                             height: 6,
                             decoration: BoxDecoration(
-                              color: AppColors.primaryGreen.withOpacity(0.2),
+                              color: AppColors.primaryGreen.withValues(
+                                alpha: 0.2,
+                              ),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: FractionallySizedBox(
@@ -105,7 +107,7 @@ class SplashScreen extends GetView<SplashController> {
                         height: 90,
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryGreen.withOpacity(0.1),
+                          color: AppColors.primaryGreen.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: SvgPicture.asset(

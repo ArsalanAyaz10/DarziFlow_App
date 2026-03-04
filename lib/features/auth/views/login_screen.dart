@@ -1,4 +1,3 @@
-import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/widgets/auth_bottom_link.dart';
 import 'package:dariziflow_app/core/widgets/auth_header.dart';
 import 'package:dariziflow_app/core/widgets/custom_elevated_button.dart';

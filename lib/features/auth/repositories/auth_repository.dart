@@ -1,5 +1,4 @@
 import 'package:cookie_jar/cookie_jar.dart';
-
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/token_storage.dart';
 
@@ -59,8 +58,6 @@ class AuthRepository {
       data: {"email": email, "password": password, "platform": "MOBILE"},
     );
 
-    print("STATUS: ${response.statusCode}");
-    print("DATA: ${response.data}");
 
     final data = response.data;
 

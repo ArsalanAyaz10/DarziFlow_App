@@ -223,7 +223,7 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.green.withOpacity(0.3),
+              color: Colors.green.withValues(alpha: 0.3),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -257,7 +257,7 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.black.withOpacity(0.15),
+                        color: AppColors.black.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -311,7 +311,7 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
             child: CircularProgressIndicator(
               value: controller.efficiencyScore.value / 100,
               strokeWidth: 6,
-              backgroundColor: AppColors.white.withOpacity(0.2),
+              backgroundColor: AppColors.white.withValues(alpha: 0.2),
               valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
             ),
           ),
@@ -407,7 +407,7 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: activities.length > 3 ? 3 : activities.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        separatorBuilder: (_, _) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
           final activity = activities[index];
 
@@ -454,7 +454,7 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
           leading: Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: color),

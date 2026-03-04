@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       initialBinding: InitialBinding(),
       getPages: AppPages.routes,
-      initialRoute: AppPages.INITIAL,
+      initialRoute: AppPages.initial,
     );
   }
 }
