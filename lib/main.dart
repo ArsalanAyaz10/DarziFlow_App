@@ -17,13 +17,14 @@ void main() async {
   await _initServices();
 
   runApp(const MyApp());
+
+  Get.find<DeeplinkService>().init();
 }
 
 Future<void> _initServices() async {
   final apiService = ApiService();
   final DeeplinkService deeplinkService = DeeplinkService();
 
-  await deeplinkService.init();
   Get.put<DeeplinkService>(deeplinkService, permanent: true);
 
   await apiService.init(() async {

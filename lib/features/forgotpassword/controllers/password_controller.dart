@@ -37,7 +37,7 @@ class PasswordController extends GetxController {
         colorText: Colors.white,
         isDismissible: true,
       );
-      Get.toNamed('/resetpassword');
+      //Get.toNamed('/resetpassword');
     } catch (e) {
       Get.snackbar(
         "Error",

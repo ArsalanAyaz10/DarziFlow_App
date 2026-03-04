@@ -25,7 +25,9 @@ class DeeplinkService extends GetxService {
     if (uri.pathSegments.contains('reset-password')) {
       final token = uri.pathSegments.last;
 
-      Get.toNamed('/reset-password', arguments: token);
+      Future.delayed(Duration.zero, () {
+        Get.offAllNamed('/resetpassword', arguments: token);
+      });
     }
   }
 }

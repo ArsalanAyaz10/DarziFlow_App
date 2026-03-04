@@ -1,18 +1,23 @@
 import 'package:dariziflow_app/core/network/api_client.dart';
 
-class ForgotPasswordService{
-
+class ForgotPasswordService {
   final ApiClient apiClient;
 
   ForgotPasswordService(this.apiClient);
 
   Future<dynamic> forgotPassword(String email) async {
-    final response = await apiClient.post("/auth/forgot-password", data: {"email": email});
+    final response = await apiClient.post(
+      "/auth/forgot-password",
+      data: {"email": email},
+    );
     return response.data;
   }
 
   Future<dynamic> resetPassword(String token, String newPassword) async {
-    final response = await apiClient.put("/auth/reset-password", data: {"token": token, "newPassword": newPassword});
+    final response = await apiClient.put(
+      "/auth/reset-password/$token",
+      data: {"password": newPassword},
+    );
     return response.data;
   }
 

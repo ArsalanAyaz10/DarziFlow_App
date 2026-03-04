@@ -27,9 +27,6 @@ class ResetPasswordController extends GetxController {
     super.onInit();
     resetToken = Get.arguments ?? "";
 
-    if (resetToken.isEmpty) {
-      debugPrint("Warning: No reset token found in arguments");
-    }
   }
 
   Future<void> resetPassword() async {
