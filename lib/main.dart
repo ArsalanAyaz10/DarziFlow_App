@@ -2,6 +2,7 @@ import 'package:dariziflow_app/app/app.dart';
 import 'package:dariziflow_app/core/network/api_client.dart';
 import 'package:dariziflow_app/data/services/api_service.dart';
 import 'package:dariziflow_app/core/storage/token_storage.dart';
+import 'package:dariziflow_app/data/services/deeplink_service.dart';
 import 'package:dariziflow_app/features/auth/service/auth_service.dart';
 import 'package:dariziflow_app/features/auth/repositories/auth_repository.dart';
 import 'package:flutter/material.dart';
@@ -20,9 +21,15 @@ void main() async {
 
 Future<void> _initServices() async {
   final apiService = ApiService();
+  final DeeplinkService deeplinkService = DeeplinkService();
+
+  await deeplinkService.init();
+  Get.put<DeeplinkService>(deeplinkService, permanent: true);
+
   await apiService.init(() async {
-  await TokenStorage.clearTokens();
-});
+    await TokenStorage.clearTokens();
+  });
+
   Get.put<ApiService>(apiService, permanent: true);
 
   final apiClient = ApiClient(apiService.dio);

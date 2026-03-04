@@ -6,6 +6,7 @@ import 'package:dariziflow_app/features/dept_head/bindings/DeptHeadBindings.dart
 import 'package:dariziflow_app/features/dept_head/views/dashboard_screen.dart';
 import 'package:dariziflow_app/features/forgotpassword/bindings/password_binding.dart';
 import 'package:dariziflow_app/features/forgotpassword/views/forgotPassword_screen.dart';
+import 'package:dariziflow_app/features/forgotpassword/views/resetPassword_screen.dart';
 import 'package:dariziflow_app/features/splash/bindings/splash_binding.dart';
 import 'package:dariziflow_app/features/splash/views/splash_screen.dart';
 import 'package:get/get.dart';
@@ -40,6 +41,12 @@ class AppPages {
       name: Routes.deptartmentHead,
       page: () => DeptHeadDashboardScreen(),
       binding: DeptheadBindings(),
+    ),
+
+    GetPage(
+      name: '/resetpassword',
+      page: () => const ResetPasswordView(),
+      binding: ForgotPasswordBinding(),
     ),
   ];
 }
