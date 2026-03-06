@@ -1,4 +1,5 @@
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:flutter/material.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/token_storage.dart';
 
@@ -11,7 +12,7 @@ String getRoleString(UserRole role) {
     case UserRole.client:
       return "CLIENT";
     case UserRole.departmenthead:
-      return "DEPARTMENT_HEAD";
+      return "DEPARTMENT HEAD";
   }
 }
 
@@ -76,7 +77,13 @@ class AuthRepository {
   }
 
   Future<void> logout(PersistCookieJar cookieJar) async {
-    await TokenStorage.clearTokens();
-    await cookieJar.deleteAll();
+    try {
+      await apiClient.post("/auth/logout");
+    } catch (e) {
+      debugPrint("Logout API error: $e");
+    } finally {
+      await TokenStorage.clearTokens();
+      await cookieJar.deleteAll();
+    }
   }
 }

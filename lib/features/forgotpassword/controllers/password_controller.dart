@@ -23,6 +23,9 @@ class PasswordController extends GetxController {
           data['message'] ?? 'Failed to send reset link. Please try again.',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.redAccent,
+          isDismissible: true,
+          padding: EdgeInsets.all(10),
+          duration: Duration(seconds: 1),
           colorText: Colors.white,
         );
         return;
@@ -32,10 +35,12 @@ class PasswordController extends GetxController {
       Get.snackbar(
         "Success",
         message,
+        isDismissible: true,
+        padding: EdgeInsets.all(10),
+        duration: Duration(seconds: 1),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.green,
         colorText: Colors.white,
-        isDismissible: true,
       );
       //Get.toNamed('/resetpassword');
     } catch (e) {
@@ -44,6 +49,9 @@ class PasswordController extends GetxController {
         "Failed to send reset link. Please try again.",
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.redAccent,
+        isDismissible: true,
+        padding: EdgeInsets.all(10),
+        duration: Duration(seconds: 1),
         colorText: Colors.white,
       );
     } finally {

@@ -11,7 +11,6 @@ class DeptHeadController extends GetxController {
   // User info
   var userName = ''.obs;
   var userRole = ''.obs;
-  var formattedUserRole = ''.obs;
 
   // Department info
   var departmentName = ''.obs;
@@ -54,6 +53,19 @@ class DeptHeadController extends GetxController {
   void onInit() {
     super.onInit();
     loadDashboardData();
+  }
+
+  String FormatUserRole(String role) {
+    switch (role) {
+      case 'CLIENT':
+        return 'Client';
+      case 'DEPARTMENT_HEAD':
+        return 'Department Head';
+      case 'QC_MEMBER':
+        return 'QC_Member';
+      default:
+        return 'Unknown Role';
+    }
   }
 
   Future<void> loadDashboardData() async {
@@ -113,26 +125,12 @@ class DeptHeadController extends GetxController {
     try {
       final user = await TokenStorage.getUser();
       userName.value = user?['name'] ?? 'User';
-      final rawRole = user?['role'] ?? 'Department Head';
-      formattedUserRole.value = _formatRole(rawRole);
-      userRole.value = rawRole;
+      userRole.value = FormatUserRole(user?['role']);
     } catch (e) {
       if (kDebugMode) {
         print("Error loading user info: $e");
       }
     }
-  }
-
-  String _formatRole(String role) {
-    return role
-        .replaceAll('_', ' ')
-        .split(' ')
-        .map(
-          (word) => word.isNotEmpty
-              ? '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}'
-              : '',
-        )
-        .join(' ');
   }
 
   Future<void> fetchOverview({bool forceRefresh = false}) async {
