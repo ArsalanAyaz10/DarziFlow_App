@@ -68,14 +68,24 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
         backgroundColor: AppColors.transparent,
         elevation: 0,
         leading: Padding(
-          padding: EdgeInsets.only(left: 10),
+          padding: const EdgeInsets.only(left: 10),
           child: InkWell(
             onTap: () {
               Get.toNamed("/profile");
             },
             child: CircleAvatar(
-              backgroundColor: AppColors.grey,
-              child: Icon(Icons.person, color: AppColors.white, size: 28),
+              radius: 20, // Increased from 10 to 20
+              backgroundColor: AppColors.grey.withValues(alpha: 0.2),
+              backgroundImage: controller.userAvatar.value.isNotEmpty
+                  ? NetworkImage(controller.userAvatar.value)
+                  : null,
+              child: controller.userAvatar.value.isEmpty
+                  ? const Icon(
+                      Icons.person,
+                      size: 24, // Adjusted size
+                      color: AppColors.primaryGreen,
+                    )
+                  : null, // Important: child should be null when image exists
             ),
           ),
         ),

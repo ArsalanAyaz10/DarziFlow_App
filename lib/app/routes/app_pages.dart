@@ -7,7 +7,9 @@ import 'package:dariziflow_app/features/dept_head/views/dashboard_screen.dart';
 import 'package:dariziflow_app/features/forgotpassword/bindings/password_binding.dart';
 import 'package:dariziflow_app/features/forgotpassword/views/forgotPassword_screen.dart';
 import 'package:dariziflow_app/features/forgotpassword/views/resetPassword_screen.dart';
-import 'package:dariziflow_app/features/profile/bindings/profile_binding.dart';
+import 'package:dariziflow_app/features/profile/bindings/editprofile_binding.dart';
+import 'package:dariziflow_app/features/profile/bindings/viewprofile_binding.dart';
+import 'package:dariziflow_app/features/profile/views/editprofile_screen.dart';
 import 'package:dariziflow_app/features/profile/views/viewprofile_screen.dart';
 import 'package:dariziflow_app/features/splash/bindings/splash_binding.dart';
 import 'package:dariziflow_app/features/splash/views/splash_screen.dart';
@@ -54,7 +56,13 @@ class AppPages {
     GetPage(
       name: '/profile',
       page: () => const ViewProfileScreen(),
-      binding: ProfileBinding(),
+      binding: ViewProfileBinding(),
+    ),
+
+    GetPage(
+      name: '/editprofile',
+      page: () => const EditProfileScreen(),
+      binding: EditProfileBinding(),
     ),
   ];
 }

@@ -59,28 +59,29 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
 
   Widget _buildProfileHeader() {
     return Obx(
-      ()=> Column(
-      children: [
-        Stack(
-          alignment: Alignment.bottomRight,
-          children: [
-            const CircleAvatar(
-              radius: 60,
-              backgroundColor: AppColors.grey,
-              child: Icon(Icons.person, size: 60, color: AppColors.white),
-            ),
-            Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: AppColors.primaryGreen,
-                shape: BoxShape.circle,
+      () => Column(
+        children: [
+          Stack(
+            alignment: Alignment.bottomRight,
+            children: [
+              CircleAvatar(
+                radius: 60,
+                backgroundColor: AppColors.grey.withValues(alpha: 0.2),
+                backgroundImage: controller.userAvatar.value.isNotEmpty
+                    ? NetworkImage(controller.userAvatar.value)
+                    : null,
+                child: controller.userAvatar.value.isEmpty
+                    ? const Icon(
+                        Icons.person,
+                        size: 60,
+                        color: AppColors.primaryGreen,
+                      )
+                    : null,
               ),
-              child: const Icon(Icons.edit, size: 20, color: AppColors.white),
-            ),
-          ],
-        ),
-        const SizedBox(height: 15),
-       Text(
+            ],
+          ),
+          const SizedBox(height: 15),
+          Text(
             controller.userName.value,
             style: const TextStyle(
               fontSize: 20,
@@ -88,37 +89,42 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
               fontFamily: AppFonts.outfit,
             ),
           ),
-        const SizedBox(height: 5),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              controller.userRole.value,
-              style: const TextStyle(
-                color: AppColors.primaryGreen,
-                fontWeight: FontWeight.w500,
-                fontSize: 10,
+          const SizedBox(height: 5),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                controller.userRole.value,
+                style: const TextStyle(
+                  color: AppColors.primaryGreen,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 10,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 15),
+          ElevatedButton(
+            onPressed: () {},
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryGreen,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+            ),
+            child: InkWell(
+              onTap: () {
+                controller.navigateToEditProfile();
+              },
+              child: const Text(
+                "Edit Profile",
+                style: TextStyle(color: AppColors.white),
               ),
             ),
-          ],
-        ),
-        const SizedBox(height: 15),
-        ElevatedButton(
-          onPressed: () {},
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primaryGreen,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
           ),
-          child: const Text(
-            "Edit Profile",
-            style: TextStyle(color: AppColors.white),
-          ),
-        ),
-      ],
-    ),
+        ],
+      ),
     );
   }
 
@@ -160,15 +166,18 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
 
             const SizedBox(height: 10), // Space between containers
             // Password Container
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: _profileTile(
-                Icons.lock_outline,
-                "Password",
-                "Last changed 3 months ago",
+            // Password Container
+            Obx(
+              () => Container(
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: _profileTile(
+                  Icons.lock_outline,
+                  "Password",
+                  controller.getPasswordUpdateText(),
+                ),
               ),
             ),
             const SizedBox(height: 10),
@@ -233,7 +242,7 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
         child: Container(
           padding: const EdgeInsets.all(15),
           decoration: BoxDecoration(
-            border: Border.all(color: AppColors.error.withOpacity(0.5)),
+            border: Border.all(color: AppColors.error.withValues(alpha: 0.5)),
             borderRadius: BorderRadius.circular(15),
           ),
           child: const Row(

@@ -59,7 +59,6 @@ class AuthRepository {
       data: {"email": email, "password": password, "platform": "MOBILE"},
     );
 
-
     final data = response.data;
 
     if (data == null || data["user"] == null) {
@@ -69,7 +68,7 @@ class AuthRepository {
     final accessToken = data["accessToken"];
     final user = data["user"];
     final role = user["role"];
-
+    print("User from login response: $user");
     await TokenStorage.saveAccessToken(accessToken);
     await TokenStorage.saveUser(user);
 
@@ -84,6 +83,21 @@ class AuthRepository {
     } finally {
       await TokenStorage.clearTokens();
       await cookieJar.deleteAll();
+    }
+  }
+
+  Future<void> fetchUserProfile() async {
+    try {
+      final response = await apiClient.get("/profile");
+      final profileData = response.data;
+
+      if (profileData != null && profileData['user'] != null) {
+        final existingUser = await TokenStorage.getUser();
+        final updatedUser = {...?existingUser, ...profileData['user']};
+        await TokenStorage.saveUser(updatedUser);
+      }
+    } catch (e) {
+      print("Failed to fetch user profile: $e");
     }
   }
 }

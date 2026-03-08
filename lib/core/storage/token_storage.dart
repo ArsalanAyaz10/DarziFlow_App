@@ -12,8 +12,9 @@ class TokenStorage {
     return await _storage.read(key: "accessToken");
   }
 
-  static Future<void> saveUser(Map<String, dynamic> user) async {
+  static Future<void> saveUser(Map<dynamic, dynamic> user) async {
     final userJson = jsonEncode(user);
+    print("Saving user data: $userJson");
     await _storage.write(key: "user", value: userJson);
   }
 
