@@ -28,11 +28,7 @@ class ViewprofileController extends GetxController {
   var notificationsEnabled = true.obs;
   var passwordUpdatedAt = ''.obs;
 
-  // Controllers for edit form
 
-  final nameController = TextEditingController();
-  final emailController = TextEditingController();
-  final locationController = TextEditingController();
 
   @override
   void onInit() {

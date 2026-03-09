@@ -29,6 +29,8 @@ class EditProfileController extends GetxController {
   var userAvatar = ''.obs;
   var userRole = ''.obs;
   var notificationsEnabled = true.obs;
+  var isCurrentPasswordVisible = false.obs;
+  var isNewPasswordVisible = false.obs;
 
   // Controllers for edit form
   final nameController = TextEditingController();
@@ -38,18 +40,14 @@ class EditProfileController extends GetxController {
   final currentPasswordController = TextEditingController();
   final newPasswordController = TextEditingController();
 
-  // Add these RxBool variables
-  var isCurrentPasswordVisible = false.obs;
-  var isNewPasswordVisible = false.obs;
-
   @override
   void onInit() {
     super.onInit();
+    loadUserInfo();
+
     refreshUserProfile();
-    //loadUserInfo();
   }
 
-  // Add toggle methods
   void toggleCurrentPasswordVisibility() {
     isCurrentPasswordVisible.toggle();
   }
@@ -66,6 +64,10 @@ class EditProfileController extends GetxController {
         userEmail.value = updatedUser['email'] ?? userEmail.value;
         userAvatar.value = updatedUser['avatar']?['url'] ?? userAvatar.value;
         userRole.value = _formatUserRole(updatedUser['role'] ?? '');
+
+        // Update controllers with api data
+        nameController.text = userName.value;
+        emailController.text = userEmail.value;
       }
     } catch (e) {
       if (kDebugMode) print("Error refreshing user profile: $e");
@@ -80,7 +82,6 @@ class EditProfileController extends GetxController {
       userAvatar.value = user?['avatar']?['url'] ?? '';
       userRole.value = _formatUserRole(user?['role'] ?? '');
 
-      // Initialize edit controllers
       nameController.text = userName.value;
       emailController.text = userEmail.value;
     } catch (e) {
@@ -101,7 +102,6 @@ class EditProfileController extends GetxController {
     }
   }
 
-  // Profile picture
   // Profile picture
   Future<void> pickAndUploadImage() async {
     try {
@@ -164,7 +164,7 @@ class EditProfileController extends GetxController {
     }
   }
 
-  // Save profile changes
+  // Save profile 
   Future<void> saveProfile() async {
     try {
       isLoading.value = true;
