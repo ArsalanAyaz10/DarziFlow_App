@@ -10,7 +10,7 @@ class LoginController extends GetxController {
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-   final formKey = GlobalKey<FormState>();
+  final formKey = GlobalKey<FormState>();
   var isPasswordVisible = false.obs;
   var isLoading = false.obs;
 
@@ -24,6 +24,9 @@ class LoginController extends GetxController {
       Get.snackbar(
         "Error",
         "Please enter email and password",
+        isDismissible: true,
+        padding: EdgeInsets.all(10),
+        duration: Duration(seconds: 1),
         snackPosition: SnackPosition.BOTTOM,
       );
       return;
@@ -37,7 +40,14 @@ class LoginController extends GetxController {
       );
       RoleRouter.route(role);
     } catch (e) {
-      Get.snackbar("Login Failed", "Invalid credentials or server error");
+      Get.snackbar(
+        "Login Failed",
+        "Invalid credentials or server error",
+        isDismissible: true,
+        padding: EdgeInsets.all(10),
+        duration: Duration(seconds: 1),
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } finally {
       isLoading.value = false;
     }

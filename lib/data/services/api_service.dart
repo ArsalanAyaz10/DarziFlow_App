@@ -5,7 +5,6 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:path_provider/path_provider.dart';
 
-
 class ApiService {
   late Dio dio;
   late PersistCookieJar cookieJar;

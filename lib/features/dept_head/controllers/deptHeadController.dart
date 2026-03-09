@@ -11,7 +11,7 @@ class DeptHeadController extends GetxController {
   // User info
   var userName = ''.obs;
   var userRole = ''.obs;
-  var formattedUserRole = ''.obs;
+  var userAvatar = ''.obs;
 
   // Department info
   var departmentName = ''.obs;
@@ -54,6 +54,24 @@ class DeptHeadController extends GetxController {
   void onInit() {
     super.onInit();
     loadDashboardData();
+    ever(userAvatar, (String url) {
+      if (kDebugMode) {
+        print("Avatar URL updated: $url");
+      }
+    });
+  }
+
+  String FormatUserRole(String role) {
+    switch (role) {
+      case 'CLIENT':
+        return 'Client';
+      case 'DEPARTMENT_HEAD':
+        return 'Department Head';
+      case 'QC_MEMBER':
+        return 'QC_Member';
+      default:
+        return 'Unknown Role';
+    }
   }
 
   Future<void> loadDashboardData() async {
@@ -109,30 +127,50 @@ class DeptHeadController extends GetxController {
     }
   }
 
+  String formatUserRole(String role) {
+    switch (role) {
+      case 'CLIENT':
+        return 'Client';
+      case 'DEPARTMENT_HEAD':
+        return 'Department Head';
+      case 'QC_MEMBER':
+        return 'QC_Member';
+      default:
+        return 'Unknown Role';
+    }
+  }
+
   Future<void> loadUserInfo() async {
     try {
       final user = await TokenStorage.getUser();
       userName.value = user?['name'] ?? 'User';
-      final rawRole = user?['role'] ?? 'Department Head';
-      formattedUserRole.value = _formatRole(rawRole);
-      userRole.value = rawRole;
+      userRole.value = formatUserRole(user?['role']);
+
+      // Safely access nested avatar object
+      if (user != null && user['avatar'] != null) {
+        // Handle both string and object formats
+        if (user['avatar'] is Map) {
+          userAvatar.value = user['avatar']['url'] ?? '';
+        } else if (user['avatar'] is String) {
+          userAvatar.value = user['avatar'];
+        } else {
+          userAvatar.value = '';
+        }
+      } else {
+        userAvatar.value = '';
+      }
+
+      if (kDebugMode) {
+        print("Loaded user: ${user?['name']}, Avatar: ${userAvatar.value}");
+      }
     } catch (e) {
       if (kDebugMode) {
         print("Error loading user info: $e");
       }
+      userName.value = 'User';
+      userRole.value = 'Unknown Role';
+      userAvatar.value = '';
     }
-  }
-
-  String _formatRole(String role) {
-    return role
-        .replaceAll('_', ' ')
-        .split(' ')
-        .map(
-          (word) => word.isNotEmpty
-              ? '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}'
-              : '',
-        )
-        .join(' ');
   }
 
   Future<void> fetchOverview({bool forceRefresh = false}) async {

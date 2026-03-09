@@ -67,30 +67,47 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
       () => AppBar(
         backgroundColor: AppColors.transparent,
         elevation: 0,
-        leading: const Padding(
-          padding: EdgeInsets.only(left: 10),
-          child: CircleAvatar(
-            backgroundColor: AppColors.grey,
-            child: Icon(Icons.person, color: AppColors.white),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 10),
+          child: InkWell(
+            onTap: () {
+              Get.toNamed("/profile");
+            },
+            child: CircleAvatar(
+              radius: 20, // Increased from 10 to 20
+              backgroundColor: AppColors.grey.withValues(alpha: 0.2),
+              backgroundImage: controller.userAvatar.value.isNotEmpty
+                  ? NetworkImage(controller.userAvatar.value)
+                  : null,
+              child: controller.userAvatar.value.isEmpty
+                  ? const Icon(
+                      Icons.person,
+                      size: 24, // Adjusted size
+                      color: AppColors.primaryGreen,
+                    )
+                  : null, // Important: child should be null when image exists
+            ),
           ),
         ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
+              controller.userName.value,
+              style: const TextStyle(
+                color: AppColors.primaryGreen,
+                fontSize: 13,
+                letterSpacing: .5,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
               controller.userRole.value,
               style: const TextStyle(
                 color: AppColors.black,
                 fontSize: 9,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              controller.userName.value,
-              style: const TextStyle(
-                color: AppColors.black,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],

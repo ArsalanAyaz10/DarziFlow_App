@@ -26,7 +26,6 @@ class ResetPasswordController extends GetxController {
   void onInit() {
     super.onInit();
     resetToken = Get.arguments ?? "";
-
   }
 
   Future<void> resetPassword() async {
@@ -37,6 +36,9 @@ class ResetPasswordController extends GetxController {
       Get.snackbar(
         "Error",
         "All fields are required",
+        isDismissible: true,
+        padding: EdgeInsets.all(10),
+        duration: Duration(seconds: 1),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.redAccent,
         colorText: Colors.white,
@@ -49,6 +51,9 @@ class ResetPasswordController extends GetxController {
         "Error",
         "Passwords do not match",
         snackPosition: SnackPosition.BOTTOM,
+        isDismissible: true,
+        padding: EdgeInsets.all(10),
+        duration: Duration(seconds: 1),
         backgroundColor: Colors.redAccent,
         colorText: Colors.white,
       );
@@ -60,6 +65,9 @@ class ResetPasswordController extends GetxController {
         "Error",
         "Password must be at least 8 characters",
         snackPosition: SnackPosition.BOTTOM,
+        isDismissible: true,
+        padding: EdgeInsets.all(10),
+        duration: Duration(seconds: 1),
         backgroundColor: Colors.redAccent,
         colorText: Colors.white,
       );
@@ -81,8 +89,11 @@ class ResetPasswordController extends GetxController {
         Get.snackbar(
           "Success",
           "Password reset successfully!",
+          isDismissible: true,
+          padding: EdgeInsets.all(10),
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
+          duration: Duration(seconds: 1),
           colorText: Colors.white,
         );
 
@@ -93,7 +104,12 @@ class ResetPasswordController extends GetxController {
     } catch (e) {
       Get.snackbar(
         "Error",
-        e.toString(),
+        e.toString().length > 50
+            ? "An error occurred. Please try again."
+            : e.toString(),
+        isDismissible: true,
+        padding: EdgeInsets.all(10),
+        duration: Duration(seconds: 1),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.redAccent,
         colorText: Colors.white,
