@@ -48,7 +48,7 @@ class DeptHeadController extends GetxController {
 
   // QUALITY STATS
 
-  var qualityScore = 100.obs; // Based on approve/reject
+  var qualityScore = 0.obs; // Based on approve/reject
   var approvedCount = 0.obs;
   var rejectedCount = 0.obs;
 
@@ -80,8 +80,8 @@ class DeptHeadController extends GetxController {
   }
 
   Future<void> loadDashboardData() async {
-    _setLoadingState(true);
-    _clearErrorMessage();
+    isLoading.value = true;
+    errorMessage.value = '';
 
     try {
       await _loadUserInfo();
@@ -96,14 +96,14 @@ class DeptHeadController extends GetxController {
     } catch (e) {
       _handleError('Failed to load dashboard data', e);
     } finally {
-      _setLoadingState(false);
+      isLoading.value = false;
     }
   }
 
   Future<void> refreshDashboard() async {
-    _invalidateCache();
-    _setLoadingState(true);
-    _clearErrorMessage();
+    _lastActivityFetch = null;
+    isLoading.value = true;
+    errorMessage.value = '';
 
     try {
       await _loadUserInfo();
@@ -119,7 +119,7 @@ class DeptHeadController extends GetxController {
     } catch (e) {
       _handleError('Failed to refresh dashboard', e);
     } finally {
-      _setLoadingState(false);
+      isLoading.value = false;
     }
   }
 
@@ -127,15 +127,16 @@ class DeptHeadController extends GetxController {
     try {
       final data = await repository.fetchOverview();
 
-      if (kDebugMode) {
-        print("📊 FULL OVERVIEW DATA: $data");
-      }
+      // if (kDebugMode) {
+      //   print("📊 FULL OVERVIEW DATA: $data");
+      // }
 
       // Extract department info
       final dept = data['department'] ?? {};
-      departmentName.value = dept['name'] ?? 'Department';
+      departmentName.value = dept['name'] ?? 'No Department';
       deptStatus.value = dept['status'] ?? 'Unknown';
       departmentId.value = dept['_id'] ?? '';
+      print("Department ID set to: ${departmentId.value}");
 
       // Load template stats
       final templateStats = data['templateStats'] ?? {};
@@ -158,17 +159,16 @@ class DeptHeadController extends GetxController {
       rejectedOps.value = opStats['rejected'] ?? 0;
 
       // if (kDebugMode) {
-      //   print("📊 ORDER STATS LOADED:");
+      //   print("ORDER STATS:");
       //   print("   totalOrders: ${totalOrders.value}");
       //   print("   inProgressOrders: ${inProgressOrders.value}");
       //   print("   pendingOrders: ${pendingOrders.value}");
       //   print("   completedOrders: ${completedOrders.value}");
 
-      //   print("📊 TEMPLATE STATS:");
+      //   print("TEMPLATE STATS:");
       //   print("   operations: ${templateOperations.value}");
       //   print("   checkpoints: ${templateCheckpoints.value}");
       // }
-
 
       _calculateCheckpointStats();
       _calculateQualityScore();
@@ -223,8 +223,9 @@ class DeptHeadController extends GetxController {
   // ==================== CALCULATION METHODS ====================
 
   void _calculateCheckpointStats() {
-    totalCheckpoints.value = totalOperationsHandled.value * 2;
+    totalCheckpoints.value = totalOperationsHandled.value;
     completedCheckpoints.value = completedOps.value;
+    print("Completed Checkpoints: ${completedCheckpoints.value}");
     pendingCheckpoints.value = pendingOps.value + inProgressOps.value;
 
     if (totalCheckpoints.value > 0) {
@@ -250,10 +251,13 @@ class DeptHeadController extends GetxController {
 
     double score = 0;
 
+    // Factor 1: Operation completion rate (40% weight)
     score += (completedOps.value / totalOperationsHandled.value) * 40;
 
+    // Factor 2: Quality score (30% weight)
     score += (qualityScore.value / 100) * 30;
 
+    // Factor 3: Order completion rate (30% weight)
     if (totalOrders.value > 0) {
       score += (completedOrders.value / totalOrders.value) * 30;
     }
@@ -315,19 +319,7 @@ class DeptHeadController extends GetxController {
         DateTime.now().difference(_lastActivityFetch!) < cacheDuration;
   }
 
-  void _invalidateCache() {
-    _lastActivityFetch = null;
-  }
-
   // UI Loader and Error Handling
-
-  void _setLoadingState(bool loading) {
-    isLoading.value = loading;
-  }
-
-  void _clearErrorMessage() {
-    errorMessage.value = '';
-  }
 
   void _handleError(String message, dynamic error) {
     errorMessage.value = message;

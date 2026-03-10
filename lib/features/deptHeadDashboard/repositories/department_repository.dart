@@ -26,8 +26,7 @@ class DepartmentRepository {
     }
   }
 
-  // Fetches complete overview data (department + templateStats + orderStats + operationStats)
-  Future<Map<String, dynamic>> fetchOverview() async {
+   Future<Map<String, dynamic>> fetchOverview() async {
     try {
       final data = await service.getDepartmentOverview();
       return data;
@@ -37,7 +36,6 @@ class DepartmentRepository {
     }
   }
 
-  // Fetches live workflows/recent activity
   Future<List<dynamic>> fetchActiveWorkflows(String id) async {
     try {
       final data = await service.getDepartmentActiveWorkflows(id);
@@ -48,7 +46,6 @@ class DepartmentRepository {
     }
   }
 
-  // NEW: Get template stats
   Future<Map<String, dynamic>> fetchTemplateStats(String deptId) async {
     try {
       final data = await service.getTemplateStats(deptId);
@@ -59,7 +56,6 @@ class DepartmentRepository {
     }
   }
 
-  // NEW: Get order stats
   Future<Map<String, dynamic>> fetchOrderStats(String deptId) async {
     try {
       final data = await service.getOrderStats(deptId);
@@ -70,7 +66,6 @@ class DepartmentRepository {
     }
   }
 
-  // NEW: Get operation stats
   Future<Map<String, dynamic>> fetchOperationStats(String deptId) async {
     try {
       final data = await service.getOperationStats(deptId);
@@ -87,7 +82,6 @@ class DepartmentRepository {
     }
   }
 
-  // Helper method to get department template details
   Future<Map<String, dynamic>> fetchDepartmentTemplate(String deptId) async {
     try {
       final data = await service.getDepartmentById(deptId);

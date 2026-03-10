@@ -313,14 +313,14 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildMetricItem(
-                  "Checkpoints",
+                  "Operations",
                   "${controller.completedCheckpoints.value}/${controller.totalCheckpoints.value}",
                   Icons.task_alt,
                 ),
                 _buildMetricItem(
-                  "Quality",
-                  "${controller.qualityScore.value}%",
-                  Icons.star,
+                  "Checkpoints",
+                  "${controller.totalOperationsHandled.value}/${controller.totalOperationsHandled.value}",
+                  Icons.checklist,
                 ),
               ],
             ),
