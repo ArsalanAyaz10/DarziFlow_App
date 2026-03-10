@@ -125,7 +125,6 @@ class SignupScreen extends GetView<SignupController> {
     );
   }
 
-  // Helper logic to validate UI before hitting API
   void _handleFormSubmit() {
     if (_formKey.currentState!.validate()) {
       if (controller.selectedRole.value == null) {

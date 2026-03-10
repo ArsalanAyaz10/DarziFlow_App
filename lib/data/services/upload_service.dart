@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dariziflow_app/core/network/api_client.dart';
 import 'package:dariziflow_app/core/storage/token_storage.dart';
+import 'package:flutter/foundation.dart';
 
 class UploadService {
   final ApiClient apiClient;
@@ -112,7 +113,9 @@ class UploadService {
         await TokenStorage.saveUser(user);
       }
     } catch (e) {
-      print("Error updating local storage with avatar: $e");
+      if (kDebugMode) {
+        print("Error updating local storage with avatar: $e");
+      }
     }
   }
 }

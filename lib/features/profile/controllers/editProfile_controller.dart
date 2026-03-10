@@ -273,7 +273,9 @@ class EditProfileController extends GetxController {
         isDismissible: true,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       );
-      print("Change password error: $e");
+      if (kDebugMode) {
+        print("Change password error: $e");
+      }
     } finally {
       isLoading.value = false;
     }

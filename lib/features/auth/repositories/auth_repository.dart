@@ -1,5 +1,5 @@
 import 'package:cookie_jar/cookie_jar.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/token_storage.dart';
 
@@ -12,7 +12,7 @@ String getRoleString(UserRole role) {
     case UserRole.client:
       return "CLIENT";
     case UserRole.departmenthead:
-      return "DEPARTMENT HEAD";
+      return "DEPARTMENT_HEAD";
   }
 }
 
@@ -68,7 +68,6 @@ class AuthRepository {
     final accessToken = data["accessToken"];
     final user = data["user"];
     final role = user["role"];
-    print("User from login response: $user");
     await TokenStorage.saveAccessToken(accessToken);
     await TokenStorage.saveUser(user);
 
@@ -97,7 +96,9 @@ class AuthRepository {
         await TokenStorage.saveUser(updatedUser);
       }
     } catch (e) {
-      print("Failed to fetch user profile: $e");
+      if (kDebugMode) {
+        print("Failed to fetch user profile: $e");
+      }
     }
   }
 }

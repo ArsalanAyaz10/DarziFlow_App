@@ -2,7 +2,7 @@ import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/widgets/bottom_nav_bar.dart';
 import 'package:dariziflow_app/core/widgets/error_view.dart';
 import 'package:dariziflow_app/core/widgets/status_badge.dart';
-import 'package:dariziflow_app/features/dept_head/controllers/deptHeadController.dart';
+import 'package:dariziflow_app/features/deptHeadDashboard/controllers/deptHeadController.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -155,16 +155,18 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
           _buildStatTile(
             "Total Orders",
             controller.totalOrders.value.toString(),
-            controller.ordersTrend.value,
+            "Orders Assigned",
             AppColors.primaryGreen,
+            icon: Icons.shopping_bag_outlined,
           ),
           const SizedBox(width: 15),
           _buildStatTile(
-            "In Progress",
+            "Active Orders",
             controller.inProgressOrders.value.toString(),
-            "Queue: ${controller.pendingCheckpoints.value}",
-            AppColors.blueGrey,
-            trendIcon: Icons.hourglass_empty,
+            "In progress now",
+            Colors.orange,
+            icon: Icons.pending_actions,
+            showTrend: false,
           ),
         ],
       );
@@ -176,7 +178,9 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
     String value,
     String subText,
     Color color, {
+    IconData? icon,
     IconData? trendIcon,
+    bool showTrend = true,
   }) {
     return Expanded(
       child: Container(
@@ -189,9 +193,17 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              label,
-              style: const TextStyle(color: Colors.black54, fontSize: 13),
+            Row(
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: 16, color: color),
+                  const SizedBox(width: 4),
+                ],
+                Text(
+                  label,
+                  style: const TextStyle(color: Colors.black54, fontSize: 12),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
             Text(
@@ -199,27 +211,33 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
               style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
-            Row(
-              children: [
-                Icon(
-                  trendIcon ??
-                      (subText.startsWith('+')
-                          ? Icons.trending_up
-                          : Icons.trending_down),
-                  size: 14,
-                  color: color,
-                ),
-                const SizedBox(width: 2),
-                Text(
-                  subText,
-                  style: TextStyle(
+            if (showTrend)
+              Row(
+                children: [
+                  Icon(
+                    trendIcon ??
+                        (subText.startsWith('+')
+                            ? Icons.trending_up
+                            : Icons.trending_down),
+                    size: 14,
                     color: color,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
                   ),
-                ),
-              ],
-            ),
+                  const SizedBox(width: 2),
+                  Text(
+                    subText,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              )
+            else
+              Text(
+                subText,
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+              ),
           ],
         ),
       ),
@@ -303,11 +321,6 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
                   "Quality",
                   "${controller.qualityScore.value}%",
                   Icons.star,
-                ),
-                _buildMetricItem(
-                  "Overdue",
-                  "${controller.overdueTasks.value}",
-                  Icons.warning_amber,
                 ),
               ],
             ),

@@ -2,8 +2,8 @@ import 'package:dariziflow_app/features/auth/bindings/login_binding.dart';
 import 'package:dariziflow_app/features/auth/bindings/signup_binding.dart';
 import 'package:dariziflow_app/features/auth/views/login_screen.dart';
 import 'package:dariziflow_app/features/auth/views/signup_screen.dart';
-import 'package:dariziflow_app/features/dept_head/bindings/DeptHeadBindings.dart';
-import 'package:dariziflow_app/features/dept_head/views/dashboard_screen.dart';
+import 'package:dariziflow_app/features/deptHeadDashboard/bindings/DeptHeadBindings.dart';
+import 'package:dariziflow_app/features/deptHeadDashboard/views/dashboard_screen.dart';
 import 'package:dariziflow_app/features/forgotpassword/bindings/password_binding.dart';
 import 'package:dariziflow_app/features/forgotpassword/views/forgotPassword_screen.dart';
 import 'package:dariziflow_app/features/forgotpassword/views/resetPassword_screen.dart';
@@ -48,13 +48,13 @@ class AppPages {
     ),
 
     GetPage(
-      name: '/resetpassword',
+      name: Routes.resetpassword,
       page: () => const ResetPasswordView(),
       binding: ForgotPasswordBinding(),
     ),
 
     GetPage(
-      name: '/profile',
+      name: Routes.profile,
       page: () => const ViewProfileScreen(),
       binding: ViewProfileBinding(),
     ),
