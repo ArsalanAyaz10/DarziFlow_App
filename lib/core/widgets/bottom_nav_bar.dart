@@ -47,11 +47,6 @@ class BottomNavBar extends StatelessWidget {
             activeIcon: Icon(Icons.message),
             label: 'Messages',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
         ],
       ),
     );

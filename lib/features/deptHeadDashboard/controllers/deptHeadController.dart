@@ -18,28 +18,29 @@ class DeptHeadController extends GetxController {
   var departmentId = ''.obs;
   var deptStatus = ''.obs;
 
-  //  Department Stats
-
-  var templateOperations = 0.obs; // Total operations in template
-  var templateCheckpoints = 0.obs; // Total checkpoints in template
+  // Department Template Stats
+  var templateOperations = 0.obs;
+  var templateCheckpoints = 0.obs;
 
   // ORDER STATS
-
-  var totalOrders = 0.obs; // All orders with this department
-  var inProgressOrders = 0.obs; // Orders with status IN_PROGRESS
-  var pendingOrders = 0.obs; // Orders with status READY_TO_START/DOCS_PENDING
-  var completedOrders = 0.obs; // Orders with status COMPLETED
+  var totalOrders = 0.obs;
+  var inProgressOrders = 0.obs;
+  var pendingOrders = 0.obs;
+  var completedOrders = 0.obs;
 
   // OPERATION STATS
-
-  var totalOperationsHandled = 0.obs; // Operations from started workflows
+  var totalOperationsHandled = 0.obs;
   var completedOps = 0.obs;
   var pendingOps = 0.obs;
   var inProgressOps = 0.obs;
   var rejectedOps = 0.obs;
 
   // CHECKPOINT STATS
+  var totalCheckpointsInWorkflow = 0.obs;
+  var completedWorkflowCheckpoints = 0.obs;
+  var pendingWorkflowCheckpoints = 0.obs;
 
+  // LEGACY CHECKPOINT STATS (for backward compatibility)
   var totalCheckpoints = 0.obs;
   var completedCheckpoints = 0.obs;
   var pendingCheckpoints = 0.obs;
@@ -47,29 +48,24 @@ class DeptHeadController extends GetxController {
   var checkpointCompletionRate = 0.0.obs;
 
   // QUALITY STATS
-
-  var qualityScore = 0.obs; // Based on approve/reject
+  var qualityScore = 100.obs;
   var approvedCount = 0.obs;
   var rejectedCount = 0.obs;
 
   // EFFICIENCY & TRENDS
-
   var efficiencyScore = 0.obs;
   var ordersTrend = '+0%'.obs;
   var avgCompletionTime = 0.0.obs;
 
   // ACTIVITIES
-
   var recentActivity = <dynamic>[].obs;
   var processedActivities = <Map<String, dynamic>>[].obs;
 
   // UI
-
   var isLoading = false.obs;
   var errorMessage = ''.obs;
 
   // CACHE
-
   DateTime? _lastActivityFetch;
   static const Duration cacheDuration = Duration(minutes: 5);
 
@@ -113,9 +109,8 @@ class DeptHeadController extends GetxController {
         departmentId.value = deptId;
       }
 
-      // Load fresh stats
       await _loadAllDepartmentStats(forceRefresh: true);
-      await _loadActivities(forceRefresh: true);
+      await _loadActivities();
     } catch (e) {
       _handleError('Failed to refresh dashboard', e);
     } finally {
@@ -127,30 +122,21 @@ class DeptHeadController extends GetxController {
     try {
       final data = await repository.fetchOverview();
 
-      // if (kDebugMode) {
-      //   print("📊 FULL OVERVIEW DATA: $data");
-      // }
-
-      // Extract department info
       final dept = data['department'] ?? {};
       departmentName.value = dept['name'] ?? 'No Department';
       deptStatus.value = dept['status'] ?? 'Unknown';
       departmentId.value = dept['_id'] ?? '';
-      print("Department ID set to: ${departmentId.value}");
 
-      // Load template stats
       final templateStats = data['templateStats'] ?? {};
       templateOperations.value = templateStats['totalOperations'] ?? 0;
       templateCheckpoints.value = templateStats['totalCheckpoints'] ?? 0;
 
-      // Load order stats
       final orderStats = data['orderStats'] ?? {};
       totalOrders.value = orderStats['totalOrders'] ?? 0;
       inProgressOrders.value = orderStats['inProgress'] ?? 0;
       pendingOrders.value = orderStats['pending'] ?? 0;
       completedOrders.value = orderStats['completed'] ?? 0;
 
-      // Load operation stats
       final opStats = data['operationStats'] ?? {};
       totalOperationsHandled.value = opStats['totalOperationsHandled'] ?? 0;
       completedOps.value = opStats['completed'] ?? 0;
@@ -158,20 +144,19 @@ class DeptHeadController extends GetxController {
       inProgressOps.value = opStats['inProgress'] ?? 0;
       rejectedOps.value = opStats['rejected'] ?? 0;
 
-      // if (kDebugMode) {
-      //   print("ORDER STATS:");
-      //   print("   totalOrders: ${totalOrders.value}");
-      //   print("   inProgressOrders: ${inProgressOrders.value}");
-      //   print("   pendingOrders: ${pendingOrders.value}");
-      //   print("   completedOrders: ${completedOrders.value}");
+      final checkpointStats = data['checkpointStats'] ?? {};
+      totalCheckpointsInWorkflow.value =
+          checkpointStats['totalCheckpoints'] ?? 0;
+      completedWorkflowCheckpoints.value = checkpointStats['completed'] ?? 0;
+      pendingWorkflowCheckpoints.value = checkpointStats['pending'] ?? 0;
 
-      //   print("TEMPLATE STATS:");
-      //   print("   operations: ${templateOperations.value}");
-      //   print("   checkpoints: ${templateCheckpoints.value}");
-      // }
+      final qualityStats = data['qualityStats'] ?? {};
+      qualityScore.value = qualityStats['score'] ?? 100;
+      approvedCount.value = qualityStats['approved'] ?? 0;
+      rejectedCount.value = qualityStats['rejected'] ?? 0;
 
-      _calculateCheckpointStats();
-      _calculateQualityScore();
+      _updateLegacyCheckpointStats();
+      _calculateCheckpointCompletionRate();
       _calculateEfficiencyScore();
       _calculateTrend();
     } catch (e) {
@@ -204,65 +189,69 @@ class DeptHeadController extends GetxController {
     }
   }
 
-  Future<void> _loadActivities({bool forceRefresh = false}) async {
-    if (departmentId.value.isEmpty) return;
-    if (!forceRefresh && _isActivityCacheValid()) return;
-
-    try {
-      final activity = await repository.fetchActiveWorkflows(
-        departmentId.value,
-      );
-      recentActivity.value = activity;
-      _processActivities();
-      _lastActivityFetch = DateTime.now();
-    } catch (e) {
-      if (kDebugMode) print("Activity Error: $e");
-    }
-  }
-
   // ==================== CALCULATION METHODS ====================
 
-  void _calculateCheckpointStats() {
-    totalCheckpoints.value = totalOperationsHandled.value;
-    completedCheckpoints.value = completedOps.value;
-    print("Completed Checkpoints: ${completedCheckpoints.value}");
-    pendingCheckpoints.value = pendingOps.value + inProgressOps.value;
-
-    if (totalCheckpoints.value > 0) {
-      checkpointCompletionRate.value =
-          (completedCheckpoints.value / totalCheckpoints.value * 100)
-              .roundToDouble();
-    }
+  void _updateLegacyCheckpointStats() {
+    totalCheckpoints.value = totalCheckpointsInWorkflow.value;
+    completedCheckpoints.value = completedWorkflowCheckpoints.value;
+    pendingCheckpoints.value = pendingWorkflowCheckpoints.value;
   }
 
-  void _calculateQualityScore() {
-    if (totalOperationsHandled.value > 0) {
-      final qualityValue =
-          100 - (rejectedOps.value / totalOperationsHandled.value * 100);
-      qualityScore.value = qualityValue.round();
+  void _calculateCheckpointCompletionRate() {
+    if (totalCheckpointsInWorkflow.value > 0) {
+      checkpointCompletionRate.value =
+          (completedWorkflowCheckpoints.value /
+                  totalCheckpointsInWorkflow.value *
+                  100)
+              .roundToDouble();
+    } else {
+      checkpointCompletionRate.value = 0;
     }
   }
 
   void _calculateEfficiencyScore() {
-    if (totalOperationsHandled.value == 0) {
+    if (totalOperationsHandled.value == 0 &&
+        totalCheckpointsInWorkflow.value == 0) {
       efficiencyScore.value = 0;
       return;
     }
 
     double score = 0;
+    double totalWeight = 0;
 
-    // Factor 1: Operation completion rate (40% weight)
-    score += (completedOps.value / totalOperationsHandled.value) * 40;
-
-    // Factor 2: Quality score (30% weight)
-    score += (qualityScore.value / 100) * 30;
-
-    // Factor 3: Order completion rate (30% weight)
-    if (totalOrders.value > 0) {
-      score += (completedOrders.value / totalOrders.value) * 30;
+    if (totalOperationsHandled.value > 0) {
+      double opRate = completedOps.value / totalOperationsHandled.value;
+      score += opRate * 25;
+      totalWeight += 25;
     }
 
-    efficiencyScore.value = score.round();
+    if (totalCheckpointsInWorkflow.value > 0) {
+      double checkpointRate =
+          completedWorkflowCheckpoints.value / totalCheckpointsInWorkflow.value;
+      score += checkpointRate * 45;
+      totalWeight += 45;
+    }
+
+    score += (qualityScore.value / 100) * 30;
+    totalWeight += 30;
+
+    if (totalWeight > 0) {
+      efficiencyScore.value = (score / totalWeight * 100).round();
+    } else {
+      efficiencyScore.value = 0;
+    }
+  }
+
+  Future<String?> _getUserDepartmentId() async {
+    try {
+      final user = await TokenStorage.getUser();
+      if (user != null && user['department'] != null) {
+        return user['department'].toString();
+      }
+    } catch (e) {
+      if (kDebugMode) print("Error getting user department: $e");
+    }
+    return null;
   }
 
   void _calculateTrend() {
@@ -279,77 +268,6 @@ class DeptHeadController extends GetxController {
     }
   }
 
-  // ACTIVITY PROCESSING
-
-  void _processActivities() {
-    final List<Map<String, dynamic>> processed = [];
-
-    for (var order in recentActivity) {
-      final orderName = order['orderName'] ?? 'Unknown Order';
-      final orderUniqueId = order['orderUniqueId'] ?? '';
-      final orderId = order['_id'] ?? '';
-      final progress = order['progress'] ?? 0;
-
-      String displayId = orderUniqueId.length > 6
-          ? orderUniqueId.substring(0, 6)
-          : orderUniqueId;
-
-      processed.add({
-        "orderId": orderId,
-        "orderName": "Order #$displayId: $orderName",
-        "progress": progress,
-        "dueDate": order['dueDate'],
-        "operations": (order['operations'] as List?)?.length ?? 0,
-        "message": _generateActivityMessage(order),
-      });
-    }
-
-    processedActivities.value = processed;
-  }
-
-  String _generateActivityMessage(Map<String, dynamic> order) {
-    final progress = order['progress'] ?? 0;
-    if (progress == 100) return "All operations completed";
-    if (progress > 0) return "$progress% complete";
-    return "Ready to start";
-  }
-
-  bool _isActivityCacheValid() {
-    return _lastActivityFetch != null &&
-        DateTime.now().difference(_lastActivityFetch!) < cacheDuration;
-  }
-
-  // UI Loader and Error Handling
-
-  void _handleError(String message, dynamic error) {
-    errorMessage.value = message;
-    if (kDebugMode) print("$message: $error");
-  }
-
-  String _formatUserRole(String role) {
-    switch (role) {
-      case 'CLIENT':
-        return 'Client';
-      case 'DEPARTMENT_HEAD':
-        return 'Department Head';
-      case 'QC_MEMBER':
-        return 'QC Member';
-      default:
-        return 'Unknown Role';
-    }
-  }
-
-  Color getStatusColor() {
-    switch (deptStatus.value) {
-      case 'ACTIVE':
-        return Colors.green;
-      case 'INACTIVE':
-        return Colors.orange;
-      default:
-        return Colors.grey;
-    }
-  }
-
   double getOrderCompletionRate() {
     if (totalOrders.value == 0) return 0;
     return (completedOrders.value / totalOrders.value * 100);
@@ -360,7 +278,242 @@ class DeptHeadController extends GetxController {
     return (completedOps.value / totalOperationsHandled.value * 100);
   }
 
-  // NAVIGATION
+  double getCheckpointCompletionRate() {
+    if (totalCheckpointsInWorkflow.value == 0) return 0;
+    return (completedWorkflowCheckpoints.value /
+        totalCheckpointsInWorkflow.value *
+        100);
+  }
+
+  // ==================== ACTIVITY PROCESSING ====================
+
+  Future<void> _loadActivities() async {
+    try {
+      final activity = await repository.fetchActiveWorkflows(
+        departmentId.value,
+      );
+      recentActivity.value = activity;
+      _processActivities();
+      _lastActivityFetch = DateTime.now();
+    } catch (e) {
+      if (kDebugMode) print("Activity Error: $e");
+    }
+  }
+
+  void _processActivities() {
+    final List<Map<String, dynamic>> processed = [];
+
+    for (var order in recentActivity) {
+      final orderName = order['orderName'] ?? 'Unknown Order';
+      final orderUniqueId = order['orderUniqueId'] ?? '';
+      final orderId = order['_id'] ?? '';
+      final progress = order['progress'] ?? 0;
+      final operations = order['operations'] as List? ?? [];
+      final updatedAt = order['updatedAt'] ?? order['createdAt'];
+
+      String displayId = orderUniqueId.length > 6
+          ? orderUniqueId.substring(0, 6)
+          : orderUniqueId;
+
+      // 1. Add movement activity (when order enters department)
+      processed.add({
+        "id": "${orderId}_movement",
+        "type": "movement",
+        "title": "Order #$displayId: $orderName",
+        "subtitle": "Moved to ${departmentName.value} department",
+        "timeAgo": _calculateTimeAgo(updatedAt),
+        "action": "MOVE",
+        "orderId": orderId,
+        "iconData": Icons.swap_horiz,
+        "color": Colors.blue,
+      });
+
+      // 2. Check for material alerts (can be extended based on actual data)
+      if (_hasLowMaterialAlert(order)) {
+        processed.add({
+          "id": "${orderId}_alert",
+          "type": "alert",
+          "title": "Low Material Alert",
+          "subtitle": _getMaterialAlertMessage(order),
+          "timeAgo": _calculateTimeAgo(updatedAt),
+          "action": "ALERT",
+          "orderId": orderId,
+          "iconData": Icons.warning_amber_rounded,
+          "color": Colors.orange,
+        });
+      }
+
+      // 3. Check for operator assignments
+      if (_hasNewAssignment(order)) {
+        processed.add({
+          "id": "${orderId}_assignment",
+          "type": "assignment",
+          "title": "New Operator Assigned",
+          "subtitle": _getAssignmentMessage(order),
+          "timeAgo": _calculateTimeAgo(updatedAt),
+          "action": "ASSIGN",
+          "orderId": orderId,
+          "iconData": Icons.person_add_alt,
+          "color": Colors.purple,
+        });
+      }
+
+      // 4. Process operations and checkpoints for detailed activities
+      for (var op in operations) {
+        final opName = op['name'] ?? 'Unknown Operation';
+        final checkpoints = op['checkpoints'] as List? ?? [];
+
+        for (var checkpoint in checkpoints) {
+          final checkpointName = checkpoint['name'] ?? 'Unknown Checkpoint';
+          final history = checkpoint['history'] as List? ?? [];
+
+          for (var h in history) {
+            final action = h['action'] ?? '';
+            final actedAt = h['actedAt'] ?? updatedAt;
+            final comment = h['comment'] ?? '';
+
+            if (action.isNotEmpty) {
+              final activityData = _createActivityFromHistory(
+                action: action,
+                orderId: orderId,
+                displayId: displayId,
+                orderName: orderName,
+                checkpointName: checkpointName,
+                opName: opName,
+                actedAt: actedAt,
+                comment: comment,
+              );
+
+              if (activityData != null) {
+                processed.add(activityData);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Sort by time (newest first)
+    processed.sort((a, b) {
+      final aTime = _parseTimeAgo(a['timeAgo']);
+      final bTime = _parseTimeAgo(b['timeAgo']);
+      return bTime.compareTo(aTime);
+    });
+
+    processedActivities.value = processed;
+  }
+
+  Map<String, dynamic>? _createActivityFromHistory({
+    required String action,
+    required String orderId,
+    required String displayId,
+    required String orderName,
+    required String checkpointName,
+    required String opName,
+    required String actedAt,
+    String comment = '',
+  }) {
+    String type;
+    IconData iconData;
+    Color color;
+    String subtitle;
+
+    switch (action) {
+      case 'SUBMIT':
+        type = 'submission';
+        iconData = Icons.upload_file;
+        color = Colors.green;
+        subtitle = "$checkpointName submitted for review";
+        break;
+      case 'APPROVE':
+        type = 'approval';
+        iconData = Icons.check_circle;
+        color = Colors.green;
+        subtitle = "$checkpointName approved";
+        break;
+      case 'FINAL_APPROVE':
+        type = 'approval';
+        iconData = Icons.task_alt;
+        color = Colors.green;
+        subtitle = "$checkpointName finalized";
+        break;
+      case 'REJECT':
+        type = 'rejection';
+        iconData = Icons.cancel;
+        color = Colors.red;
+        subtitle = comment.isNotEmpty
+            ? "$checkpointName rejected: $comment"
+            : "$checkpointName rejected";
+        break;
+      default:
+        return null;
+    }
+
+    return {
+      "id": "${orderId}_${action}_$actedAt",
+      "type": type,
+      "title": "Order #$displayId: $orderName",
+      "subtitle": subtitle,
+      "timeAgo": _calculateTimeAgo(actedAt),
+      "action": action,
+      "orderId": orderId,
+      "iconData": iconData,
+      "color": color,
+    };
+  }
+
+  String _calculateTimeAgo(String? dateStr) {
+    if (dateStr == null) return '';
+    try {
+      final date = DateTime.parse(dateStr);
+      final diff = DateTime.now().difference(date);
+
+      if (diff.inMinutes < 1) return 'Just now';
+      if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+      if (diff.inHours < 24) return '${diff.inHours}h ago';
+      if (diff.inDays == 1) return 'Yesterday';
+      if (diff.inDays < 7) return '${diff.inDays}d ago';
+      return '${date.day}/${date.month}';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  DateTime _parseTimeAgo(String timeAgo) {
+    // This is a simplified parser - for sorting purposes
+    if (timeAgo.contains('m')) {
+      final minutes = int.tryParse(timeAgo.replaceAll('m ago', '')) ?? 0;
+      return DateTime.now().subtract(Duration(minutes: minutes));
+    } else if (timeAgo.contains('h')) {
+      final hours = int.tryParse(timeAgo.replaceAll('h ago', '')) ?? 0;
+      return DateTime.now().subtract(Duration(hours: hours));
+    } else if (timeAgo.contains('d')) {
+      final days = int.tryParse(timeAgo.replaceAll('d ago', '')) ?? 0;
+      return DateTime.now().subtract(Duration(days: days));
+    }
+    return DateTime.now();
+  }
+
+  bool _hasLowMaterialAlert(Map<String, dynamic> order) {
+    // This should be implemented based on actual data
+    // For now, return false as placeholder
+    return false;
+  }
+
+  bool _hasNewAssignment(Map<String, dynamic> order) {
+    // This should be implemented based on actual data
+    // For now, return false as placeholder
+    return false;
+  }
+
+  String _getMaterialAlertMessage(Map<String, dynamic> order) {
+    return "Thread count low for Batch B-12";
+  }
+
+  String _getAssignmentMessage(Map<String, dynamic> order) {
+    return "Maria G. assigned to Table 4";
+  }
+
 
   void navigateToFullActivityList() {
     Get.toNamed(
@@ -372,36 +525,11 @@ class DeptHeadController extends GetxController {
     );
   }
 
-  String formatTimeAgo(DateTime? date) {
-    if (date == null) return '';
-    final diff = DateTime.now().difference(date);
-    if (diff.inMinutes < 1) return 'Just now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    if (diff.inDays < 7) return '${diff.inDays}d ago';
-    return '${date.day}/${date.month}/${date.year}';
-  }
+  // ==================== UI HELPERS ====================
 
-  IconData getActivityIcon(String type) {
-    switch (type) {
-      case 'rejection':
-        return Icons.cancel_outlined;
-      case 'approval':
-        return Icons.check_circle_outline;
-      default:
-        return Icons.compare_arrows_outlined;
-    }
-  }
-
-  Color getActivityColor(String type) {
-    switch (type) {
-      case 'rejection':
-        return Colors.red;
-      case 'approval':
-        return Colors.green;
-      default:
-        return Colors.blue;
-    }
+  void _handleError(String message, dynamic error) {
+    errorMessage.value = message;
+    if (kDebugMode) print("$message: $error");
   }
 
   String formatReadableMessage(String action, String checkpoint) {
@@ -417,15 +545,26 @@ class DeptHeadController extends GetxController {
     }
   }
 
-  Future<String?> _getUserDepartmentId() async {
-    try {
-      final user = await TokenStorage.getUser();
-      if (user != null && user['department'] != null) {
-        return user['department'].toString();
-      }
-    } catch (e) {
-      if (kDebugMode) print("Error getting user department: $e");
+  String formatTimeAgo(DateTime? date) {
+    if (date == null) return '';
+    final diff = DateTime.now().difference(date);
+    if (diff.inMinutes < 1) return 'Just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    if (diff.inDays < 7) return '${diff.inDays}d ago';
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
+  String _formatUserRole(String role) {
+    switch (role) {
+      case 'CLIENT':
+        return 'Client';
+      case 'DEPARTMENT_HEAD':
+        return 'Department Head';
+      case 'QC_MEMBER':
+        return 'QC Member';
+      default:
+        return 'Unknown Role';
     }
-    return null;
   }
 }

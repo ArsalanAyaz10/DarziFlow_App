@@ -101,4 +101,24 @@ class AuthRepository {
       }
     }
   }
+
+  Future<String> VerifyEmail(String token) async {
+    try {
+      final response = await apiClient.get("/auth/verify/$token");
+      final result;
+
+      if (response.statusCode == 200) {
+        result = response.data['message'] ?? "Email verified successfully";
+        return result;
+      }
+      throw Exception(
+        "Verification failed with status: ${response.statusCode}",
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print("Failed to verify email: $e");
+      }
+      throw Exception("Failed to verify email");
+    }
+  }
 }

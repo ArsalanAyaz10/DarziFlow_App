@@ -314,13 +314,13 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
               children: [
                 _buildMetricItem(
                   "Operations",
-                  "${controller.completedCheckpoints.value}/${controller.totalCheckpoints.value}",
-                  Icons.task_alt,
+                  "${controller.completedOps.value}/${controller.totalOperationsHandled.value}",
+                  Icons.checklist,
                 ),
                 _buildMetricItem(
                   "Checkpoints",
-                  "${controller.totalOperationsHandled.value}/${controller.totalOperationsHandled.value}",
-                  Icons.checklist,
+                  "${controller.completedCheckpoints.value}/${controller.totalCheckpoints.value}",
+                  Icons.task_alt,
                 ),
               ],
             ),
@@ -425,10 +425,17 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
       }
 
       if (activities.isEmpty) {
-        return const Center(
-          child: Padding(
-            padding: EdgeInsets.all(20),
-            child: Text("No recent activity"),
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: const Center(
+            child: Text(
+              "No recent activity",
+              style: TextStyle(color: AppColors.grey),
+            ),
           ),
         );
       }
@@ -440,92 +447,137 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
         separatorBuilder: (_, _) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
           final activity = activities[index];
-
-          final action = activity['action'] ?? '';
-          final checkpoint = activity['checkpointName'] ?? '';
-          final orderName = activity['orderName'] ?? '';
-
-          final actedAt = DateTime.tryParse(activity['actedAt'] ?? '');
-          final timeAgo = controller.formatTimeAgo(actedAt);
-          final message = controller.formatReadableMessage(action, checkpoint);
-
-          return _buildActivityCard(
-            orderId: activity['orderId'] ?? '',
-            title: orderName,
-            message: message,
-            action: action,
-            timeAgo: timeAgo,
-          );
+          return _buildActivityCard(activity);
         },
       );
     });
   }
 
-  Widget _buildActivityCard({
-    required String orderId,
-    required String title,
-    required String message,
-    required String action,
-    required String timeAgo,
-  }) {
-    final color = _getActionColor(action);
-    final icon = _getActionIcon(action);
+  Widget _buildActivityCard(Map<String, dynamic> activity) {
+    final activityType = _getActivityType(activity);
+    final iconData = _getActivityIcon(activityType);
+    final color = _getActivityTypeColor(activityType);
+    final timeAgo = activity['timeAgo'] ?? '';
+    final title = activity['title'] ?? '';
+    final subtitle = activity['subtitle'] ?? '';
 
-    return GestureDetector(
-      onTap: () => Get.toNamed("/order-details", arguments: orderId),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: Container(
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade100),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Icon with colored background
+          Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: color),
+            child: Icon(iconData, color: color, size: 20),
           ),
-          title: Text(
-            title,
-            style: const TextStyle(fontWeight: FontWeight.bold),
+          const SizedBox(width: 12),
+
+          // Content
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                ),
+              ],
+            ),
           ),
-          subtitle: Text(message, style: TextStyle(color: color)),
-          trailing: Text(
+
+          // Time
+          Text(
             timeAgo,
-            style: const TextStyle(color: AppColors.grey, fontSize: 12),
+            style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  Color _getActionColor(String action) {
-    switch (action) {
-      case 'APPROVE':
-        return AppColors.primaryGreen;
-      case 'REJECT':
-        return AppColors.error;
-      case 'SUBMIT':
-        return AppColors.primaryBlue;
+  IconData _getActivityIcon(String type) {
+    switch (type) {
+      case 'movement':
+        return Icons.swap_horiz;
+      case 'alert':
+        return Icons.warning_amber_rounded;
+      case 'assignment':
+        return Icons.person_add_alt;
+      case 'submission':
+        return Icons.upload_file;
+      case 'approval':
+        return Icons.check_circle;
+      case 'rejection':
+        return Icons.cancel;
       default:
-        return AppColors.grey;
+        return Icons.circle;
     }
   }
 
-  IconData _getActionIcon(String action) {
-    switch (action) {
-      case 'APPROVE':
-        return Icons.check_circle_outline;
-      case 'REJECT':
-        return Icons.cancel_outlined;
-      case 'SUBMIT':
-        return Icons.send_outlined;
+  String _getActivityType(Map<String, dynamic> activity) {
+    // Determine activity type based on available data
+    if (activity['type'] != null) return activity['type'];
+
+    final action = activity['action'] ?? '';
+    final message = activity['message'] ?? '';
+
+    if (message.toLowerCase().contains('material') ||
+        message.toLowerCase().contains('alert')) {
+      return 'alert';
+    }
+    if (action == 'ASSIGN' || message.toLowerCase().contains('assigned')) {
+      return 'assignment';
+    }
+    if (action == 'MOVE' || message.toLowerCase().contains('moved')) {
+      return 'movement';
+    }
+    if (action == 'SUBMIT') {
+      return 'submission';
+    }
+    if (action == 'APPROVE') {
+      return 'approval';
+    }
+    if (action == 'REJECT') {
+      return 'rejection';
+    }
+
+    return 'default';
+  }
+
+  Color _getActivityTypeColor(String type) {
+    switch (type) {
+      case 'movement':
+        return Colors.blue;
+      case 'alert':
+        return Colors.orange;
+      case 'assignment':
+        return Colors.purple;
+      case 'submission':
+        return AppColors.primaryGreen;
+      case 'approval':
+        return Colors.green;
+      case 'rejection':
+        return Colors.red;
       default:
-        return Icons.fiber_manual_record;
+        return Colors.grey;
     }
   }
 }
