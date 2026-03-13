@@ -29,11 +29,14 @@ class CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (showLabel && label != null) ...[
-          _buildLabel(label!),
+          _buildLabel(label!, context),
           const SizedBox(height: 8),
         ],
         TextFormField(
@@ -42,25 +45,25 @@ class CustomTextField extends StatelessWidget {
           keyboardType: keyboardType,
           validator: validator,
           autovalidateMode: AutovalidateMode.onUserInteraction,
-          style: const TextStyle(fontSize: 14),
+          style: TextStyle(fontSize: 14, color: colors.onSurface),
           decoration: InputDecoration(
             filled: true,
-            fillColor: const Color(0xFFF1F4F8),
+            fillColor: colors.surfaceContainerHighest,
             hintText: hint,
             hintStyle: TextStyle(
-              color: AppColors.grey.withValues(alpha: 0.6),
+              color: colors.onSurfaceVariant.withValues(alpha: 0.6),
               fontSize: 14,
             ),
             prefixIcon: Icon(
               icon,
-              color: AppColors.grey.withValues(alpha: 0.8),
+              color: colors.onSurfaceVariant.withValues(alpha: 0.8),
               size: 18,
             ),
             suffixIcon: suffixIcon != null
                 ? IconButton(
                     icon: Icon(
                       suffixIcon,
-                      color: AppColors.grey.withValues(alpha: 0.8),
+                      color: colors.onSurfaceVariant.withValues(alpha: 0.8),
                       size: 18,
                     ),
                     onPressed: onSuffixTap,
@@ -80,8 +83,8 @@ class CustomTextField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: AppColors.primaryGreen,
+              borderSide: BorderSide(
+                color: colors.primary,
                 width: 1,
               ),
             ),
@@ -95,7 +98,8 @@ class CustomTextField extends StatelessWidget {
     );
   }
 
-  Widget _buildLabel(String text) {
+  Widget _buildLabel(String text, BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Align(
       alignment: Alignment.centerLeft,
       child: Padding(
@@ -105,7 +109,7 @@ class CustomTextField extends StatelessWidget {
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.bold,
-            color: AppColors.black.withValues(alpha: 0.7),
+            color: colors.onSurface.withValues(alpha: 0.7),
             letterSpacing: 1.1,
           ),
         ),

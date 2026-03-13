@@ -13,9 +13,15 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
     final initialActivities =
         arguments?['activities'] as List<Map<String, dynamic>>? ?? [];
 
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    
+    // Create a local observable for the selected filter
+    final selectedFilter = 0.obs;
+
     return Scaffold(
-      backgroundColor: AppColors.lightGrey,
-      appBar: _buildAppBar(),
+      backgroundColor: colors.surfaceContainerLowest,
+      appBar: _buildAppBar(context, selectedFilter),
       body: Obx(() {
         // Use controller's processedActivities if available, otherwise use passed activities
         final activities = controller.processedActivities.isNotEmpty
@@ -27,26 +33,49 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
         }
 
         if (activities.isEmpty) {
-          return _buildEmptyState();
+          return _buildEmptyState(context);
         }
+        
+        // Filter logic
+        final filteredActivities = _filterActivities(activities.toList(), selectedFilter.value);
 
-        return _buildActivityList(activities);
+        return _buildActivityList(context, filteredActivities, selectedFilter);
       }),
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
+  List<Map<String, dynamic>> _filterActivities(List<Map<String, dynamic>> activities, int filterIndex) {
+    if (filterIndex == 0) return activities; // All
+    
+    final typeMappings = {
+      1: 'movement',
+      2: 'alert',
+      3: 'assignment',
+      4: 'submission',
+    };
+    
+    final filterType = typeMappings[filterIndex];
+    
+    if (filterType != null) {
+       return activities.where((a) => a['type'] == filterType).toList();
+    }
+    
+    return activities;
+  }
+
+  PreferredSizeWidget _buildAppBar(BuildContext context, RxInt selectedFilter) {
+    final colors = Theme.of(context).colorScheme;
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: colors.surface,
       elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black),
+        icon: Icon(Icons.arrow_back, color: colors.onSurface),
         onPressed: () => Get.back(),
       ),
-      title: const Text(
+      title: Text(
         "All Activities",
         style: TextStyle(
-          color: Colors.black,
+          color: colors.onSurface,
           fontSize: 18,
           fontWeight: FontWeight.bold,
         ),
@@ -54,14 +83,15 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
       centerTitle: true,
       actions: [
         IconButton(
-          icon: const Icon(Icons.filter_list, color: Colors.grey),
-          onPressed: _showFilterOptions,
+          icon: Icon(Icons.filter_list, color: colors.onSurfaceVariant),
+          onPressed: () => _showFilterOptions(context, selectedFilter),
         ),
       ],
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -69,126 +99,171 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: colors.surfaceContainer,
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.history, size: 50, color: Colors.grey.shade400),
+            child: Icon(Icons.history, size: 50, color: colors.onSurfaceVariant.withValues(alpha: 0.5)),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             "No Activities Yet",
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: colors.onSurface,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             "Activities from your department\nwill appear here",
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+            style: TextStyle(fontSize: 14, color: colors.onSurfaceVariant),
           ),
           const SizedBox(height: 30),
           ElevatedButton(
             onPressed: () => controller.refreshDashboard(),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryGreen,
+              foregroundColor: colors.onPrimary,
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: const Text("Refresh", style: TextStyle(color: Colors.white)),
+            child: const Text("Refresh"),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildActivityList(RxList<Map<String, dynamic>> activities) {
+  Widget _buildActivityList(BuildContext context, List<Map<String, dynamic>> activities, RxInt selectedFilter) {
     return Column(
       children: [
-        _buildFilterBar(),
+        _buildFilterBar(context, selectedFilter),
         Expanded(
           child: RefreshIndicator(
             onRefresh: controller.refreshDashboard,
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: activities.length,
-              itemBuilder: (context, index) {
-                final activity = activities[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _buildActivityCard(activity),
-                );
-              },
-            ),
+            color: AppColors.primaryGreen,
+            child: activities.isEmpty
+                ? _buildEmptyFilteredState(context, selectedFilter)
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: activities.length,
+                    itemBuilder: (context, index) {
+                      final activity = activities[index];
+                      // Add animation to the list items
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _buildActivityCard(context, activity),
+                      );
+                    },
+                  ),
           ),
         ),
       ],
     );
   }
+  
+  Widget _buildEmptyFilteredState(BuildContext context, RxInt selectedFilter) {
+     final colors = Theme.of(context).colorScheme;
+     final filterNames = ['All', 'Movement', 'Alerts', 'Assignments', 'Submissions'];
+     final name = filterNames[selectedFilter.value];
+     
+     return Center(
+       child: Column(
+         mainAxisAlignment: MainAxisAlignment.center,
+         children: [
+           Icon(Icons.search_off, size: 60, color: colors.onSurfaceVariant.withValues(alpha: 0.4)),
+           const SizedBox(height: 16),
+           Text(
+             "No $name Activities",
+             style: TextStyle(
+               fontSize: 16,
+               fontWeight: FontWeight.bold,
+               color: colors.onSurfaceVariant,
+             ),
+           ),
+           const SizedBox(height: 8),
+           TextButton(
+             onPressed: () => selectedFilter.value = 0,
+             child: Text("Clear Filters", style: TextStyle(color: AppColors.primaryGreen)),
+           )
+         ],
+       ),
+     );
+  }
 
-  Widget _buildFilterBar() {
-    // Selected filter index (0 = All, 1 = Movement, 2 = Alerts, 3 = Assignments, 4 = Submissions)
-    final selectedFilter = 0.obs;
+  Widget _buildFilterBar(BuildContext context, RxInt selectedFilter) {
+    final colors = Theme.of(context).colorScheme;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      color: colors.surface,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
         child: Row(
           children: [
-            _buildFilterChip("All", 0, selectedFilter),
+            _buildFilterChip(context, "All", 0, selectedFilter),
             const SizedBox(width: 8),
-            _buildFilterChip("Movement", 1, selectedFilter),
+            _buildFilterChip(context, "Movement", 1, selectedFilter),
             const SizedBox(width: 8),
-            _buildFilterChip("Alerts", 2, selectedFilter),
+            _buildFilterChip(context, "Alerts", 2, selectedFilter),
             const SizedBox(width: 8),
-            _buildFilterChip("Assignments", 3, selectedFilter),
+            _buildFilterChip(context, "Assignments", 3, selectedFilter),
             const SizedBox(width: 8),
-            _buildFilterChip("Submissions", 4, selectedFilter),
+            _buildFilterChip(context, "Submissions", 4, selectedFilter),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildFilterChip(String label, int index, RxInt selectedFilter) {
+  Widget _buildFilterChip(BuildContext context, String label, int index, RxInt selectedFilter) {
+    final colors = Theme.of(context).colorScheme;
     return Obx(
-      () => FilterChip(
-        label: Text(label),
-        selected: selectedFilter.value == index,
-        onSelected: (selected) {
-          selectedFilter.value = index;
-          // TODO: Implement filtering logic
-        },
-        backgroundColor: Colors.grey.shade50,
-        selectedColor: AppColors.primaryGreen.withValues(alpha: 0.1),
-        checkmarkColor: AppColors.primaryGreen,
-        labelStyle: TextStyle(
-          color: selectedFilter.value == index
-              ? AppColors.primaryGreen
-              : Colors.grey.shade700,
-          fontWeight: selectedFilter.value == index
-              ? FontWeight.bold
-              : FontWeight.normal,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: BorderSide(
-            color: selectedFilter.value == index
-                ? AppColors.primaryGreen
-                : Colors.grey.shade300,
+      () {
+        final isSelected = selectedFilter.value == index;
+        return FilterChip(
+          label: Text(label),
+          selected: isSelected,
+          onSelected: (selected) {
+            selectedFilter.value = index;
+          },
+          backgroundColor: colors.surfaceContainerLowest,
+          selectedColor: AppColors.primaryGreen,
+          checkmarkColor: colors.surface,
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+          labelStyle: TextStyle(
+            color: isSelected
+                ? colors.surface
+                : colors.onSurfaceVariant,
+            fontWeight: isSelected
+                ? FontWeight.bold
+                : FontWeight.normal,
+            fontSize: 13,
           ),
-        ),
-      ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(
+              color: isSelected
+                  ? Colors.transparent
+                  : colors.outline.withValues(alpha: 0.3),
+            ),
+          ),
+          showCheckmark: false,
+          elevation: isSelected ? 2 : 0,
+          pressElevation: 0,
+        );
+      }
     );
   }
 
-  Widget _buildActivityCard(Map<String, dynamic> activity) {
+  Widget _buildActivityCard(BuildContext context, Map<String, dynamic> activity) {
+    final colors = Theme.of(context).colorScheme;
     final iconData = activity['iconData'] ?? _getDefaultIcon(activity['type']);
     final color = activity['color'] ?? _getDefaultColor(activity['type']);
     final title = activity['title'] ?? 'Unknown Activity';
@@ -197,21 +272,24 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colors.outline.withValues(alpha: 0.1)),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 5,
-            offset: const Offset(0, 2),
+            color: colors.onSurface.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => _showActivityDetails(activity),
+          onTap: () => _showActivityDetails(context, activity),
           borderRadius: BorderRadius.circular(16),
+          splashColor: color.withValues(alpha: 0.1),
+          highlightColor: color.withValues(alpha: 0.05),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -221,10 +299,10 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    color: color.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Icon(iconData, color: color, size: 20),
+                  child: Icon(iconData, color: color, size: 22),
                 ),
                 const SizedBox(width: 16),
 
@@ -235,22 +313,24 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
+                        style: TextStyle(
+                          color: colors.onSurface,
+                          fontWeight: FontWeight.w700,
                           fontSize: 15,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 6),
                       Text(
                         subtitle,
                         style: TextStyle(
-                          color: Colors.grey.shade600,
+                          color: colors.onSurfaceVariant,
                           fontSize: 13,
+                          height: 1.3,
                         ),
                       ),
                       if (activity['orderId'] != null) ...[
-                        const SizedBox(height: 8),
-                        _buildOrderChip(activity['orderId']),
+                        const SizedBox(height: 10),
+                        _buildOrderChip(context, activity['orderId']),
                       ],
                     ],
                   ),
@@ -260,18 +340,26 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      timeAgo,
-                      style: TextStyle(
-                        color: Colors.grey.shade500,
-                        fontSize: 12,
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: colors.surfaceContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        timeAgo,
+                        style: TextStyle(
+                          color: colors.onSurfaceVariant.withValues(alpha: 0.9),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 12),
                     Icon(
-                      Icons.chevron_right,
-                      size: 16,
-                      color: Colors.grey.shade400,
+                      Icons.arrow_forward_ios_rounded,
+                      size: 14,
+                      color: colors.onSurfaceVariant.withValues(alpha: 0.4),
                     ),
                   ],
                 ),
@@ -283,28 +371,29 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
     );
   }
 
-  Widget _buildOrderChip(String orderId) {
+  Widget _buildOrderChip(BuildContext context, String orderId) {
+    final colors = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: AppColors.primaryGreen.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             Icons.shopping_bag_outlined,
-            size: 12,
+            size: 14,
             color: AppColors.primaryGreen,
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 6),
           Text(
             "View Order",
             style: TextStyle(
-              fontSize: 11,
+              fontSize: 12,
               color: AppColors.primaryGreen,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -312,48 +401,78 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
     );
   }
 
-  void _showActivityDetails(Map<String, dynamic> activity) {
+  void _showActivityDetails(BuildContext context, Map<String, dynamic> activity) {
+    final colors = Theme.of(context).colorScheme;
     Get.bottomSheet(
       Container(
-        padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
           ),
+          boxShadow: [
+             BoxShadow(
+                color: colors.shadow.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, -5),
+             )
+          ]
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Handle bar
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: colors.outline.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   "Activity Details",
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey.shade800,
+                    color: colors.onSurface,
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Get.back(),
+                Container(
+                  decoration: BoxDecoration(
+                    color: colors.surfaceContainer,
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: Icon(Icons.close, color: colors.onSurfaceVariant, size: 20),
+                    onPressed: () => Get.back(),
+                    constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                    padding: EdgeInsets.zero,
+                  ),
                 ),
               ],
             ),
-            const Divider(),
             const SizedBox(height: 16),
-            _buildDetailRow("Title", activity['title'] ?? ''),
-            _buildDetailRow("Description", activity['subtitle'] ?? ''),
-            _buildDetailRow("Time", activity['timeAgo'] ?? ''),
+            Divider(color: colors.outline.withValues(alpha: 0.1)),
+            const SizedBox(height: 16),
+            _buildDetailRow(context, "Title", activity['title'] ?? ''),
+            _buildDetailRow(context, "Description", activity['subtitle'] ?? ''),
+            _buildDetailRow(context, "Time", activity['timeAgo'] ?? ''),
             if (activity['orderId'] != null)
-              _buildDetailRow("Order ID", activity['orderId']),
-            const SizedBox(height: 20),
+              _buildDetailRow(context, "Order ID", activity['orderId']),
+            const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
+              height: 50,
               child: ElevatedButton(
                 onPressed: () {
                   Get.back();
@@ -366,40 +485,51 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryGreen,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  foregroundColor: colors.surface,
+                  elevation: 0,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 child: const Text(
                   "View Full Order",
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
           ],
         ),
       ),
+      isScrollControlled: true,
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildDetailRow(BuildContext context, String label, String value) {
+    final colors = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 80,
+            width: 90,
             child: Text(
               label,
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+              style: TextStyle(
+                color: colors.onSurfaceVariant, 
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                fontSize: 14, 
+                fontWeight: FontWeight.w600,
+                color: colors.onSurface,
+              ),
             ),
           ),
         ],
@@ -407,37 +537,60 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
     );
   }
 
-  void _showFilterOptions() {
+  void _showFilterOptions(BuildContext context, RxInt selectedFilter) {
+    final colors = Theme.of(context).colorScheme;
     Get.bottomSheet(
       Container(
-        padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
           ),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+             Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: colors.outline.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Text(
               "Filter Activities",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 20, 
+                fontWeight: FontWeight.bold,
+                color: colors.onSurface,
+              ),
             ),
             const SizedBox(height: 20),
-            _buildFilterOption("All Activities", Icons.list, () {}),
-            _buildFilterOption("Today", Icons.today, () {}),
-            _buildFilterOption("This Week", Icons.date_range, () {}),
-            _buildFilterOption("This Month", Icons.calendar_month, () {}),
-            _buildFilterOption("Custom Range", Icons.tune, () {}),
-            const SizedBox(height: 20),
+             _buildFilterOption(context, "All Activities", Icons.list, 0, selectedFilter),
+            _buildFilterOption(context, "Movement", Icons.swap_horiz, 1, selectedFilter),
+             _buildFilterOption(context, "Alerts", Icons.warning_amber_rounded, 2, selectedFilter),
+             _buildFilterOption(context, "Assignments", Icons.person_add_alt, 3, selectedFilter),
+             _buildFilterOption(context, "Submissions", Icons.upload_file, 4, selectedFilter),
+            const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
-              child: TextButton(
+              height: 50,
+              child: OutlinedButton(
                 onPressed: () => Get.back(),
-                child: const Text("Cancel"),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: colors.outline.withValues(alpha: 0.5)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text("Done", style: TextStyle(color: colors.onSurface, fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -446,12 +599,37 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
     );
   }
 
-  Widget _buildFilterOption(String label, IconData icon, VoidCallback onTap) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.grey.shade700),
-      title: Text(label),
-      onTap: onTap,
-    );
+  Widget _buildFilterOption(BuildContext context, String label, IconData icon, int index, RxInt selectedFilter) {
+    final colors = Theme.of(context).colorScheme;
+    return Obx(() {
+      final isSelected = selectedFilter.value == index;
+      
+      return ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+             color: isSelected ? AppColors.primaryGreen.withValues(alpha: 0.1) : colors.surfaceContainer,
+             borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: isSelected ? AppColors.primaryGreen : colors.onSurfaceVariant, size: 20)
+        ),
+        title: Text(
+          label, 
+          style: TextStyle(
+             color: isSelected ? AppColors.primaryGreen : colors.onSurface,
+             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          )
+        ),
+        trailing: isSelected ? Icon(Icons.check, color: AppColors.primaryGreen) : null,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        tileColor: isSelected ? AppColors.primaryGreen.withValues(alpha: 0.05) : Colors.transparent,
+        onTap: () {
+          selectedFilter.value = index;
+          Get.back(); // close bottom sheet on selection
+        },
+      );
+    });
   }
 
   IconData _getDefaultIcon(String? type) {

@@ -11,8 +11,12 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.lightGrey,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Obx(() {
         if (controller.isLoading.value &&
             controller.processedActivities.isEmpty) {
@@ -27,7 +31,7 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
 
         return Column(
           children: [
-            _buildAppBar(),
+            _buildAppBar(context),
             Expanded(
               child: RefreshIndicator(
                 onRefresh: controller.refreshDashboard,
@@ -40,15 +44,15 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildDeptHeader(),
+                      _buildDeptHeader(context),
                       const SizedBox(height: 20),
-                      _buildStatCards(),
+                      _buildStatCards(context),
                       const SizedBox(height: 20),
-                      _buildEfficiencyCard(),
+                      _buildEfficiencyCard(context),
                       const SizedBox(height: 30),
-                      _buildRecentActivityHeader(),
+                      _buildRecentActivityHeader(context),
                       const SizedBox(height: 15),
-                      _buildActivityList(),
+                      _buildActivityList(context),
                       const SizedBox(height: 20),
                     ],
                   ),
@@ -62,10 +66,11 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
     );
   }
 
-  Widget _buildAppBar() {
+  Widget _buildAppBar(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Obx(
       () => AppBar(
-        backgroundColor: AppColors.transparent,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.only(left: 10),
@@ -74,18 +79,18 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
               Get.toNamed("/profile");
             },
             child: CircleAvatar(
-              radius: 20, // Increased from 10 to 20
-              backgroundColor: AppColors.grey.withValues(alpha: 0.2),
+              radius: 20,
+              backgroundColor: colors.onSurface.withValues(alpha: 0.1),
               backgroundImage: controller.userAvatar.value.isNotEmpty
                   ? NetworkImage(controller.userAvatar.value)
                   : null,
               child: controller.userAvatar.value.isEmpty
-                  ? const Icon(
+                  ? Icon(
                       Icons.person,
-                      size: 24, // Adjusted size
+                      size: 24,
                       color: AppColors.primaryGreen,
                     )
-                  : null, // Important: child should be null when image exists
+                  : null,
             ),
           ),
         ),
@@ -104,8 +109,8 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
             const SizedBox(height: 2),
             Text(
               controller.userRole.value,
-              style: const TextStyle(
-                color: AppColors.black,
+              style: TextStyle(
+                color: colors.onSurface,
                 fontSize: 9,
                 fontWeight: FontWeight.w500,
               ),
@@ -115,18 +120,19 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
         actions: [
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.search, color: AppColors.black),
+            icon: Icon(Icons.search, color: colors.onSurface),
           ),
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.notifications_none, color: AppColors.black),
+            icon: Icon(Icons.notifications_none, color: colors.onSurface),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDeptHeader() {
+  Widget _buildDeptHeader(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Obx(
       () => Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -135,7 +141,11 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
             controller.departmentName.value.isEmpty
                 ? "Department"
                 : controller.departmentName.value,
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
+            style: TextStyle(
+              fontSize: 22, 
+              fontWeight: FontWeight.w500,
+              color: colors.onSurface,
+            ),
           ),
           StatusBadge(
             status: controller.deptStatus.value.isEmpty
@@ -148,11 +158,12 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
     );
   }
 
-  Widget _buildStatCards() {
+  Widget _buildStatCards(BuildContext context) {
     return Obx(() {
       return Row(
         children: [
           _buildStatTile(
+            context,
             "Total Orders",
             controller.totalOrders.value.toString(),
             "Orders Assigned",
@@ -161,6 +172,7 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
           ),
           const SizedBox(width: 15),
           _buildStatTile(
+            context,
             "Active Orders",
             controller.inProgressOrders.value.toString(),
             "In progress now",
@@ -174,6 +186,7 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
   }
 
   Widget _buildStatTile(
+    BuildContext context,
     String label,
     String value,
     String subText,
@@ -182,13 +195,14 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
     IconData? trendIcon,
     bool showTrend = true,
   }) {
+    final colors = Theme.of(context).colorScheme;
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colors.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: colors.outline.withValues(alpha: 0.1)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -201,14 +215,18 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
                 ],
                 Text(
                   label,
-                  style: const TextStyle(color: Colors.black54, fontSize: 12),
+                  style: TextStyle(color: colors.onSurfaceVariant, fontSize: 12),
                 ),
               ],
             ),
             const SizedBox(height: 8),
             Text(
               value,
-              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 26, 
+                fontWeight: FontWeight.bold,
+                color: colors.onSurface,
+              ),
             ),
             const SizedBox(height: 4),
             if (showTrend)
@@ -236,7 +254,7 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
             else
               Text(
                 subText,
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                style: TextStyle(color: colors.onSurfaceVariant, fontSize: 12),
               ),
           ],
         ),
@@ -244,21 +262,29 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
     );
   }
 
-  Widget _buildEfficiencyCard() {
+  Widget _buildEfficiencyCard(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Obx(
       () => Container(
         width: double.infinity,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
+          // Use a theme-adaptive background for the card
           gradient: LinearGradient(
-            colors: [AppColors.primaryGreen, const Color(0xFF4CAF50)],
+            colors: isDark 
+              ? [colors.primaryContainer, colors.primaryContainer.withValues(alpha: 0.8)]
+              : [AppColors.primaryGreen, const Color(0xFF4CAF50)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.green.withValues(alpha: 0.3),
+              color: isDark 
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.green.withValues(alpha: 0.3),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -272,15 +298,18 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       "Department Performance",
-                      style: TextStyle(color: Colors.white70, fontSize: 13),
+                      style: TextStyle(
+                        color: isDark ? colors.onPrimaryContainer.withValues(alpha: 0.7) : Colors.white70, 
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
+                    Text(
                       "Efficiency Score",
                       style: TextStyle(
-                        color: AppColors.white,
+                        color: isDark ? colors.onPrimaryContainer : AppColors.white,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
@@ -292,20 +321,22 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.black.withValues(alpha: 0.15),
+                        color: isDark 
+                          ? colors.onSurface.withValues(alpha: 0.1) 
+                          : AppColors.black.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         "Quality: ${controller.qualityScore.value}%",
-                        style: const TextStyle(
-                          color: AppColors.white,
+                        style: TextStyle(
+                          color: isDark ? colors.onPrimaryContainer : AppColors.white,
                           fontSize: 11,
                         ),
                       ),
                     ),
                   ],
                 ),
-                _buildScoreCircle(),
+                _buildScoreCircle(context),
               ],
             ),
             const SizedBox(height: 15),
@@ -313,11 +344,13 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildMetricItem(
+                  context,
                   "Operations",
                   "${controller.completedOps.value}/${controller.totalOperationsHandled.value}",
                   Icons.checklist,
                 ),
                 _buildMetricItem(
+                  context,
                   "Checkpoints",
                   "${controller.completedCheckpoints.value}/${controller.totalCheckpoints.value}",
                   Icons.task_alt,
@@ -330,7 +363,10 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
     );
   }
 
-  Widget _buildScoreCircle() {
+  Widget _buildScoreCircle(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Obx(
       () => Stack(
         alignment: Alignment.center,
@@ -341,8 +377,12 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
             child: CircularProgressIndicator(
               value: controller.efficiencyScore.value / 100,
               strokeWidth: 6,
-              backgroundColor: AppColors.white.withValues(alpha: 0.2),
-              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+              backgroundColor: isDark 
+                ? colors.onPrimaryContainer.withValues(alpha: 0.2)
+                : AppColors.white.withValues(alpha: 0.2),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                isDark ? colors.onPrimaryContainer : Colors.white
+              ),
             ),
           ),
           Column(
@@ -350,15 +390,18 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
             children: [
               Text(
                 "${controller.efficiencyScore.value}",
-                style: const TextStyle(
-                  color: AppColors.white,
+                style: TextStyle(
+                  color: isDark ? colors.onPrimaryContainer : AppColors.white,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const Text(
+              Text(
                 "%",
-                style: TextStyle(color: Colors.white70, fontSize: 10),
+                style: TextStyle(
+                  color: isDark ? colors.onPrimaryContainer.withValues(alpha: 0.7) : Colors.white70, 
+                  fontSize: 10,
+                ),
               ),
             ],
           ),
@@ -367,34 +410,49 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
     );
   }
 
-  Widget _buildMetricItem(String label, String value, IconData icon) {
+  Widget _buildMetricItem(BuildContext context, String label, String value, IconData icon) {
+    final colors = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       children: [
-        Icon(icon, color: Colors.white70, size: 16),
+        Icon(
+          icon, 
+          color: isDark ? colors.onPrimaryContainer.withValues(alpha: 0.7) : Colors.white70, 
+          size: 16
+        ),
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
-            color: AppColors.white,
+          style: TextStyle(
+            color: isDark ? colors.onPrimaryContainer : AppColors.white,
             fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
         ),
         Text(
           label,
-          style: const TextStyle(color: Colors.white70, fontSize: 10),
+          style: TextStyle(
+            color: isDark ? colors.onPrimaryContainer.withValues(alpha: 0.7) : Colors.white70, 
+            fontSize: 10
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildRecentActivityHeader() {
+  Widget _buildRecentActivityHeader(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
+        Text(
           "Recent Activity",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 18, 
+            fontWeight: FontWeight.bold,
+            color: colors.onSurface,
+          ),
         ),
         GestureDetector(
           onTap: controller.navigateToFullActivityList,
@@ -411,7 +469,7 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
     );
   }
 
-  Widget _buildActivityList() {
+  Widget _buildActivityList(BuildContext context) {
     return Obx(() {
       final activities = controller.processedActivities;
 
@@ -425,10 +483,11 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
       }
 
       if (activities.isEmpty) {
+        final colors = Theme.of(context).colorScheme;
         return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colors.surface,
             borderRadius: BorderRadius.circular(15),
           ),
           child: const Center(
@@ -447,13 +506,14 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
         separatorBuilder: (_, _) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
           final activity = activities[index];
-          return _buildActivityCard(activity);
+          return _buildActivityCard(context, activity);
         },
       );
     });
   }
 
-  Widget _buildActivityCard(Map<String, dynamic> activity) {
+  Widget _buildActivityCard(BuildContext context, Map<String, dynamic> activity) {
+    final colors = Theme.of(context).colorScheme;
     final activityType = _getActivityType(activity);
     final iconData = _getActivityIcon(activityType);
     final color = _getActivityTypeColor(activityType);
@@ -464,9 +524,9 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: colors.outline.withValues(alpha: 0.1)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -489,15 +549,16 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
+                    color: colors.onSurface,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                  style: TextStyle(color: colors.onSurfaceVariant, fontSize: 13),
                 ),
               ],
             ),
@@ -506,7 +567,7 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
           // Time
           Text(
             timeAgo,
-            style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+            style: TextStyle(color: colors.onSurfaceVariant, fontSize: 12),
           ),
         ],
       ),

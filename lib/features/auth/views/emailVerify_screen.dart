@@ -8,12 +8,12 @@ class EmailverifyScreen extends GetView<EmailverifyController> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryGreen = const Color(0xFF479C2B);
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: colorScheme.surface,
+      backgroundColor: colors.surface,
       body: SafeArea(
         child: Obx(() {
           return AnimatedSwitcher(
@@ -22,8 +22,7 @@ class EmailverifyScreen extends GetView<EmailverifyController> {
               context,
               controller.status.value,
               controller.message.value,
-              primaryGreen,
-              colorScheme,
+              colors,
               isDark,
             ),
           );
@@ -36,24 +35,21 @@ class EmailverifyScreen extends GetView<EmailverifyController> {
     BuildContext context,
     VerifyStatus status,
     String message,
-    Color primaryGreen,
-    ColorScheme colorScheme,
+    ColorScheme colors,
     bool isDark,
   ) {
     switch (status) {
       case VerifyStatus.loading:
         return _LoadingState(
           key: const ValueKey('loading'),
-          primaryGreen: primaryGreen,
-          colorScheme: colorScheme,
+          colors: colors,
           isDark: isDark,
         );
       case VerifyStatus.success:
         return _SuccessState(
           key: const ValueKey('success'),
           message: message,
-          primaryGreen: primaryGreen,
-          colorScheme: colorScheme,
+          colors: colors,
           isDark: isDark,
           onContinue: controller.goToLogin,
         );
@@ -61,8 +57,7 @@ class EmailverifyScreen extends GetView<EmailverifyController> {
         return _ErrorState(
           key: const ValueKey('error'),
           message: message,
-          primaryGreen: primaryGreen,
-          colorScheme: colorScheme,
+          colors: colors,
           isDark: isDark,
           onRetry: controller.retryWithEmail,
         );
@@ -73,14 +68,12 @@ class EmailverifyScreen extends GetView<EmailverifyController> {
 // ──────────────────── Loading State ────────────────────
 
 class _LoadingState extends StatelessWidget {
-  final Color primaryGreen;
-  final ColorScheme colorScheme;
+  final ColorScheme colors;
   final bool isDark;
 
   const _LoadingState({
     super.key,
-    required this.primaryGreen,
-    required this.colorScheme,
+    required this.colors,
     required this.isDark,
   });
 
@@ -92,20 +85,20 @@ class _LoadingState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _LogoRow(primaryGreen: primaryGreen, colorScheme: colorScheme),
+            _LogoRow(colors: colors),
             const SizedBox(height: 48),
             Container(
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: primaryGreen.withValues(alpha: 0.1),
+                color: colors.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: CircularProgressIndicator(
                   strokeWidth: 3,
-                  color: primaryGreen,
+                  color: colors.primary,
                 ),
               ),
             ),
@@ -115,7 +108,7 @@ class _LoadingState extends StatelessWidget {
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: colorScheme.onSurface,
+                color: colors.onSurface,
               ),
               textAlign: TextAlign.center,
             ),
@@ -124,7 +117,7 @@ class _LoadingState extends StatelessWidget {
               'Please wait while we confirm your email address.',
               style: TextStyle(
                 fontSize: 14,
-                color: colorScheme.onSurface.withValues(alpha: 0.55),
+                color: colors.onSurface.withValues(alpha: 0.55),
                 height: 1.6,
               ),
               textAlign: TextAlign.center,
@@ -140,16 +133,14 @@ class _LoadingState extends StatelessWidget {
 
 class _SuccessState extends StatelessWidget {
   final String message;
-  final Color primaryGreen;
-  final ColorScheme colorScheme;
+  final ColorScheme colors;
   final bool isDark;
   final VoidCallback onContinue;
 
   const _SuccessState({
     super.key,
     required this.message,
-    required this.primaryGreen,
-    required this.colorScheme,
+    required this.colors,
     required this.isDark,
     required this.onContinue,
   });
@@ -162,7 +153,7 @@ class _SuccessState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _LogoRow(primaryGreen: primaryGreen, colorScheme: colorScheme),
+            _LogoRow(colors: colors),
             const SizedBox(height: 48),
 
             // Success Icon
@@ -170,13 +161,13 @@ class _SuccessState extends StatelessWidget {
               width: 96,
               height: 96,
               decoration: BoxDecoration(
-                color: primaryGreen.withValues(alpha: 0.12),
+                color: colors.primary.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.check_circle_rounded,
                 size: 52,
-                color: primaryGreen,
+                color: colors.primary,
               ),
             ),
             const SizedBox(height: 32),
@@ -186,7 +177,7 @@ class _SuccessState extends StatelessWidget {
               style: TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.w800,
-                color: colorScheme.onSurface,
+                color: colors.onSurface,
                 letterSpacing: -0.5,
               ),
               textAlign: TextAlign.center,
@@ -199,7 +190,7 @@ class _SuccessState extends StatelessWidget {
                   : 'Your email has been successfully verified. You can now log in to your DarziFlow account.',
               style: TextStyle(
                 fontSize: 14,
-                color: colorScheme.onSurface.withValues(alpha: 0.6),
+                color: colors.onSurface.withValues(alpha: 0.6),
                 height: 1.65,
               ),
               textAlign: TextAlign.center,
@@ -210,7 +201,7 @@ class _SuccessState extends StatelessWidget {
             _StatusChip(
               label: 'Verification complete',
               icon: Icons.verified_rounded,
-              color: primaryGreen,
+              color: colors.primary,
               isDark: isDark,
             ),
             const SizedBox(height: 40),
@@ -221,8 +212,8 @@ class _SuccessState extends StatelessWidget {
               height: 52,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryGreen,
-                  foregroundColor: Colors.white,
+                  backgroundColor: colors.primary,
+                  foregroundColor: colors.onPrimary,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
@@ -250,16 +241,14 @@ class _SuccessState extends StatelessWidget {
 
 class _ErrorState extends StatelessWidget {
   final String message;
-  final Color primaryGreen;
-  final ColorScheme colorScheme;
+  final ColorScheme colors;
   final bool isDark;
   final VoidCallback onRetry;
 
   const _ErrorState({
     super.key,
     required this.message,
-    required this.primaryGreen,
-    required this.colorScheme,
+    required this.colors,
     required this.isDark,
     required this.onRetry,
   });
@@ -274,7 +263,7 @@ class _ErrorState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _LogoRow(primaryGreen: primaryGreen, colorScheme: colorScheme),
+            _LogoRow(colors: colors),
             const SizedBox(height: 48),
 
             // Error Icon
@@ -298,7 +287,7 @@ class _ErrorState extends StatelessWidget {
               style: TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.w800,
-                color: colorScheme.onSurface,
+                color: colors.onSurface,
                 letterSpacing: -0.5,
               ),
               textAlign: TextAlign.center,
@@ -311,7 +300,7 @@ class _ErrorState extends StatelessWidget {
                   : 'Something went wrong while verifying your email. The link may have expired or already been used.',
               style: TextStyle(
                 fontSize: 14,
-                color: colorScheme.onSurface.withValues(alpha: 0.6),
+                color: colors.onSurface.withValues(alpha: 0.6),
                 height: 1.65,
               ),
               textAlign: TextAlign.center,
@@ -332,8 +321,8 @@ class _ErrorState extends StatelessWidget {
               height: 52,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryGreen,
-                  foregroundColor: Colors.white,
+                  backgroundColor: colors.primary,
+                  foregroundColor: colors.onPrimary,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
@@ -355,7 +344,7 @@ class _ErrorState extends StatelessWidget {
               'Request a new verification email from the login page.',
               style: TextStyle(
                 fontSize: 12,
-                color: colorScheme.onSurface.withValues(alpha: 0.4),
+                color: colors.onSurface.withValues(alpha: 0.4),
               ),
               textAlign: TextAlign.center,
             ),
@@ -369,10 +358,9 @@ class _ErrorState extends StatelessWidget {
 // ──────────────────── Shared Widgets ────────────────────
 
 class _LogoRow extends StatelessWidget {
-  final Color primaryGreen;
-  final ColorScheme colorScheme;
+  final ColorScheme colors;
 
-  const _LogoRow({required this.primaryGreen, required this.colorScheme});
+  const _LogoRow({required this.colors});
 
   @override
   Widget build(BuildContext context) {
@@ -383,7 +371,7 @@ class _LogoRow extends StatelessWidget {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: primaryGreen.withValues(alpha: 0.12),
+            color: colors.primary.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Padding(
@@ -400,7 +388,7 @@ class _LogoRow extends StatelessWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: colorScheme.onSurface,
+            color: colors.onSurface,
             letterSpacing: -0.2,
           ),
         ),

@@ -10,30 +10,30 @@ import 'package:get/get_instance/src/extension_instance.dart';
 
 class InitialBinding extends Bindings {
   @override
-  void dependencies() {
+  Future<void> dependencies() async {
+    // DeeplinkService can remain lazy
     Get.lazyPut<DeeplinkService>(() {
       final service = DeeplinkService();
       service.init();
       return service;
     });
 
-    Get.putAsync<ApiService>(() async {
-      final apiService = ApiService();
-
-      await apiService.init(() async {
-        await AppStorage.clearTokens();
-      });
-
-      return apiService;
-    }, permanent: true);
-
-    Get.lazyPut<ApiClient>(() {
-      final apiService = Get.find<ApiService>();
-      return ApiClient(apiService.dio);
+    // Make ApiService synchronous
+    final apiService = ApiService();
+    await apiService.init(() async {
+      await AppStorage.clearTokens();
     });
+    Get.put<ApiService>(apiService, permanent: true);
 
-    Get.lazyPut<AuthService>(() => AuthService(apiClient: Get.find()));
+    // API client depends on ApiService
+    final apiClient = ApiClient(apiService.dio);
+    Get.put<ApiClient>(apiClient, permanent: true);
 
-    Get.lazyPut<AuthRepository>(() => AuthRepository(authService: Get.find()));
+    // AuthService & AuthRepository are permanent global services
+    final authService = AuthService(apiClient: apiClient);
+    Get.put<AuthService>(authService, permanent: true);
+
+    final authRepo = AuthRepository(authService: authService);
+    Get.put<AuthRepository>(authRepo, permanent: true);
   }
 }

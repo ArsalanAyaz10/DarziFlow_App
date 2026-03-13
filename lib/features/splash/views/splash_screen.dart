@@ -107,7 +107,7 @@ class SplashScreen extends StatelessWidget {
                         height: 90,
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: colors.onSurfaceVariant,
+                          color: colors.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: SvgPicture.asset(
@@ -123,12 +123,11 @@ class SplashScreen extends StatelessWidget {
                             fontSize: 28,
                             fontFamily: AppFonts.outfit,
                             fontWeight: FontWeight.bold,
-                            color: colors.onSurfaceVariant,
+                            color: colors.onSurface,
                           ),
                           children: [
                             TextSpan(
                               text: "Darzi",
-                              style: TextStyle(color: colors.onSurfaceVariant),
                             ),
                             const TextSpan(
                               text: "Flow",
@@ -144,7 +143,7 @@ class SplashScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16,
                           fontFamily: AppFonts.outfit,
-                          color: AppColors.grey,
+                          color: colors.onSurfaceVariant,
                         ),
                       ),
                       const Spacer(flex: 3),
@@ -223,7 +222,7 @@ class SplashScreen extends StatelessWidget {
                         text: TextSpan(
                           style: TextStyle(
                             fontSize: 12,
-                            color: AppColors.grey,
+                            color: colors.onSurfaceVariant,
                             fontFamily: AppFonts.outfit,
                           ),
                           children: const [
