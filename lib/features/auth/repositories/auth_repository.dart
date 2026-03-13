@@ -2,7 +2,7 @@ import 'package:dariziflow_app/features/auth/service/auth_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import '../../../core/storage/storage.dart';
-
+import 'dart:developer' as dev;
 
 enum UserRole { qcMember, client, departmenthead }
 
@@ -58,7 +58,7 @@ class AuthRepository {
     try {
       await authService.logout();
     } catch (e) {
-      debugPrint("Logout API error: $e");
+      dev.log("Logout API error: $e");
     } finally {
       await AppStorage.clearTokens();
       await cookieJar.deleteAll();
@@ -77,7 +77,7 @@ class AuthRepository {
       }
     } catch (e) {
       if (kDebugMode) {
-        print("Failed to fetch user profile: $e");
+        dev.log("Failed to fetch user profile: $e");
       }
     }
   }
@@ -93,7 +93,7 @@ class AuthRepository {
         "Verification failed with status: ${response.statusCode}",
       );
     } catch (e) {
-      if (kDebugMode) print("Failed to verify email: $e");
+      if (kDebugMode) dev.log("Failed to verify email: $e");
       throw Exception("Failed to verify email");
     }
   }

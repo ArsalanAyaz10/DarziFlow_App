@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:dariziflow_app/core/utils/colors.dart';
 
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;

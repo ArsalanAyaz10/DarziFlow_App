@@ -1,7 +1,8 @@
-// lib/core/services/cookie_service.dart
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
+import 'dart:developer' as dev;
+
 
 class CookieService {
   static final CookieService _instance = CookieService._internal();
@@ -26,7 +27,7 @@ class CookieService {
       );
     } catch (e) {
       if (kDebugMode) {
-        print("Error initializing cookie jar: $e");
+        dev.log("Error initializing cookie jar: $e");
       }
       // Fallback to in-memory cookie jar
       _cookieJar = PersistCookieJar();
@@ -40,7 +41,7 @@ class CookieService {
       }
     } catch (e) {
       if (kDebugMode) {
-        print("Error deleting cookies: $e");
+        dev.log("Error deleting cookies: $e");
       }
     }
   }

@@ -13,7 +13,7 @@ class EditProfileScreen extends GetView<EditProfileController> {
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: colors.background,
+      backgroundColor: colors.surface,
       appBar: _buildAppBar(context),
       body: Obx(
         () => Stack(
@@ -60,7 +60,7 @@ class EditProfileScreen extends GetView<EditProfileController> {
       backgroundColor: colors.surface,
       elevation: 0,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: colors.onBackground),
+        icon: Icon(Icons.arrow_back, color: colors.onSurface),
         onPressed: () => Get.back(
           result: {
             'name': controller.userName.value,
@@ -526,7 +526,7 @@ class EditProfileScreen extends GetView<EditProfileController> {
     final colors = theme.colorScheme;
 
     return Container(
-      color: colors.onBackground.withValues(alpha: 0.3),
+      color: colors.onSurface.withValues(alpha: 0.3),
       child: Center(
         child: CircularProgressIndicator(color: AppColors.primaryGreen),
       ),

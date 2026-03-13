@@ -13,12 +13,12 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
     final colors = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: colors.background,
+      backgroundColor: colors.surface,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: colors.onBackground),
+          icon: Icon(Icons.arrow_back, color: colors.onSurface),
           onPressed: () => Get.back(),
         ),
         title: Text(
@@ -32,7 +32,7 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.settings_outlined, color: colors.onBackground),
+            icon: Icon(Icons.settings_outlined, color: colors.onSurface),
             onPressed: () {},
           ),
         ],

@@ -11,6 +11,7 @@ import 'package:get/get_instance/src/extension_instance.dart';
 class InitialBinding extends Bindings {
   @override
   Future<void> dependencies() async {
+    
     // DeeplinkService can remain lazy
     Get.lazyPut<DeeplinkService>(() {
       final service = DeeplinkService();
