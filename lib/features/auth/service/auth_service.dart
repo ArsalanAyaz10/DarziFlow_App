@@ -1,34 +1,53 @@
-import 'package:dariziflow_app/data/services/api_service.dart';
-import 'package:dariziflow_app/features/auth/repositories/auth_repository.dart';
-import 'package:flutter/widgets.dart';
-import 'package:get/get.dart';
+import 'package:dariziflow_app/core/network/api_client.dart';
 
-class AuthService extends GetxService with WidgetsBindingObserver {
-  final AuthRepository authRepository;
-  final ApiService apiService;
+class AuthService {
+  final ApiClient apiClient;
+  static const route = "/auth";
+  static const platform = "MOBILE";
 
-  AuthService({required this.authRepository, required this.apiService});
+  AuthService({required this.apiClient});
 
-  @override
-  void onInit() {
-    super.onInit();
-    WidgetsBinding.instance.addObserver(this);
+  Future<dynamic> register({
+    required String name,
+    required String email,
+    required String role,
+    required String password,
+  }) async {
+    return apiClient.post(
+      "$route/register",
+      data: {
+        "name": name,
+        "email": email,
+        "role": role,
+        "password": password,
+        "platform": platform,
+      },
+    );
   }
 
-  @override
-  void onClose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.onClose();
+  Future<dynamic> login({
+    required String email,
+    required String password,
+  }) async {
+    return apiClient.post(
+      "$route/login",
+      data: {"email": email, "password": password, "platform": platform},
+    );
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) async {
-     if (state == AppLifecycleState.detached) {
-      await _handleTerminationLogout();
-    }
+  Future<dynamic> getProfile() async {
+    return apiClient.get("/profile");
   }
 
-  Future<void> _handleTerminationLogout() async {
-    await authRepository.logout(apiService.cookieJar);
+  Future<dynamic> verifyEmail(String token) async {
+    return apiClient.get("/auth/verify/$token");
+  }
+
+  Future<dynamic> logout() async {
+    return apiClient.post("/auth/logout");
+  }
+
+  Future<dynamic> me() async {
+    return apiClient.get("$route/me");
   }
 }

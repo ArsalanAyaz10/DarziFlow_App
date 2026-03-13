@@ -8,10 +8,13 @@ class EditProfileScreen extends GetView<EditProfileController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: AppColors.white,
-      appBar: _buildAppBar(),
+      backgroundColor: colors.background,
+      appBar: _buildAppBar(context),
       body: Obx(
         () => Stack(
           children: [
@@ -20,41 +23,44 @@ class EditProfileScreen extends GetView<EditProfileController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildPhotoPicker(),
+                  _buildPhotoPicker(context),
                   const SizedBox(height: 30),
-                  _buildSectionHeader("PERSONAL DETAILS"),
+                  _buildSectionHeader(context, "PERSONAL DETAILS"),
                   const SizedBox(height: 15),
-                  _buildInputField("Full Name", controller.nameController),
+                  _buildInputField(context, "Full Name", controller.nameController),
                   const SizedBox(height: 15),
-                  _buildInputField("Email Address", controller.emailController),
+                  _buildInputField(context, "Email Address", controller.emailController),
                   const SizedBox(height: 30),
-                  _buildSectionHeader("SECURITY & PASSWORD"),
+                  _buildSectionHeader(context, "SECURITY & PASSWORD"),
                   const SizedBox(height: 10),
-                  _buildSecurityCard(),
+                  _buildSecurityCard(context),
                   const SizedBox(height: 30),
-                  _buildSectionHeader("APP PREFERENCES"),
+                  _buildSectionHeader(context, "APP PREFERENCES"),
                   const SizedBox(height: 10),
-                  _buildNotificationToggle(),
+                  _buildNotificationToggle(context),
                   const SizedBox(height: 30),
-                  _buildActionButtons(),
+                  _buildActionButtons(context),
                   const SizedBox(height: 20),
                 ],
               ),
             ),
             if (controller.isUploading.value || controller.isLoading.value)
-              _buildLoadingOverlay(),
+              _buildLoadingOverlay(context),
           ],
         ),
       ),
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return AppBar(
-      backgroundColor: AppColors.white,
+      backgroundColor: colors.surface,
       elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: AppColors.black),
+        icon: Icon(Icons.arrow_back, color: colors.onBackground),
         onPressed: () => Get.back(
           result: {
             'name': controller.userName.value,
@@ -62,10 +68,10 @@ class EditProfileScreen extends GetView<EditProfileController> {
           },
         ),
       ),
-      title: const Text(
+      title: Text(
         "Edit Profile",
         style: TextStyle(
-          color: AppColors.black,
+          color: colors.onSurface,
           fontWeight: FontWeight.bold,
           fontSize: 18,
         ),
@@ -73,7 +79,10 @@ class EditProfileScreen extends GetView<EditProfileController> {
     );
   }
 
-  Widget _buildPhotoPicker() {
+  Widget _buildPhotoPicker(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Center(
       child: Column(
         children: [
@@ -83,14 +92,12 @@ class EditProfileScreen extends GetView<EditProfileController> {
               Obx(
                 () => CircleAvatar(
                   radius: 55,
-                  backgroundColor: AppColors.primaryGreen.withValues(
-                    alpha: 0.1,
-                  ),
+                  backgroundColor: AppColors.primaryGreen.withValues(alpha: 0.1),
                   backgroundImage: controller.userAvatar.value.isNotEmpty
                       ? NetworkImage(controller.userAvatar.value)
                       : null,
                   child: controller.userAvatar.value.isEmpty
-                      ? const Icon(
+                      ? Icon(
                           Icons.person_outline,
                           size: 50,
                           color: AppColors.primaryGreen,
@@ -102,10 +109,10 @@ class EditProfileScreen extends GetView<EditProfileController> {
                 radius: 18,
                 backgroundColor: AppColors.primaryGreen,
                 child: IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.camera_alt,
                     size: 16,
-                    color: AppColors.white,
+                    color: colors.surface,
                   ),
                   onPressed: controller.pickAndUploadImage,
                 ),
@@ -115,7 +122,7 @@ class EditProfileScreen extends GetView<EditProfileController> {
           const SizedBox(height: 10),
           GestureDetector(
             onTap: controller.pickAndUploadImage,
-            child: const Text(
+            child: Text(
               "Change Profile Photo",
               style: TextStyle(
                 color: AppColors.primaryGreen,
@@ -123,16 +130,19 @@ class EditProfileScreen extends GetView<EditProfileController> {
               ),
             ),
           ),
-          const Text(
+          Text(
             "JPEG, GIF or PNG. Max 3MB (2MB)",
-            style: TextStyle(color: AppColors.grey, fontSize: 11),
+            style: TextStyle(color: colors.onSurfaceVariant, fontSize: 11),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title, {IconData? icon}) {
+  Widget _buildSectionHeader(BuildContext context, String title, {IconData? icon}) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Row(
       children: [
         if (icon != null) ...[
@@ -141,7 +151,7 @@ class EditProfileScreen extends GetView<EditProfileController> {
         ],
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.primaryGreen,
             fontWeight: FontWeight.bold,
             fontSize: 13,
@@ -152,37 +162,47 @@ class EditProfileScreen extends GetView<EditProfileController> {
     );
   }
 
-  Widget _buildInputField(String label, TextEditingController controller) {
+  Widget _buildInputField(BuildContext context, String label, TextEditingController textController) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          style: TextStyle(
+            color: colors.onSurface,
+            fontWeight: FontWeight.bold, 
+            fontSize: 13,
+          ),
         ),
         const SizedBox(height: 8),
         TextFormField(
           onTapOutside: (_) => FocusScope.of(Get.context!).unfocus(),
-          controller: controller,
-          style: const TextStyle(fontSize: 14),
+          controller: textController,
+          style: TextStyle(
+            color: colors.onSurface,
+            fontSize: 14,
+          ),
           decoration: InputDecoration(
             filled: true,
-            fillColor: Colors.grey.shade400.withValues(alpha: 0.2),
+            fillColor: colors.surfaceContainerLowest,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 15,
               vertical: 12,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade200),
+              borderSide: BorderSide(color: colors.outline),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade100),
+              borderSide: BorderSide(color: colors.outline.withValues(alpha: 0.5)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.primaryGreen),
+              borderSide: BorderSide(color: AppColors.primaryGreen),
             ),
           ),
         ),
@@ -190,7 +210,10 @@ class EditProfileScreen extends GetView<EditProfileController> {
     );
   }
 
-  Widget _buildSecurityCard() {
+  Widget _buildSecurityCard(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
@@ -203,6 +226,7 @@ class EditProfileScreen extends GetView<EditProfileController> {
       child: Column(
         children: [
           _buildPasswordField(
+            context,
             "Current Password",
             controller.currentPasswordController,
             isVisible: controller.isCurrentPasswordVisible,
@@ -210,17 +234,21 @@ class EditProfileScreen extends GetView<EditProfileController> {
           ),
           const SizedBox(height: 15),
           _buildPasswordField(
+            context,
             "New Password",
             controller.newPasswordController,
             isVisible: controller.isNewPasswordVisible,
             onToggle: controller.toggleNewPasswordVisibility,
           ),
           const SizedBox(height: 8),
-          const Align(
+          Align(
             alignment: Alignment.centerLeft,
             child: Text(
               "Minimum 8 chars",
-              style: TextStyle(color: AppColors.grey, fontSize: 11),
+              style: TextStyle(
+                color: colors.onSurfaceVariant, 
+                fontSize: 11,
+              ),
             ),
           ),
 
@@ -239,7 +267,7 @@ class EditProfileScreen extends GetView<EditProfileController> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text(
+              child: Text(
                 "Update Password",
                 style: TextStyle(
                   color: AppColors.primaryGreen,
@@ -255,36 +283,47 @@ class EditProfileScreen extends GetView<EditProfileController> {
   }
 
   Widget _buildPasswordField(
+    BuildContext context,
     String label,
-    TextEditingController controller, {
+    TextEditingController textController, {
     required RxBool isVisible,
     required VoidCallback onToggle,
   }) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+          style: TextStyle(
+            color: colors.onSurface,
+            fontWeight: FontWeight.bold, 
+            fontSize: 12,
+          ),
         ),
         const SizedBox(height: 8),
         Obx(
           () => TextFormField(
-            controller: controller,
+            controller: textController,
             obscureText: !isVisible.value,
             keyboardType: TextInputType.visiblePassword,
-            style: const TextStyle(fontSize: 14),
+            style: TextStyle(
+              color: colors.onSurface,
+              fontSize: 14,
+            ),
             decoration: InputDecoration(
               suffixIcon: IconButton(
                 icon: Icon(
                   isVisible.value ? Icons.visibility_off : Icons.visibility,
                   size: 18,
-                  color: AppColors.grey,
+                  color: colors.onSurfaceVariant,
                 ),
                 onPressed: onToggle,
               ),
               filled: true,
-              fillColor: AppColors.white,
+              fillColor: colors.surface,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 15,
                 vertical: 12,
@@ -300,26 +339,36 @@ class EditProfileScreen extends GetView<EditProfileController> {
     );
   }
 
-  Widget _buildNotificationToggle() {
+  Widget _buildNotificationToggle(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Obx(
       () => Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: colors.surface,
           borderRadius: BorderRadius.circular(15),
         ),
         child: ListTile(
-          leading: const Icon(
+          leading: Icon(
             Icons.notifications_active_outlined,
-            color: AppColors.grey,
+            color: colors.onSurfaceVariant,
           ),
-          title: const Text(
+          title: Text(
             "Order Notification",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+            style: TextStyle(
+              color: colors.onSurface,
+              fontWeight: FontWeight.bold, 
+              fontSize: 12,
+            ),
           ),
-          subtitle: const Text(
+          subtitle: Text(
             "Alert for production messages",
-            style: TextStyle(fontSize: 10),
+            style: TextStyle(
+              color: colors.onSurfaceVariant,
+              fontSize: 10,
+            ),
           ),
           trailing: Switch(
             value: controller.notificationsEnabled.value,
@@ -331,14 +380,17 @@ class EditProfileScreen extends GetView<EditProfileController> {
     );
   }
 
-  Widget _buildActionButtons() {
+  Widget _buildActionButtons(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Column(
       children: [
         // Save Button
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: _showSaveConfirmationDialog,
+            onPressed: () => _showSaveConfirmationDialog(context),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryGreen,
               padding: const EdgeInsets.all(15),
@@ -346,10 +398,10 @@ class EditProfileScreen extends GetView<EditProfileController> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text(
+            child: Text(
               "Save Changes",
               style: TextStyle(
-                color: AppColors.white,
+                color: colors.surface,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
@@ -362,18 +414,18 @@ class EditProfileScreen extends GetView<EditProfileController> {
         SizedBox(
           width: double.infinity,
           child: OutlinedButton(
-            onPressed: _showDiscardConfirmationDialog,
+            onPressed: () => _showDiscardConfirmationDialog(context),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.all(15),
-              side: BorderSide(color: Colors.grey.shade300),
+              side: BorderSide(color: colors.outline),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text(
+            child: Text(
               "Discard Changes",
               style: TextStyle(
-                color: Colors.blueGrey,
+                color: colors.onSurfaceVariant,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
@@ -385,21 +437,25 @@ class EditProfileScreen extends GetView<EditProfileController> {
   }
 
   // Save Confirmation Dialog
-  void _showSaveConfirmationDialog() {
+  void _showSaveConfirmationDialog(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     Future.delayed(const Duration(milliseconds: 100), () {
       Get.dialog(
         AlertDialog(
-          title: const Text("Save Changes"),
-          content: const Text("Are you sure you want to save the changes?"),
+          backgroundColor: colors.surface,
+          title: Text("Save Changes", style: TextStyle(color: colors.onSurface)),
+          content: Text("Are you sure you want to save the changes?", style: TextStyle(color: colors.onSurfaceVariant)),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
           actions: [
             TextButton(
               onPressed: () => Get.back(),
-              child: const Text(
+              child: Text(
                 "Cancel",
-                style: TextStyle(color: AppColors.grey),
+                style: TextStyle(color: colors.onSurfaceVariant),
               ),
             ),
             ElevatedButton(
@@ -410,9 +466,9 @@ class EditProfileScreen extends GetView<EditProfileController> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryGreen,
               ),
-              child: const Text(
+              child: Text(
                 "Save",
-                style: TextStyle(color: AppColors.white),
+                style: TextStyle(color: colors.surface),
               ),
             ),
           ],
@@ -425,21 +481,25 @@ class EditProfileScreen extends GetView<EditProfileController> {
   }
 
   // Discard Confirmation Dialog
-  void _showDiscardConfirmationDialog() {
+  void _showDiscardConfirmationDialog(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     Future.delayed(const Duration(milliseconds: 100), () {
       Get.dialog(
         AlertDialog(
-          title: const Text("Discard Changes"),
-          content: const Text("Are you sure you want to discard all changes?"),
+          backgroundColor: colors.surface,
+          title: Text("Discard Changes", style: TextStyle(color: colors.onSurface)),
+          content: Text("Are you sure you want to discard all changes?", style: TextStyle(color: colors.onSurfaceVariant)),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
           actions: [
             TextButton(
               onPressed: () => Get.back(),
-              child: const Text(
+              child: Text(
                 "Cancel",
-                style: TextStyle(color: AppColors.grey),
+                style: TextStyle(color: colors.onSurfaceVariant),
               ),
             ),
             ElevatedButton(
@@ -447,10 +507,10 @@ class EditProfileScreen extends GetView<EditProfileController> {
                 Get.back(); // Close dialog
                 Get.back(); // Go back to previous screen
               },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-              child: const Text(
+              style: ElevatedButton.styleFrom(backgroundColor: colors.error),
+              child: Text(
                 "Discard",
-                style: TextStyle(color: AppColors.white),
+                style: TextStyle(color: colors.surface),
               ),
             ),
           ],
@@ -461,10 +521,13 @@ class EditProfileScreen extends GetView<EditProfileController> {
     });
   }
 
-  Widget _buildLoadingOverlay() {
+  Widget _buildLoadingOverlay(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Container(
-      color: Colors.black.withValues(alpha: 0.3),
-      child: const Center(
+      color: colors.onBackground.withValues(alpha: 0.3),
+      child: Center(
         child: CircularProgressIndicator(color: AppColors.primaryGreen),
       ),
     );

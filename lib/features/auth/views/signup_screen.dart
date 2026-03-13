@@ -17,8 +17,11 @@ class SignupScreen extends GetView<SignupController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colors.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -125,7 +128,6 @@ class SignupScreen extends GetView<SignupController> {
     );
   }
 
-  // Helper logic to validate UI before hitting API
   void _handleFormSubmit() {
     if (_formKey.currentState!.validate()) {
       if (controller.selectedRole.value == null) {

@@ -12,8 +12,11 @@ class ForgotpasswordScreen extends GetView<PasswordController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colors.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -22,9 +25,9 @@ class ForgotpasswordScreen extends GetView<PasswordController> {
             child: Column(
               children: [
                 const SizedBox(height: 60),
-                _buildHeader(),
+                _buildHeader(context),
                 const SizedBox(height: 40),
-                _buildDescription(),
+                _buildDescription(context),
                 const SizedBox(height: 30),
                 CustomTextField(
                   controller: controller.emailController,
@@ -61,7 +64,7 @@ class ForgotpasswordScreen extends GetView<PasswordController> {
                   routeName: '/login',
                 ),
                 const SizedBox(height: 40),
-                _buildFooter(),
+                _buildFooter(context),
               ],
             ),
           ),
@@ -70,7 +73,9 @@ class ForgotpasswordScreen extends GetView<PasswordController> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Column(
       children: [
         Center(
@@ -78,7 +83,7 @@ class ForgotpasswordScreen extends GetView<PasswordController> {
             width: 70,
             height: 70,
             decoration: BoxDecoration(
-              color: AppColors.primaryGreen,
+              color: colors.primary,
               borderRadius: BorderRadius.circular(18),
             ),
             child: const Icon(
@@ -89,19 +94,21 @@ class ForgotpasswordScreen extends GetView<PasswordController> {
           ),
         ),
         const SizedBox(height: 24),
-        const Text(
+        Text(
           "Forgot Password?",
           style: TextStyle(
             fontSize: 26,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: colors.onSurface,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildDescription() {
+  Widget _buildDescription(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Text(
@@ -110,17 +117,19 @@ class ForgotpasswordScreen extends GetView<PasswordController> {
         style: TextStyle(
           fontFamily: AppFonts.outfit,
           fontSize: 14,
-          color: AppColors.grey,
+          color: colors.onSurfaceVariant,
           height: 1.5,
         ),
       ),
     );
   }
 
-  Widget _buildFooter() {
+  Widget _buildFooter(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Column(
       children: [
-        const Divider(color: Color(0xFFE0E0E0), thickness: 1),
+        Divider(color: colors.outline, thickness: 1),
         const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -129,7 +138,7 @@ class ForgotpasswordScreen extends GetView<PasswordController> {
               "POWERED BY ",
               style: TextStyle(
                 fontSize: 10,
-                color: AppColors.grey,
+                color: colors.onSurfaceVariant,
                 letterSpacing: 1,
               ),
             ),

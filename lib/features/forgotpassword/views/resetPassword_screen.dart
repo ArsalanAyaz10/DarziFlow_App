@@ -10,19 +10,22 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: colors.surface,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: colors.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.black),
+          icon: Icon(Icons.arrow_back, color: colors.onSurface),
           onPressed: () => Get.back(),
         ),
-        title: const Text(
+        title: Text(
           'Reset Password',
           style: TextStyle(
-            color: AppColors.black,
+            color: colors.onSurface,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
@@ -35,20 +38,20 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 40),
-            const Text(
+            Text(
               'Create New Password',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1A1C1E),
+                color: colors.onSurface,
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'Please enter your new password below to secure your DarziFlow account.',
               style: TextStyle(
                 fontSize: 15,
-                color: AppColors.grey,
+                color: colors.onSurfaceVariant,
                 height: 1.5,
               ),
             ),
@@ -94,16 +97,16 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(
+                Icon(
                   Icons.info_outline,
                   size: 18,
-                  color: AppColors.primaryGreen,
+                  color: colors.primary,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Your password must be at least 8 characters long.',
-                    style: TextStyle(fontSize: 13, color: AppColors.grey),
+                    style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant),
                   ),
                 ),
               ],

@@ -2,8 +2,9 @@ import 'package:dariziflow_app/features/auth/bindings/login_binding.dart';
 import 'package:dariziflow_app/features/auth/bindings/signup_binding.dart';
 import 'package:dariziflow_app/features/auth/views/login_screen.dart';
 import 'package:dariziflow_app/features/auth/views/signup_screen.dart';
-import 'package:dariziflow_app/features/dept_head/bindings/DeptHeadBindings.dart';
-import 'package:dariziflow_app/features/dept_head/views/dashboard_screen.dart';
+import 'package:dariziflow_app/features/deptHeadDashboard/bindings/DeptHeadBindings.dart';
+import 'package:dariziflow_app/features/deptHeadDashboard/views/all_activities_screen.dart';
+import 'package:dariziflow_app/features/deptHeadDashboard/views/dashboard_screen.dart';
 import 'package:dariziflow_app/features/forgotpassword/bindings/password_binding.dart';
 import 'package:dariziflow_app/features/forgotpassword/views/forgotPassword_screen.dart';
 import 'package:dariziflow_app/features/forgotpassword/views/resetPassword_screen.dart';
@@ -11,7 +12,6 @@ import 'package:dariziflow_app/features/profile/bindings/editprofile_binding.dar
 import 'package:dariziflow_app/features/profile/bindings/viewprofile_binding.dart';
 import 'package:dariziflow_app/features/profile/views/editprofile_screen.dart';
 import 'package:dariziflow_app/features/profile/views/viewprofile_screen.dart';
-import 'package:dariziflow_app/features/splash/bindings/splash_binding.dart';
 import 'package:dariziflow_app/features/splash/views/splash_screen.dart';
 import 'package:get/get.dart';
 part 'app_routes.dart';
@@ -23,7 +23,6 @@ class AppPages {
     GetPage(
       name: Routes.splash,
       page: () => SplashScreen(),
-      binding: SplashBinding(),
     ),
     GetPage(
       name: Routes.signup,
@@ -46,15 +45,14 @@ class AppPages {
       page: () => DeptHeadDashboardScreen(),
       binding: DeptheadBindings(),
     ),
-
     GetPage(
-      name: '/resetpassword',
+      name: Routes.resetpassword,
       page: () => const ResetPasswordView(),
       binding: ForgotPasswordBinding(),
     ),
 
     GetPage(
-      name: '/profile',
+      name: Routes.profile,
       page: () => const ViewProfileScreen(),
       binding: ViewProfileBinding(),
     ),
@@ -64,5 +62,7 @@ class AppPages {
       page: () => const EditProfileScreen(),
       binding: EditProfileBinding(),
     ),
+
+    GetPage(name: '/all-activities', page: () => const AllActivitiesScreen()),
   ];
 }

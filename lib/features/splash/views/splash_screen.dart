@@ -1,22 +1,22 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/utils/fonts.dart';
 import 'package:dariziflow_app/core/widgets/bgcircles.dart';
-import 'package:dariziflow_app/features/splash/controller/splash_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
-import 'package:get/get_state_manager/src/simple/get_view.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class SplashScreen extends GetView<SplashController> {
+class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final PageController pageController = PageController();
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           BackgroundCircle(top: -0.3, left: -0.2),
@@ -47,7 +47,7 @@ class SplashScreen extends GetView<SplashController> {
                           style: TextStyle(
                             fontFamily: AppFonts.outfit,
                             fontSize: 14,
-                            color: AppColors.black,
+                            color: colors.onSurface,
                             fontWeight: FontWeight.w300,
                           ),
                         ),
@@ -82,7 +82,7 @@ class SplashScreen extends GetView<SplashController> {
                           Text(
                             'VERSION 1.0',
                             style: TextStyle(
-                              color: AppColors.grey,
+                              color: colors.onSurfaceVariant,
                               fontFamily: AppFonts.outfit,
                               fontSize: 12,
                             ),
@@ -107,7 +107,7 @@ class SplashScreen extends GetView<SplashController> {
                         height: 90,
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryGreen.withValues(alpha: 0.1),
+                          color: colors.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: SvgPicture.asset(
@@ -123,11 +123,13 @@ class SplashScreen extends GetView<SplashController> {
                             fontSize: 28,
                             fontFamily: AppFonts.outfit,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.black,
+                            color: colors.onSurface,
                           ),
-                          children: const [
-                            TextSpan(text: "Darzi"),
+                          children: [
                             TextSpan(
+                              text: "Darzi",
+                            ),
+                            const TextSpan(
                               text: "Flow",
                               style: TextStyle(color: AppColors.primaryGreen),
                             ),
@@ -141,7 +143,7 @@ class SplashScreen extends GetView<SplashController> {
                         style: TextStyle(
                           fontSize: 16,
                           fontFamily: AppFonts.outfit,
-                          color: AppColors.grey,
+                          color: colors.onSurfaceVariant,
                         ),
                       ),
                       const Spacer(flex: 3),
@@ -220,7 +222,7 @@ class SplashScreen extends GetView<SplashController> {
                         text: TextSpan(
                           style: TextStyle(
                             fontSize: 12,
-                            color: AppColors.grey,
+                            color: colors.onSurfaceVariant,
                             fontFamily: AppFonts.outfit,
                           ),
                           children: const [

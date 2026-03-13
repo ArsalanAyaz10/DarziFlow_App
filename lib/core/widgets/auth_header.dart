@@ -16,6 +16,9 @@ class AuthHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Column(
       children: [
         const SizedBox(height: 60),
@@ -24,10 +27,10 @@ class AuthHeader extends StatelessWidget {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: AppColors.primaryGreen,
+              color: colors.primary,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: Colors.white, size: 40),
+            child: Icon(icon, color: colors.onPrimary, size: 40),
           ),
         ),
         const SizedBox(height: 20),
@@ -37,7 +40,7 @@ class AuthHeader extends StatelessWidget {
             fontFamily: AppFonts.outfit,
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: AppColors.black,
+            color: colors.onSurface,
           ),
         ),
         const SizedBox(height: 8),
@@ -47,7 +50,7 @@ class AuthHeader extends StatelessWidget {
           style: TextStyle(
             fontFamily: AppFonts.outfit,
             fontSize: 12,
-            color: AppColors.grey,
+            color: colors.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: 30),

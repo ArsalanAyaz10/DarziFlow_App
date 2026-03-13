@@ -23,17 +23,20 @@ class CustomDropdown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (showLabel && label != null) ...[
-          _buildLabel(label!),
+          _buildLabel(label!, context),
           const SizedBox(height: 8),
         ],
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
-            color: const Color(0xFFF1F4F8),
+            color: colors.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(12),
           ),
           child: DropdownButtonHideUnderline(
@@ -42,22 +45,23 @@ class CustomDropdown<T> extends StatelessWidget {
               hint: Text(
                 hint,
                 style: TextStyle(
-                  color: AppColors.grey.withValues(alpha: 0.6),
+                  color: colors.onSurfaceVariant.withValues(alpha: 0.6),
                   fontSize: 14,
                 ),
               ),
-              icon: Icon(Icons.arrow_drop_down, color: AppColors.grey),
+              icon: Icon(Icons.arrow_drop_down, color: colors.onSurfaceVariant),
+              style: TextStyle(color: colors.onSurface, fontSize: 14),
               decoration: InputDecoration(
                 prefixIcon: Icon(
                   prefixIcon,
-                  color: AppColors.grey.withValues(alpha: 0.8),
+                  color: colors.onSurfaceVariant.withValues(alpha: 0.8),
                 ),
                 prefixIconConstraints: const BoxConstraints(minWidth: 40),
                 border: InputBorder.none,
               ),
               items: items,
               onChanged: onChanged,
-              dropdownColor: Colors.white,
+              dropdownColor: colors.surfaceContainer,
               borderRadius: BorderRadius.circular(12),
             ),
           ),
@@ -66,7 +70,8 @@ class CustomDropdown<T> extends StatelessWidget {
     );
   }
 
-  Widget _buildLabel(String text) {
+  Widget _buildLabel(String text, BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Align(
       alignment: Alignment.centerLeft,
       child: Padding(
@@ -76,7 +81,7 @@ class CustomDropdown<T> extends StatelessWidget {
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.bold,
-            color: AppColors.black.withValues(alpha: 0.7),
+            color: colors.onSurface.withValues(alpha: 0.7),
             letterSpacing: 1.1,
           ),
         ),

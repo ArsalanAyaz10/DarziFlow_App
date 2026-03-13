@@ -10,5 +10,5 @@ abstract class Routes {
   static const forgotpassword = '/forgotpassword';
   static const resetpassword = '/resetpassword';
   static const deptartmentHead = '/dept-head-dashboard';
-
+  static const allActivities = '/all-activities';
 }

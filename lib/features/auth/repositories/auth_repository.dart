@@ -1,7 +1,8 @@
+import 'package:dariziflow_app/features/auth/service/auth_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:cookie_jar/cookie_jar.dart';
-import 'package:flutter/material.dart';
-import '../../../core/network/api_client.dart';
-import '../../../core/storage/token_storage.dart';
+import '../../../core/storage/storage.dart';
+
 
 enum UserRole { qcMember, client, departmenthead }
 
@@ -12,53 +13,31 @@ String getRoleString(UserRole role) {
     case UserRole.client:
       return "CLIENT";
     case UserRole.departmenthead:
-      return "DEPARTMENT HEAD";
+      return "DEPARTMENT_HEAD";
   }
 }
 
 class AuthRepository {
-  final ApiClient apiClient;
+  final AuthService authService;
 
-  AuthRepository(this.apiClient);
-
-  Future<bool> restoreSession() async {
-    final token = await TokenStorage.getAccessToken();
-
-    if (token == null) return false;
-
-    try {
-      await apiClient.get("/auth/me");
-      return true;
-    } catch (_) {
-      return false;
-    }
-  }
+  AuthRepository({required this.authService});
 
   Future<void> register({
     required String name,
     required String email,
     required String password,
     required UserRole role,
-    required String platform,
   }) async {
-    await apiClient.post(
-      "/auth/register",
-      data: {
-        "name": name,
-        "email": email,
-        "password": password,
-        "role": getRoleString(role),
-        "platform": platform,
-      },
+    await authService.register(
+      name: name,
+      email: email,
+      password: password,
+      role: getRoleString(role),
     );
   }
 
   Future<String> login(String email, String password) async {
-    final response = await apiClient.post(
-      "/auth/login",
-      data: {"email": email, "password": password, "platform": "MOBILE"},
-    );
-
+    final response = await authService.login(email: email, password: password);
     final data = response.data;
 
     if (data == null || data["user"] == null) {
@@ -68,36 +47,54 @@ class AuthRepository {
     final accessToken = data["accessToken"];
     final user = data["user"];
     final role = user["role"];
-    print("User from login response: $user");
-    await TokenStorage.saveAccessToken(accessToken);
-    await TokenStorage.saveUser(user);
+
+    await AppStorage.saveAccessToken(accessToken);
+    await AppStorage.saveUser(user);
 
     return role;
   }
 
   Future<void> logout(PersistCookieJar cookieJar) async {
     try {
-      await apiClient.post("/auth/logout");
+      await authService.logout();
     } catch (e) {
       debugPrint("Logout API error: $e");
     } finally {
-      await TokenStorage.clearTokens();
+      await AppStorage.clearTokens();
       await cookieJar.deleteAll();
     }
   }
 
   Future<void> fetchUserProfile() async {
     try {
-      final response = await apiClient.get("/profile");
+      final response = await authService.getProfile();
       final profileData = response.data;
 
       if (profileData != null && profileData['user'] != null) {
-        final existingUser = await TokenStorage.getUser();
+        final existingUser = await AppStorage.getUser();
         final updatedUser = {...?existingUser, ...profileData['user']};
-        await TokenStorage.saveUser(updatedUser);
+        await AppStorage.saveUser(updatedUser);
       }
     } catch (e) {
-      print("Failed to fetch user profile: $e");
+      if (kDebugMode) {
+        print("Failed to fetch user profile: $e");
+      }
+    }
+  }
+
+  Future<String> verifyEmail(String token) async {
+    try {
+      final response = await authService.verifyEmail(token);
+
+      if (response.statusCode == 200) {
+        return response.data['message'] ?? "Email verified successfully";
+      }
+      throw Exception(
+        "Verification failed with status: ${response.statusCode}",
+      );
+    } catch (e) {
+      if (kDebugMode) print("Failed to verify email: $e");
+      throw Exception("Failed to verify email");
     }
   }
 }

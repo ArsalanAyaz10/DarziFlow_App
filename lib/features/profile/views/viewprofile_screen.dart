@@ -9,19 +9,22 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: AppColors.lightGrey,
+      backgroundColor: colors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.black),
+          icon: Icon(Icons.arrow_back, color: colors.onBackground),
           onPressed: () => Get.back(),
         ),
-        title: const Text(
+        title: Text(
           "Profile",
           style: TextStyle(
-            color: AppColors.black,
+            color: colors.onSurface,
             fontFamily: AppFonts.outfit,
             fontWeight: FontWeight.w400,
           ),
@@ -29,7 +32,7 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings_outlined, color: AppColors.black),
+            icon: Icon(Icons.settings_outlined, color: colors.onBackground),
             onPressed: () {},
           ),
         ],
@@ -39,16 +42,16 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
           child: Column(
             children: [
               const SizedBox(height: 20),
-              _buildProfileHeader(),
+              _buildProfileHeader(context),
               const SizedBox(height: 30),
-              _buildSectionTitle("ACCOUNT DETAILS"),
+              _buildSectionTitle(context, "ACCOUNT DETAILS"),
               const SizedBox(height: 10),
-              _buildAccountSection(),
+              _buildAccountSection(context),
               const SizedBox(height: 20),
-              _buildSectionTitle("SYSTEM"),
-              _buildSystemSection(),
+              _buildSectionTitle(context, "SYSTEM"),
+              _buildSystemSection(context),
               const SizedBox(height: 30),
-              _buildLogoutButton(),
+              _buildLogoutButton(context),
               const SizedBox(height: 20),
             ],
           ),
@@ -57,7 +60,10 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
     );
   }
 
-  Widget _buildProfileHeader() {
+  Widget _buildProfileHeader(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Obx(
       () => Column(
         children: [
@@ -66,12 +72,12 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
             children: [
               CircleAvatar(
                 radius: 60,
-                backgroundColor: AppColors.grey.withValues(alpha: 0.2),
+                backgroundColor: colors.onSurfaceVariant.withValues(alpha: 0.2),
                 backgroundImage: controller.userAvatar.value.isNotEmpty
                     ? NetworkImage(controller.userAvatar.value)
                     : null,
                 child: controller.userAvatar.value.isEmpty
-                    ? const Icon(
+                    ? Icon(
                         Icons.person,
                         size: 60,
                         color: AppColors.primaryGreen,
@@ -83,7 +89,8 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
           const SizedBox(height: 15),
           Text(
             controller.userName.value,
-            style: const TextStyle(
+            style: TextStyle(
+              color: colors.onSurface,
               fontSize: 20,
               fontWeight: FontWeight.w600,
               fontFamily: AppFonts.outfit,
@@ -95,7 +102,7 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
             children: [
               Text(
                 controller.userRole.value,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.primaryGreen,
                   fontWeight: FontWeight.w500,
                   fontSize: 10,
@@ -117,9 +124,9 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
               onTap: () {
                 controller.navigateToEditProfile();
               },
-              child: const Text(
+              child: Text(
                 "Edit Profile",
-                style: TextStyle(color: AppColors.white),
+                style: TextStyle(color: colors.surface),
               ),
             ),
           ),
@@ -128,15 +135,18 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(BuildContext context, String title) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Align(
         alignment: Alignment.centerLeft,
         child: Text(
           title,
-          style: const TextStyle(
-            color: AppColors.grey,
+          style: TextStyle(
+            color: colors.onSurfaceVariant,
             fontSize: 12,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.2,
@@ -146,7 +156,10 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
     );
   }
 
-  Widget _buildAccountSection() {
+  Widget _buildAccountSection(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Obx(
       () => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -154,10 +167,11 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: colors.surface,
                 borderRadius: BorderRadius.circular(15),
               ),
               child: _profileTile(
+                context,
                 Icons.email_outlined,
                 "Email Address",
                 controller.userEmail.value,
@@ -166,14 +180,14 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
 
             const SizedBox(height: 10), // Space between containers
             // Password Container
-            // Password Container
             Obx(
               () => Container(
                 decoration: BoxDecoration(
-                  color: AppColors.white,
+                  color: colors.surface,
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: _profileTile(
+                  context,
                   Icons.lock_outline,
                   "Password",
                   controller.getPasswordUpdateText(),
@@ -183,10 +197,11 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
             const SizedBox(height: 10),
             Container(
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: colors.surface,
                 borderRadius: BorderRadius.circular(15),
               ),
               child: _profileTile(
+                context,
                 Icons.notifications_none,
                 "Notifications",
                 "Manage alerts and news",
@@ -198,43 +213,59 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
     );
   }
 
-  Widget _buildSystemSection() {
+  Widget _buildSystemSection(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: colors.surface,
           borderRadius: BorderRadius.circular(15),
         ),
-        child: _profileTile(Icons.language, "Language", "English (US)"),
+        child: _profileTile(context, Icons.language, "Language", "English (US)"),
       ),
     );
   }
 
-  Widget _profileTile(IconData icon, String title, String subtitle) {
+  Widget _profileTile(BuildContext context, IconData icon, String title, String subtitle) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return ListTile(
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppColors.lightGrey,
+          color: colors.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(icon, color: AppColors.primaryGreen),
       ),
       title: Text(
         title,
-        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          color: colors.onSurface,
+          fontSize: 14, 
+          fontWeight: FontWeight.bold,
+        ),
       ),
       subtitle: Text(
         subtitle,
-        style: const TextStyle(fontSize: 12, color: AppColors.grey),
+        style: TextStyle(
+          fontSize: 12, 
+          color: colors.onSurfaceVariant,
+        ),
       ),
-      trailing: const Icon(Icons.chevron_right, color: AppColors.grey),
+      trailing: Icon(Icons.chevron_right, color: colors.onSurfaceVariant),
       onTap: () {},
     );
   }
 
-  Widget _buildLogoutButton() {
+  Widget _buildLogoutButton(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: InkWell(
@@ -242,18 +273,18 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
         child: Container(
           padding: const EdgeInsets.all(15),
           decoration: BoxDecoration(
-            border: Border.all(color: AppColors.error.withValues(alpha: 0.5)),
+            border: Border.all(color: colors.error.withValues(alpha: 0.5)),
             borderRadius: BorderRadius.circular(15),
           ),
-          child: const Row(
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.logout, color: AppColors.error),
-              SizedBox(width: 10),
+              Icon(Icons.logout, color: colors.error),
+              const SizedBox(width: 10),
               Text(
                 "Log Out",
                 style: TextStyle(
-                  color: AppColors.error,
+                  color: colors.error,
                   fontWeight: FontWeight.bold,
                 ),
               ),

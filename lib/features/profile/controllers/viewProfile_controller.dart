@@ -1,10 +1,8 @@
-import 'package:cookie_jar/cookie_jar.dart';
-import 'package:dariziflow_app/core/storage/token_storage.dart';
+import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/data/services/cookie_service.dart';
 import 'package:dariziflow_app/features/auth/repositories/auth_repository.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_navigation/src/snackbar/snackbar.dart';
@@ -28,8 +26,6 @@ class ViewprofileController extends GetxController {
   var notificationsEnabled = true.obs;
   var passwordUpdatedAt = ''.obs;
 
-
-
   @override
   void onInit() {
     super.onInit();
@@ -51,7 +47,7 @@ class ViewprofileController extends GetxController {
 
   Future<void> loadUserInfo() async {
     try {
-      final user = await TokenStorage.getUser();
+      final user = await AppStorage.getUser();
       userName.value = user?['name'] ?? 'User';
       userRole.value = formatUserRole(user?['role']);
       userEmail.value = user?['email'] ?? 'No email found';
