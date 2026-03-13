@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class TokenStorage {
+class AppStorage {
   static const _storage = FlutterSecureStorage();
 
   static Future<void> saveAccessToken(String token) async {

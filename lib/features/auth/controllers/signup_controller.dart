@@ -3,14 +3,16 @@ import 'package:get/get.dart';
 import '../repositories/auth_repository.dart';
 
 class SignupController extends GetxController {
-  final AuthRepository authRepository = Get.find<AuthRepository>();
+  final AuthRepository authRepository;
+
+  SignupController({required this.authRepository});
 
   // Form Controllers
   final fullNameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  // Role selection for QC and Supervisor
+  // Role selection
   final List<String> roles = ["QC Member", "Department Head"];
   var selectedRole = Rxn<UserRole>();
 
@@ -55,7 +57,6 @@ class SignupController extends GetxController {
         email: email,
         password: password,
         role: selectedRole.value!,
-        platform: "MOBILE",
       );
 
       Get.snackbar(

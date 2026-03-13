@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:cookie_jar/cookie_jar.dart';
-import 'package:dariziflow_app/core/storage/token_storage.dart';
+import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/data/services/upload_service.dart';
 import 'package:dariziflow_app/features/profile/repositories/profile_repository.dart';
@@ -76,7 +76,7 @@ class EditProfileController extends GetxController {
 
   Future<void> loadUserInfo() async {
     try {
-      final user = await TokenStorage.getUser();
+      final user = await AppStorage.getUser();
       userName.value = user?['name'] ?? 'User';
       userEmail.value = user?['email'] ?? 'No email found';
       userAvatar.value = user?['avatar']?['url'] ?? '';
@@ -164,7 +164,7 @@ class EditProfileController extends GetxController {
     }
   }
 
-  // Save profile 
+  // Save profile
   Future<void> saveProfile() async {
     try {
       isLoading.value = true;
@@ -174,9 +174,9 @@ class EditProfileController extends GetxController {
         email: emailController.text,
       );
 
-      final updatedUser = await TokenStorage.getUser();
+      final updatedUser = await AppStorage.getUser();
       final avatarUrl = updatedUser?['avatar']?['url'] ?? userAvatar.value;
-      await TokenStorage.saveUser({
+      await AppStorage.saveUser({
         ...?updatedUser,
         'name': nameController.text,
         'email': emailController.text,

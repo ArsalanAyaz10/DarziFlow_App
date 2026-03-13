@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dariziflow_app/core/network/api_client.dart';
-import 'package:dariziflow_app/core/storage/token_storage.dart';
+import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:flutter/foundation.dart';
 
 class UploadService {
@@ -106,11 +106,11 @@ class UploadService {
     String publicId,
   ) async {
     try {
-      final user = await TokenStorage.getUser();
+      final user = await AppStorage.getUser();
       if (user != null) {
         // Update the avatar object in the user data
         user['avatar'] = {'url': url, 'publicId': publicId};
-        await TokenStorage.saveUser(user);
+        await AppStorage.saveUser(user);
       }
     } catch (e) {
       if (kDebugMode) {

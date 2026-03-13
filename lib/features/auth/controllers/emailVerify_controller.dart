@@ -26,7 +26,7 @@ class EmailverifyController extends GetxController {
   Future<void> _verifyEmail(String token) async {
     try {
       status.value = VerifyStatus.loading;
-      final result = await repository.VerifyEmail(token);
+      final result = await repository.verifyEmail(token);
       message.value = result;
       status.value = VerifyStatus.success;
     } catch (e) {

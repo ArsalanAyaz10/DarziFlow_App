@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import '../storage/token_storage.dart';
+import '../storage/storage.dart';
 
 class AuthInterceptor extends Interceptor {
   final Dio dio;
@@ -8,9 +8,11 @@ class AuthInterceptor extends Interceptor {
   AuthInterceptor(this.dio, this.onLogout);
 
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
-
-    final token = await TokenStorage.getAccessToken();
+  void onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
+    final token = await AppStorage.getAccessToken();
 
     if (token != null) {
       options.headers["Authorization"] = "Bearer $token";
@@ -21,7 +23,6 @@ class AuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-
     if (err.response?.statusCode == 401) {
       try {
         // Call refresh endpoint (refresh cookie automatically sent)
@@ -30,7 +31,7 @@ class AuthInterceptor extends Interceptor {
         final newToken = response.headers["x-access-token"]?.first;
 
         if (newToken != null) {
-          await TokenStorage.saveAccessToken(newToken);
+          await AppStorage.saveAccessToken(newToken);
 
           // Retry original request
           final requestOptions = err.requestOptions;

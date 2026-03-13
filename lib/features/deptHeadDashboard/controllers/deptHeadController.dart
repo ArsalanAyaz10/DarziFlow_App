@@ -1,4 +1,4 @@
-import 'package:dariziflow_app/core/storage/token_storage.dart';
+import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:dariziflow_app/features/deptHeadDashboard/repositories/department_repository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -65,10 +65,6 @@ class DeptHeadController extends GetxController {
   var isLoading = false.obs;
   var errorMessage = ''.obs;
 
-  // CACHE
-  DateTime? _lastActivityFetch;
-  static const Duration cacheDuration = Duration(minutes: 5);
-
   @override
   void onInit() {
     super.onInit();
@@ -82,7 +78,7 @@ class DeptHeadController extends GetxController {
     try {
       await _loadUserInfo();
 
-      final user = await TokenStorage.getUser();
+      final user = await AppStorage.getUser();
       if (user != null && user['department'] != null) {
         departmentId.value = user['department'];
       }
@@ -97,7 +93,6 @@ class DeptHeadController extends GetxController {
   }
 
   Future<void> refreshDashboard() async {
-    _lastActivityFetch = null;
     isLoading.value = true;
     errorMessage.value = '';
 
@@ -166,7 +161,7 @@ class DeptHeadController extends GetxController {
 
   Future<void> _loadUserInfo() async {
     try {
-      final user = await TokenStorage.getUser();
+      final user = await AppStorage.getUser();
       userName.value = user?['name'] ?? 'User';
       userRole.value = _formatUserRole(user?['role'] ?? '');
       _loadUserAvatar(user);
@@ -244,7 +239,7 @@ class DeptHeadController extends GetxController {
 
   Future<String?> _getUserDepartmentId() async {
     try {
-      final user = await TokenStorage.getUser();
+      final user = await AppStorage.getUser();
       if (user != null && user['department'] != null) {
         return user['department'].toString();
       }
@@ -294,7 +289,6 @@ class DeptHeadController extends GetxController {
       );
       recentActivity.value = activity;
       _processActivities();
-      _lastActivityFetch = DateTime.now();
     } catch (e) {
       if (kDebugMode) print("Activity Error: $e");
     }
@@ -307,7 +301,6 @@ class DeptHeadController extends GetxController {
       final orderName = order['orderName'] ?? 'Unknown Order';
       final orderUniqueId = order['orderUniqueId'] ?? '';
       final orderId = order['_id'] ?? '';
-      final progress = order['progress'] ?? 0;
       final operations = order['operations'] as List? ?? [];
       final updatedAt = order['updatedAt'] ?? order['createdAt'];
 
@@ -514,15 +507,25 @@ class DeptHeadController extends GetxController {
     return "Maria G. assigned to Table 4";
   }
 
-
   void navigateToFullActivityList() {
-    Get.toNamed(
-      '/all-activities',
-      arguments: {
-        'departmentId': departmentId.value,
-        'activities': processedActivities.toList(),
-      },
+    print(
+      "🔄 Navigating to all-activities with ${processedActivities.length} activities",
     );
+    print("Current route: ${Get.currentRoute}");
+
+    Get.toNamed(
+          '/all-activities',
+          arguments: {
+            'departmentId': departmentId.value,
+            'activities': processedActivities.toList(),
+          },
+        )
+        ?.then((value) {
+          print("Returned from all-activities with: $value");
+        })
+        .catchError((error) {
+          print("Navigation error: $error");
+        });
   }
 
   // ==================== UI HELPERS ====================

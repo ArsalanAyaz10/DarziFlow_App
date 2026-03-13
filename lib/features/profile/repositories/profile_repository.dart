@@ -1,4 +1,4 @@
-import 'package:dariziflow_app/core/storage/token_storage.dart';
+import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:dariziflow_app/features/profile/services/profile_service.dart';
 
 class ProfileRepository {
@@ -12,13 +12,13 @@ class ProfileRepository {
     required String email,
   }) async {
     try {
-      await service.updateProfile(name: name, email: email,);
+      await service.updateProfile(name: name, email: email);
 
-      final user = await TokenStorage.getUser();
+      final user = await AppStorage.getUser();
       if (user != null) {
         user['name'] = name;
         user['email'] = email;
-        await TokenStorage.saveUser(user);
+        await AppStorage.saveUser(user);
       }
     } catch (e) {
       throw Exception("Failed to update profile: $e");
@@ -54,7 +54,7 @@ class ProfileRepository {
     try {
       final data = await service.getUserProfile();
       if (data != null && data['user'] != null) {
-        await TokenStorage.saveUser(data['user']);
+        await AppStorage.saveUser(data['user']);
         return data['user'];
       }
       return null;
