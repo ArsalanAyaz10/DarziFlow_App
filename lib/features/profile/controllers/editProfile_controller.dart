@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:developer' as dev;
+
 
 class EditProfileController extends GetxController {
   final ProfileRepository profileRepository;
@@ -85,7 +87,7 @@ class EditProfileController extends GetxController {
       nameController.text = userName.value;
       emailController.text = userEmail.value;
     } catch (e) {
-      if (kDebugMode) print("Error loading user info: $e");
+      if (kDebugMode) dev.log("Error loading user info: $e");
     }
   }
 
@@ -274,7 +276,7 @@ class EditProfileController extends GetxController {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       );
       if (kDebugMode) {
-        print("Change password error: $e");
+        dev.log("Change password error: $e");
       }
     } finally {
       isLoading.value = false;

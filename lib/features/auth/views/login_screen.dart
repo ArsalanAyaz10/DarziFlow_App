@@ -24,10 +24,12 @@ class LoginScreen extends GetView<LoginController> {
             key: controller.formKey,
             child: Column(
               children: [
-                const AuthHeader(
-                  title: "Welcome Back",
-                  subtitle: "Log in to manage your production flow",
-                  icon: Icons.archive_outlined,
+                RepaintBoundary(
+                  child: const AuthHeader(
+                    title: "Welcome Back",
+                    subtitle: "Log in to manage your production flow",
+                    icon: Icons.archive_outlined,
+                  ),
                 ),
 
                 CustomTextField(

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -30,6 +31,14 @@ class AppStorage {
   static Future<String?> getUserRole() async {
     return await _storage.read(key: "role");
   }
+
+  // static Future<void> saveDeptID(String deptID) async {
+  //   await _storage.write(key: "departmentID", value: deptID);
+  // }
+
+  // static Future<String?> getDeptID() async {
+  //   return await _storage.read(key: "departmentID");
+  // }
 
   static Future<void> clearTokens() async {
     await _storage.deleteAll();

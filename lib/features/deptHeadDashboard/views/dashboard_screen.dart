@@ -51,7 +51,6 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
                       _buildEfficiencyCard(context),
                       const SizedBox(height: 30),
                       _buildRecentActivityHeader(context),
-                      const SizedBox(height: 15),
                       _buildActivityList(context),
                       const SizedBox(height: 20),
                     ],
@@ -85,11 +84,7 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
                   ? NetworkImage(controller.userAvatar.value)
                   : null,
               child: controller.userAvatar.value.isEmpty
-                  ? Icon(
-                      Icons.person,
-                      size: 24,
-                      color: AppColors.primaryGreen,
-                    )
+                  ? Icon(Icons.person, size: 24, color: AppColors.primaryGreen)
                   : null,
             ),
           ),
@@ -142,7 +137,7 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
                 ? "Department"
                 : controller.departmentName.value,
             style: TextStyle(
-              fontSize: 22, 
+              fontSize: 22,
               fontWeight: FontWeight.w500,
               color: colors.onSurface,
             ),
@@ -215,7 +210,10 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
                 ],
                 Text(
                   label,
-                  style: TextStyle(color: colors.onSurfaceVariant, fontSize: 12),
+                  style: TextStyle(
+                    color: colors.onSurfaceVariant,
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ),
@@ -223,7 +221,7 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
             Text(
               value,
               style: TextStyle(
-                fontSize: 26, 
+                fontSize: 26,
                 fontWeight: FontWeight.bold,
                 color: colors.onSurface,
               ),
@@ -273,18 +271,21 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
         decoration: BoxDecoration(
           // Use a theme-adaptive background for the card
           gradient: LinearGradient(
-            colors: isDark 
-              ? [colors.primaryContainer, colors.primaryContainer.withValues(alpha: 0.8)]
-              : [AppColors.primaryGreen, const Color(0xFF4CAF50)],
+            colors: isDark
+                ? [
+                    colors.primaryContainer,
+                    colors.primaryContainer.withValues(alpha: 0.8),
+                  ]
+                : [AppColors.primaryGreen, const Color(0xFF4CAF50)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: isDark 
-                ? Colors.black.withValues(alpha: 0.3)
-                : Colors.green.withValues(alpha: 0.3),
+              color: isDark
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : Colors.green.withValues(alpha: 0.3),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -301,7 +302,9 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
                     Text(
                       "Department Performance",
                       style: TextStyle(
-                        color: isDark ? colors.onPrimaryContainer.withValues(alpha: 0.7) : Colors.white70, 
+                        color: isDark
+                            ? colors.onPrimaryContainer.withValues(alpha: 0.7)
+                            : Colors.white70,
                         fontSize: 13,
                       ),
                     ),
@@ -309,7 +312,9 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
                     Text(
                       "Efficiency Score",
                       style: TextStyle(
-                        color: isDark ? colors.onPrimaryContainer : AppColors.white,
+                        color: isDark
+                            ? colors.onPrimaryContainer
+                            : AppColors.white,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
@@ -321,15 +326,17 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: isDark 
-                          ? colors.onSurface.withValues(alpha: 0.1) 
-                          : AppColors.black.withValues(alpha: 0.15),
+                        color: isDark
+                            ? colors.onSurface.withValues(alpha: 0.1)
+                            : AppColors.black.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         "Quality: ${controller.qualityScore.value}%",
                         style: TextStyle(
-                          color: isDark ? colors.onPrimaryContainer : AppColors.white,
+                          color: isDark
+                              ? colors.onPrimaryContainer
+                              : AppColors.white,
                           fontSize: 11,
                         ),
                       ),
@@ -377,11 +384,11 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
             child: CircularProgressIndicator(
               value: controller.efficiencyScore.value / 100,
               strokeWidth: 6,
-              backgroundColor: isDark 
-                ? colors.onPrimaryContainer.withValues(alpha: 0.2)
-                : AppColors.white.withValues(alpha: 0.2),
+              backgroundColor: isDark
+                  ? colors.onPrimaryContainer.withValues(alpha: 0.2)
+                  : AppColors.white.withValues(alpha: 0.2),
               valueColor: AlwaysStoppedAnimation<Color>(
-                isDark ? colors.onPrimaryContainer : Colors.white
+                isDark ? colors.onPrimaryContainer : Colors.white,
               ),
             ),
           ),
@@ -399,7 +406,9 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
               Text(
                 "%",
                 style: TextStyle(
-                  color: isDark ? colors.onPrimaryContainer.withValues(alpha: 0.7) : Colors.white70, 
+                  color: isDark
+                      ? colors.onPrimaryContainer.withValues(alpha: 0.7)
+                      : Colors.white70,
                   fontSize: 10,
                 ),
               ),
@@ -410,16 +419,23 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
     );
   }
 
-  Widget _buildMetricItem(BuildContext context, String label, String value, IconData icon) {
+  Widget _buildMetricItem(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+  ) {
     final colors = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       children: [
         Icon(
-          icon, 
-          color: isDark ? colors.onPrimaryContainer.withValues(alpha: 0.7) : Colors.white70, 
-          size: 16
+          icon,
+          color: isDark
+              ? colors.onPrimaryContainer.withValues(alpha: 0.7)
+              : Colors.white70,
+          size: 16,
         ),
         const SizedBox(height: 4),
         Text(
@@ -433,8 +449,10 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
         Text(
           label,
           style: TextStyle(
-            color: isDark ? colors.onPrimaryContainer.withValues(alpha: 0.7) : Colors.white70, 
-            fontSize: 10
+            color: isDark
+                ? colors.onPrimaryContainer.withValues(alpha: 0.7)
+                : Colors.white70,
+            fontSize: 10,
           ),
         ),
       ],
@@ -449,7 +467,7 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
         Text(
           "Recent Activity",
           style: TextStyle(
-            fontSize: 18, 
+            fontSize: 18,
             fontWeight: FontWeight.bold,
             color: colors.onSurface,
           ),
@@ -512,7 +530,10 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
     });
   }
 
-  Widget _buildActivityCard(BuildContext context, Map<String, dynamic> activity) {
+  Widget _buildActivityCard(
+    BuildContext context,
+    Map<String, dynamic> activity,
+  ) {
     final colors = Theme.of(context).colorScheme;
     final activityType = _getActivityType(activity);
     final iconData = _getActivityIcon(activityType);
@@ -550,24 +571,30 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
                 Text(
                   title,
                   style: TextStyle(
+                    overflow: TextOverflow.ellipsis,
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                     color: colors.onSurface,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: TextStyle(color: colors.onSurfaceVariant, fontSize: 13),
+                  style: TextStyle(
+                    overflow: TextOverflow.ellipsis,
+                    color: colors.onSurfaceVariant,
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
           ),
-
+          const SizedBox(width: 20),
           // Time
           Text(
             timeAgo,
-            style: TextStyle(color: colors.onSurfaceVariant, fontSize: 12),
+            softWrap: true,
+            style: TextStyle(color: colors.onSurfaceVariant, fontSize: 10),
           ),
         ],
       ),

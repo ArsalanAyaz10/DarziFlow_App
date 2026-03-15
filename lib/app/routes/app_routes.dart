@@ -2,7 +2,6 @@ part of 'app_pages.dart';
 
 abstract class Routes {
   static const splash = '/';
-  static const onboarding = '/onboarding';
   static const signup = '/signup';
   static const login = '/login';
   static const profile = '/profile';
@@ -11,4 +10,5 @@ abstract class Routes {
   static const resetpassword = '/resetpassword';
   static const deptartmentHead = '/dept-head-dashboard';
   static const allActivities = '/all-activities';
+  static const orders = '/orders';
 }

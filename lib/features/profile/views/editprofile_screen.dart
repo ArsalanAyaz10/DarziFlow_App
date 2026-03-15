@@ -27,9 +27,17 @@ class EditProfileScreen extends GetView<EditProfileController> {
                   const SizedBox(height: 30),
                   _buildSectionHeader(context, "PERSONAL DETAILS"),
                   const SizedBox(height: 15),
-                  _buildInputField(context, "Full Name", controller.nameController),
+                  _buildInputField(
+                    context,
+                    "Full Name",
+                    controller.nameController,
+                  ),
                   const SizedBox(height: 15),
-                  _buildInputField(context, "Email Address", controller.emailController),
+                  _buildInputField(
+                    context,
+                    "Email Address",
+                    controller.emailController,
+                  ),
                   const SizedBox(height: 30),
                   _buildSectionHeader(context, "SECURITY & PASSWORD"),
                   const SizedBox(height: 10),
@@ -92,7 +100,9 @@ class EditProfileScreen extends GetView<EditProfileController> {
               Obx(
                 () => CircleAvatar(
                   radius: 55,
-                  backgroundColor: AppColors.primaryGreen.withValues(alpha: 0.1),
+                  backgroundColor: AppColors.primaryGreen.withValues(
+                    alpha: 0.1,
+                  ),
                   backgroundImage: controller.userAvatar.value.isNotEmpty
                       ? NetworkImage(controller.userAvatar.value)
                       : null,
@@ -109,11 +119,7 @@ class EditProfileScreen extends GetView<EditProfileController> {
                 radius: 18,
                 backgroundColor: AppColors.primaryGreen,
                 child: IconButton(
-                  icon: Icon(
-                    Icons.camera_alt,
-                    size: 16,
-                    color: colors.surface,
-                  ),
+                  icon: Icon(Icons.camera_alt, size: 16, color: colors.surface),
                   onPressed: controller.pickAndUploadImage,
                 ),
               ),
@@ -139,9 +145,13 @@ class EditProfileScreen extends GetView<EditProfileController> {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title, {IconData? icon}) {
+  Widget _buildSectionHeader(
+    BuildContext context,
+    String title, {
+    IconData? icon,
+  }) {
     final theme = Theme.of(context);
-    final colors = theme.colorScheme;
+    final _ = theme.colorScheme;
 
     return Row(
       children: [
@@ -162,7 +172,11 @@ class EditProfileScreen extends GetView<EditProfileController> {
     );
   }
 
-  Widget _buildInputField(BuildContext context, String label, TextEditingController textController) {
+  Widget _buildInputField(
+    BuildContext context,
+    String label,
+    TextEditingController textController,
+  ) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
@@ -173,7 +187,7 @@ class EditProfileScreen extends GetView<EditProfileController> {
           label,
           style: TextStyle(
             color: colors.onSurface,
-            fontWeight: FontWeight.bold, 
+            fontWeight: FontWeight.bold,
             fontSize: 13,
           ),
         ),
@@ -181,10 +195,7 @@ class EditProfileScreen extends GetView<EditProfileController> {
         TextFormField(
           onTapOutside: (_) => FocusScope.of(Get.context!).unfocus(),
           controller: textController,
-          style: TextStyle(
-            color: colors.onSurface,
-            fontSize: 14,
-          ),
+          style: TextStyle(color: colors.onSurface, fontSize: 14),
           decoration: InputDecoration(
             filled: true,
             fillColor: colors.surfaceContainerLowest,
@@ -198,7 +209,9 @@ class EditProfileScreen extends GetView<EditProfileController> {
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: colors.outline.withValues(alpha: 0.5)),
+              borderSide: BorderSide(
+                color: colors.outline.withValues(alpha: 0.5),
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -245,10 +258,7 @@ class EditProfileScreen extends GetView<EditProfileController> {
             alignment: Alignment.centerLeft,
             child: Text(
               "Minimum 8 chars",
-              style: TextStyle(
-                color: colors.onSurfaceVariant, 
-                fontSize: 11,
-              ),
+              style: TextStyle(color: colors.onSurfaceVariant, fontSize: 11),
             ),
           ),
 
@@ -299,7 +309,7 @@ class EditProfileScreen extends GetView<EditProfileController> {
           label,
           style: TextStyle(
             color: colors.onSurface,
-            fontWeight: FontWeight.bold, 
+            fontWeight: FontWeight.bold,
             fontSize: 12,
           ),
         ),
@@ -309,10 +319,7 @@ class EditProfileScreen extends GetView<EditProfileController> {
             controller: textController,
             obscureText: !isVisible.value,
             keyboardType: TextInputType.visiblePassword,
-            style: TextStyle(
-              color: colors.onSurface,
-              fontSize: 14,
-            ),
+            style: TextStyle(color: colors.onSurface, fontSize: 14),
             decoration: InputDecoration(
               suffixIcon: IconButton(
                 icon: Icon(
@@ -359,16 +366,13 @@ class EditProfileScreen extends GetView<EditProfileController> {
             "Order Notification",
             style: TextStyle(
               color: colors.onSurface,
-              fontWeight: FontWeight.bold, 
+              fontWeight: FontWeight.bold,
               fontSize: 12,
             ),
           ),
           subtitle: Text(
             "Alert for production messages",
-            style: TextStyle(
-              color: colors.onSurfaceVariant,
-              fontSize: 10,
-            ),
+            style: TextStyle(color: colors.onSurfaceVariant, fontSize: 10),
           ),
           trailing: Switch(
             value: controller.notificationsEnabled.value,
@@ -445,8 +449,14 @@ class EditProfileScreen extends GetView<EditProfileController> {
       Get.dialog(
         AlertDialog(
           backgroundColor: colors.surface,
-          title: Text("Save Changes", style: TextStyle(color: colors.onSurface)),
-          content: Text("Are you sure you want to save the changes?", style: TextStyle(color: colors.onSurfaceVariant)),
+          title: Text(
+            "Save Changes",
+            style: TextStyle(color: colors.onSurface),
+          ),
+          content: Text(
+            "Are you sure you want to save the changes?",
+            style: TextStyle(color: colors.onSurfaceVariant),
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
@@ -466,10 +476,7 @@ class EditProfileScreen extends GetView<EditProfileController> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryGreen,
               ),
-              child: Text(
-                "Save",
-                style: TextStyle(color: colors.surface),
-              ),
+              child: Text("Save", style: TextStyle(color: colors.surface)),
             ),
           ],
         ),
@@ -489,8 +496,14 @@ class EditProfileScreen extends GetView<EditProfileController> {
       Get.dialog(
         AlertDialog(
           backgroundColor: colors.surface,
-          title: Text("Discard Changes", style: TextStyle(color: colors.onSurface)),
-          content: Text("Are you sure you want to discard all changes?", style: TextStyle(color: colors.onSurfaceVariant)),
+          title: Text(
+            "Discard Changes",
+            style: TextStyle(color: colors.onSurface),
+          ),
+          content: Text(
+            "Are you sure you want to discard all changes?",
+            style: TextStyle(color: colors.onSurfaceVariant),
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
@@ -508,10 +521,7 @@ class EditProfileScreen extends GetView<EditProfileController> {
                 Get.back(); // Go back to previous screen
               },
               style: ElevatedButton.styleFrom(backgroundColor: colors.error),
-              child: Text(
-                "Discard",
-                style: TextStyle(color: colors.surface),
-              ),
+              child: Text("Discard", style: TextStyle(color: colors.surface)),
             ),
           ],
         ),

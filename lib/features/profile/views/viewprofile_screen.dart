@@ -112,7 +112,9 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
           ),
           const SizedBox(height: 15),
           ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              controller.navigateToEditProfile();
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryGreen,
               shape: RoundedRectangleBorder(
@@ -120,14 +122,9 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
               ),
               padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
             ),
-            child: InkWell(
-              onTap: () {
-                controller.navigateToEditProfile();
-              },
-              child: Text(
-                "Edit Profile",
-                style: TextStyle(color: colors.surface),
-              ),
+            child: Text(
+              "Edit Profile",
+              style: TextStyle(color: colors.surface),
             ),
           ),
         ],
@@ -224,12 +221,22 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
           color: colors.surface,
           borderRadius: BorderRadius.circular(15),
         ),
-        child: _profileTile(context, Icons.language, "Language", "English (US)"),
+        child: _profileTile(
+          context,
+          Icons.language,
+          "Language",
+          "English (US)",
+        ),
       ),
     );
   }
 
-  Widget _profileTile(BuildContext context, IconData icon, String title, String subtitle) {
+  Widget _profileTile(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String subtitle,
+  ) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
@@ -246,16 +253,13 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
         title,
         style: TextStyle(
           color: colors.onSurface,
-          fontSize: 14, 
+          fontSize: 14,
           fontWeight: FontWeight.bold,
         ),
       ),
       subtitle: Text(
         subtitle,
-        style: TextStyle(
-          fontSize: 12, 
-          color: colors.onSurfaceVariant,
-        ),
+        style: TextStyle(fontSize: 12, color: colors.onSurfaceVariant),
       ),
       trailing: Icon(Icons.chevron_right, color: colors.onSurfaceVariant),
       onTap: () {},

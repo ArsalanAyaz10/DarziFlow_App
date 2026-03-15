@@ -1,3 +1,4 @@
+import 'package:dariziflow_app/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -22,15 +23,19 @@ class BottomNavBar extends StatelessWidget {
       ),
       child: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
+        elevation: 2,
+        showSelectedLabels: true,
+        selectedFontSize: 15,
         selectedItemColor: Colors.green,
         unselectedItemColor: Colors.grey,
         currentIndex: currentIndex,
         onTap: onTap ?? _handleNavigation,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard_outlined),
+            icon: Icon(Icons.dashboard_outlined, size: 20),
             activeIcon: Icon(Icons.dashboard),
-            label: 'Dashboard',
+
+            label: 'Home',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_bag_outlined),
@@ -55,9 +60,10 @@ class BottomNavBar extends StatelessWidget {
   void _handleNavigation(int index) {
     switch (index) {
       case 0: // Dashboard
+        Get.offAllNamed(Routes.deptartmentHead);
         break;
       case 1: // Orders
-        Get.toNamed('/orders');
+        Get.toNamed(Routes.orders);
         break;
       case 2: // Workflows
         Get.toNamed('/workflows');
@@ -66,7 +72,7 @@ class BottomNavBar extends StatelessWidget {
         Get.toNamed('/messages');
         break;
       case 4: // Profile
-        Get.toNamed('/profile');
+        Get.toNamed(Routes.profile);
         break;
     }
   }

@@ -1,34 +1,56 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/utils/fonts.dart';
-import 'package:dariziflow_app/core/widgets/bgcircles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  final PageController pageController = PageController();
+
+  final SvgAssetLoader darkSplash = const SvgAssetLoader(
+    'assets/images/Darksplash.svg',
+  );
+  final SvgAssetLoader lightSplash = const SvgAssetLoader(
+    'assets/images/Lightsplash.svg',
+  );
+  final SvgAssetLoader darkLayer = const SvgAssetLoader(
+    'assets/images/darkLayer.svg',
+  );
+  final SvgAssetLoader lightLayer = const SvgAssetLoader(
+    'assets/images/lightLayer.svg',
+  );
+
+  @override
+  void dispose() {
+    pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final PageController pageController = PageController();
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
-          BackgroundCircle(top: -0.3, left: -0.2),
-          BackgroundCircle(bottom: -0.3, right: -0.2),
-
           PageView(
             controller: pageController,
             onPageChanged: (index) {
               if (index == 1) {}
             },
             children: [
-              // PAGE 1: The Splash Content
+              // Page 1: The Splash Content
               SafeArea(
                 child: Column(
                   children: [
@@ -36,8 +58,8 @@ class SplashScreen extends StatelessWidget {
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        SvgPicture.asset(
-                          'assets/images/splash.svg',
+                        SvgPicture(
+                          isDark ? darkSplash : lightSplash,
                           width: 150.0,
                           height: 150.0,
                         ),
@@ -69,7 +91,7 @@ class SplashScreen extends StatelessWidget {
                             ),
                             child: FractionallySizedBox(
                               alignment: Alignment.centerLeft,
-                              widthFactor: 0.5, // Represents Page 1 of 2
+                              widthFactor: 0.5,
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: AppColors.primaryGreen,
@@ -110,13 +132,13 @@ class SplashScreen extends StatelessWidget {
                           color: colors.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: SvgPicture.asset(
-                          'assets/images/Layer.svg',
+                        child: SvgPicture(
+                          isDark ? darkLayer : lightLayer,
                           fit: BoxFit.contain,
                         ),
                       ),
                       const SizedBox(height: 40),
-                      // App Name/Branding
+
                       RichText(
                         text: TextSpan(
                           style: TextStyle(
@@ -126,9 +148,7 @@ class SplashScreen extends StatelessWidget {
                             color: colors.onSurface,
                           ),
                           children: [
-                            TextSpan(
-                              text: "Darzi",
-                            ),
+                            TextSpan(text: "Darzi"),
                             const TextSpan(
                               text: "Flow",
                               style: TextStyle(color: AppColors.primaryGreen),
@@ -216,7 +236,7 @@ class SplashScreen extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 30),
-                      // Footer Terms
+                      // Footer
                       RichText(
                         textAlign: TextAlign.center,
                         text: TextSpan(
