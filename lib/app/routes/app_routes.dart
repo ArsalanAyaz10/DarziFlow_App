@@ -11,4 +11,5 @@ abstract class Routes {
   static const deptartmentHead = '/dept-head-dashboard';
   static const allActivities = '/all-activities';
   static const orders = '/orders';
+  static const orderDetails = "/order-details";
 }

@@ -8,6 +8,7 @@ import 'package:dariziflow_app/features/deptHeadDashboard/views/dashboard_screen
 import 'package:dariziflow_app/features/forgotpassword/bindings/password_binding.dart';
 import 'package:dariziflow_app/features/forgotpassword/views/forgotPassword_screen.dart';
 import 'package:dariziflow_app/features/forgotpassword/views/resetPassword_screen.dart';
+import 'package:dariziflow_app/features/orders/views/OrderDetails_screen.dart';
 import 'package:dariziflow_app/features/orders/views/order_screen.dart';
 import 'package:dariziflow_app/features/profile/bindings/editprofile_binding.dart';
 import 'package:dariziflow_app/features/profile/bindings/viewprofile_binding.dart';
@@ -22,10 +23,7 @@ class AppPages {
   static final initial = Routes.splash;
 
   static final routes = [
-    GetPage(
-      name: Routes.splash,
-      page: () => SplashScreen(),
-    ),
+    GetPage(name: Routes.splash, page: () => SplashScreen()),
     GetPage(
       name: Routes.signup,
       page: () => SignupScreen(),
@@ -69,6 +67,12 @@ class AppPages {
     GetPage(
       name: Routes.orders,
       page: () => const OrderScreen(),
+      binding: OrderBinding(),
+    ),
+
+    GetPage(
+      name: Routes.orderDetails,
+      page: () => const OrderDetailsScreen(),
       binding: OrderBinding(),
     ),
   ];

@@ -2,6 +2,7 @@ import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:dariziflow_app/data/models/order_card_model.dart';
 import 'package:dariziflow_app/features/orders/repository/order_repository.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:developer' as dev;
 
@@ -11,6 +12,7 @@ class OrderController extends GetxController {
   OrderController(this.repository);
 
   var orders = <OrderCardModel>[].obs;
+
   var isLoading = false.obs;
   var errorMessage = ''.obs;
 
@@ -18,6 +20,7 @@ class OrderController extends GetxController {
   var selectedFilter = 'All'.obs;
   final List<String> filterOptions = ['All', 'Active', 'Completed', 'Overdue'];
   var searchQuery = ''.obs;
+  final searchController = TextEditingController();
 
   @override
   void onInit() {
@@ -25,9 +28,14 @@ class OrderController extends GetxController {
     fetchOrders();
   }
 
+  @override
+  void onClose() {
+    searchController.dispose(); // Always dispose controllers
+    super.onClose();
+  }
+
   Future<String?> _getDepartmentId() async {
     try {
-
       // Extract Dept ID from Storage
       final user = await AppStorage.getUser();
       if (user != null && user['department'] != null) {
@@ -74,8 +82,8 @@ class OrderController extends GetxController {
   }
 
   OrderCardModel _transformToOrderCard(Map<String, dynamic> orderData) {
-    // Extract basic info
     final orderId = orderData['_id']?.toString() ?? '';
+
     final orderName = orderData['orderName'] ?? 'Unknown Order';
     final uniqueId = orderData['orderUniqueId']?.toString() ?? '';
     final dueDate = orderData['dueDate'] != null
@@ -222,6 +230,7 @@ class OrderController extends GetxController {
 
   void clearSearch() {
     searchQuery.value = '';
+    searchController.clear();
   }
 
   // Filter methods

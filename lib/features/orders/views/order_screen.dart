@@ -89,38 +89,41 @@ class OrderScreen extends GetView<OrderController> {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      child: TextField(
-        onChanged: (value) => controller.updateSearchQuery(value),
-        decoration: InputDecoration(
-          hintText: 'Search Orders',
-          hintStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-          prefixIcon: Icon(
-            Icons.search,
-            color: theme.colorScheme.onSurfaceVariant,
+      child: Obx(
+        () => TextField(
+          controller: controller.searchController,
+          onChanged: (value) => controller.updateSearchQuery(value),
+          decoration: InputDecoration(
+            hintText: 'Search Orders',
+            hintStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+            prefixIcon: Icon(
+              Icons.search,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            suffixIcon: controller.searchQuery.value.isNotEmpty
+                ? IconButton(
+                    icon: Icon(
+                      Icons.clear,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    onPressed: () {
+                      controller.clearSearch();
+                      FocusScope.of(context).unfocus();
+                    },
+                  )
+                : null,
+            filled: true,
+            fillColor: isDark
+                ? theme.colorScheme.surfaceContainerHighest
+                : Colors.grey.shade100,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.symmetric(vertical: 14),
           ),
-          suffixIcon: controller.searchQuery.value.isNotEmpty
-              ? IconButton(
-                  icon: Icon(
-                    Icons.clear,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  onPressed: () {
-                    controller.clearSearch();
-                    FocusScope.of(context).unfocus();
-                  },
-                )
-              : null,
-          filled: true,
-          fillColor: isDark
-              ? theme.colorScheme.surfaceContainerHighest
-              : Colors.grey.shade100,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+          style: theme.textTheme.bodyMedium,
         ),
-        style: theme.textTheme.bodyMedium,
       ),
     );
   }
@@ -188,7 +191,9 @@ class OrderScreen extends GetView<OrderController> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => _showOrderDetails(order),
+          onTap: () {
+            _showOrderDetails(order);
+          },
           borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -387,6 +392,6 @@ class OrderScreen extends GetView<OrderController> {
   }
 
   void _showOrderDetails(OrderCardModel order) {
-    Get.toNamed('/order-details', arguments: order.orderId);
+    Get.toNamed("/order-details", arguments: order.orderId);
   }
 }
