@@ -30,9 +30,9 @@ class CustomTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    final hintColor = colors.onSurfaceVariant.withOpacity(0.6);
-    final iconColor = colors.onSurfaceVariant.withOpacity(0.8);
-    final labelColor = colors.onSurface.withOpacity(0.7);
+    final hintColor = colors.onSurfaceVariant.withValues(alpha: 0.6);
+    final iconColor = colors.onSurfaceVariant.withValues(alpha: 0.8);
+    final _ = colors.onSurface.withValues(alpha:0.7);
 
     return RepaintBoundary(
       child: Column(

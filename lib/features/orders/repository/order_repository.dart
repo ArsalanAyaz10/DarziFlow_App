@@ -9,11 +9,10 @@ class OrderRepository {
 
   OrderRepository(this.service);
 
-
-
   Future<List<dynamic>> fetchActiveWorkflows(String id) async {
     try {
       final data = await service.getDepartmentOrders(id);
+
       return data["orders"] ?? [];
     } catch (e) {
       if (kDebugMode) dev.log("Error fetching active workflows: $e");

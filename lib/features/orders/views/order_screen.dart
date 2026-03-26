@@ -1,6 +1,6 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/widgets/bottom_nav_bar.dart';
-import 'package:dariziflow_app/data/models/order_card_model.dart';
+import 'package:dariziflow_app/data/models/orderCard_model.dart';
 import 'package:dariziflow_app/features/orders/controllers/order_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -159,7 +159,7 @@ class OrderScreen extends GetView<OrderController> {
               },
               backgroundColor: theme.colorScheme.surfaceContainerHighest,
               selectedColor: AppColors.primaryGreen,
-              checkmarkColor: Colors.white,
+              showCheckmark: false,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -172,159 +172,153 @@ class OrderScreen extends GetView<OrderController> {
 
   Widget _buildOrderCard(BuildContext context, OrderCardModel order) {
     final theme = Theme.of(context);
-    final statusColor = order.status.getColor(theme);
-    final statusBgColor = order.status.getBackgroundColor(theme);
+
+    final bool isCompleted = order.progress >= 100;
+    final bool isOverdue = order.isOverdue;
+
+    Color progressColor = AppColors.primaryGreen;
+    if (isOverdue) progressColor = theme.colorScheme.error;
+    if (isCompleted) progressColor = theme.colorScheme.primary;
 
     return Container(
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.colorScheme.outlineVariant, width: 0.5),
+        border: Border.all(
+          color: theme.dividerColor.withValues(alpha: 0.1),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.shadow.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {
-            _showOrderDetails(order);
-          },
+          onTap: () => _showOrderDetails(order),
           borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Order ID and Status
+                // Header: ID and Status Badge
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      order.displayOrderId,
+                      order.uniqueId.toUpperCase().substring(0, 6),
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
+                        letterSpacing: 1.1,
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: statusBgColor,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        order.status.displayName,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: statusColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10,
-                        ),
-                      ),
-                    ),
+                    _buildStatusBadge(theme, order),
                   ],
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
 
                 // Order Name
                 Text(
                   order.orderName,
                   style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
 
-                // Progress Label
-                Text(
-                  'Production Progress',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                // Progress Bar and Percentage
-                Row(
-                  children: [
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: order.progress / 100,
-                          backgroundColor:
-                              theme.colorScheme.surfaceContainerHighest,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            order.isOverdue
-                                ? theme.colorScheme.error
-                                : order.isHighPriority
-                                ? Colors.orange
-                                : AppColors.primaryGreen,
-                          ),
-                          minHeight: 8,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      '${order.progress}%',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: order.isOverdue
-                            ? theme.colorScheme.error
-                            : order.isHighPriority
-                            ? Colors.redAccent
-                            : AppColors.primaryGreen,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-
-                // Due Date and Action
+                // Progress Section
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      order.displayDueDate,
+                      'Production Progress',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: order.isOverdue
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    Text(
+                      '${order.progress.toInt()}%',
+                      style: TextStyle(
+                        color: progressColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: LinearProgressIndicator(
+                    value: order.progress / 100,
+                    backgroundColor: theme.colorScheme.surfaceVariant,
+                    valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+                    minHeight: 8,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Footer: Due Date
+                Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today_outlined,
+                      size: 14,
+                      color: isOverdue
+                          ? theme.colorScheme.error
+                          : theme.colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      order.dueDate != null
+                          ? "Due: ${order.dueDate!.day}/${order.dueDate!.month}/${order.dueDate!.year}"
+                          : "No Due Date",
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: isOverdue
                             ? theme.colorScheme.error
                             : theme.colorScheme.onSurfaceVariant,
-                        fontWeight: order.isOverdue
+                        fontWeight: isOverdue
                             ? FontWeight.bold
                             : FontWeight.normal,
                       ),
                     ),
-                    if (order.isPending)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryGreen.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          'Assign Staff',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: AppColors.primaryGreen,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+                    const Spacer(),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      size: 12,
+                      color: theme.disabledColor,
+                    ),
                   ],
                 ),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusBadge(ThemeData theme, OrderCardModel order) {
+    final bool isCompleted = order.progress >= 100;
+    final Color color = AppColors.primaryGreen;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        isCompleted ? "COMPLETED" : "ACTIVE",
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
@@ -392,6 +386,6 @@ class OrderScreen extends GetView<OrderController> {
   }
 
   void _showOrderDetails(OrderCardModel order) {
-    Get.toNamed("/order-details", arguments: order.orderId);
+    Get.toNamed("/order-details", arguments: {"orderId": order.orderId});
   }
 }

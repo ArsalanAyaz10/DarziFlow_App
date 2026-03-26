@@ -1,10 +1,12 @@
 import 'package:dariziflow_app/core/storage/storage.dart';
-import 'package:dariziflow_app/data/models/order_card_model.dart';
+import 'package:dariziflow_app/data/models/checkpointModel.dart'
+    show CheckpointModel;
+import 'package:dariziflow_app/data/models/operationModel.dart';
+import 'package:dariziflow_app/data/models/orderCard_model.dart';
 import 'package:dariziflow_app/features/orders/repository/order_repository.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'dart:developer' as dev;
+import 'package:get/get_rx/src/rx_types/rx_types.dart';
+import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 
 class OrderController extends GetxController {
   final OrderRepository repository;
@@ -16,9 +18,10 @@ class OrderController extends GetxController {
   var isLoading = false.obs;
   var errorMessage = ''.obs;
 
-  // Filter state
+  // UI state only
   var selectedFilter = 'All'.obs;
-  final List<String> filterOptions = ['All', 'Active', 'Completed', 'Overdue'];
+  final List<String> filterOptions = ['All', 'Active', 'Completed'];
+
   var searchQuery = ''.obs;
   final searchController = TextEditingController();
 
@@ -30,22 +33,51 @@ class OrderController extends GetxController {
 
   @override
   void onClose() {
-    searchController.dispose(); // Always dispose controllers
+    searchController.dispose();
     super.onClose();
   }
 
   Future<String?> _getDepartmentId() async {
     try {
-      // Extract Dept ID from Storage
       final user = await AppStorage.getUser();
-      if (user != null && user['department'] != null) {
-        return user['department'].toString();
-      }
-      return null;
+      return user?['department']?.toString();
     } catch (e) {
-      if (kDebugMode) dev.log("Error getting department ID: $e");
       return null;
     }
+  }
+
+  void updateSearchQuery(String query) {
+    searchQuery.value = query;
+  }
+
+  void clearSearch() {
+    searchController.clear();
+    searchQuery.value = '';
+  }
+
+  int _calculateProgress(Map<String, dynamic> data) {
+    int total = 0;
+    int done = 0;
+
+    final operations = data['operations'] as List? ?? [];
+
+    for (final op in operations) {
+      final checkpoints = op['checkpoints'] as List? ?? [];
+      total += checkpoints.length;
+
+      for (final cp in checkpoints) {
+        final status = cp['status'];
+
+        if (status == 'COMPLETED' ||
+            status == 'QC_APPROVED' ||
+            status == 'APPROVED') {
+          done++;
+        }
+      }
+    }
+
+    if (total == 0) return 0;
+    return ((done / total) * 100).round();
   }
 
   Future<void> fetchOrders() async {
@@ -55,191 +87,84 @@ class OrderController extends GetxController {
     try {
       final deptId = await _getDepartmentId();
 
-      if (deptId == null || deptId.isEmpty) {
-        errorMessage.value =
-            "Department ID not found. Please check your profile.";
-        isLoading.value = false;
-        if (kDebugMode) dev.log("Department ID is null or empty");
+      if (deptId == null) {
+        errorMessage.value = "Department not found.";
         return;
       }
 
-      if (kDebugMode) dev.log("Fetching orders for department: $deptId");
+      final response = await repository.fetchActiveWorkflows(deptId);
 
-      final ordersData = await repository.fetchActiveWorkflows(deptId);
+      final List data = response;
 
-      // Transform API response into OrderCardModel
-      orders.value = ordersData.map((orderData) {
-        return _transformToOrderCard(orderData);
-      }).toList();
-
-      if (kDebugMode) dev.log("Fetched ${orders.length} orders");
+      orders.value = data.map((json) => _mapOrder(json)).toList();
     } catch (e) {
-      errorMessage.value = "Failed to load orders. Please try again.";
-      if (kDebugMode) dev.log("Error fetching orders: $e");
+      errorMessage.value = "Failed to load orders.";
     } finally {
       isLoading.value = false;
     }
   }
 
-  OrderCardModel _transformToOrderCard(Map<String, dynamic> orderData) {
-    final orderId = orderData['_id']?.toString() ?? '';
-
-    final orderName = orderData['orderName'] ?? 'Unknown Order';
-    final uniqueId = orderData['orderUniqueId']?.toString() ?? '';
-    final dueDate = orderData['dueDate'] != null
-        ? DateTime.tryParse(orderData['dueDate'].toString())
-        : null;
-
-    // Calculate progress and status
-    final progress = _calculateProgress(orderData);
-    final status = _determineStatus(orderData, progress, dueDate);
+  OrderCardModel _mapOrder(Map<String, dynamic> json) {
+    // 1. Calculate the progress locally using your logic
+    final calculatedProgress = _calculateProgress(json).toDouble();
 
     return OrderCardModel(
-      orderId: orderId,
-      orderName: orderName,
-      uniqueId: uniqueId,
-      dueDate: dueDate,
-      status: status,
-      progress: progress,
-      rawData: orderData,
+      orderId: json['_id'] ?? '',
+      orderName: json['orderName'] ?? 'Unknown Order',
+      uniqueId: json['orderUniqueId'] ?? '',
+      dueDate: json['dueDate'] != null
+          ? DateTime.tryParse(json['dueDate'].toString())
+          : null,
+
+      // 2. Use the calculated progress instead of the backend's 0
+      progress: calculatedProgress,
+
+      operations: (json['operations'] as List? ?? [])
+          .map(
+            (op) => OperationModel(
+              name: op['name'] ?? '',
+              status: op['status'] ?? 'PENDING',
+              checkpoints: (op['checkpoints'] as List? ?? [])
+                  .map(
+                    (cp) => CheckpointModel(
+                      name: cp['name'] ?? '',
+                      status: cp['status'] ?? 'PENDING',
+                      qcRequired: cp['qcRequired'] ?? false,
+                      submissionFiles: [],
+                      history: [],
+                    ),
+                  )
+                  .toList(),
+            ),
+          )
+          .toList(),
     );
   }
 
-  int _calculateProgress(Map<String, dynamic> orderData) {
-    int totalCheckpoints = 0;
-    int completedCheckpoints = 0;
-
-    final operations = orderData['operations'] as List? ?? [];
-
-    for (var op in operations) {
-      final checkpoints = op['checkpoints'] as List? ?? [];
-      totalCheckpoints += checkpoints.length;
-
-      for (var cp in checkpoints) {
-        final status = cp['status'] ?? '';
-        if (status == 'COMPLETED' ||
-            status == 'QC_APPROVED' ||
-            status == 'APPROVED') {
-          completedCheckpoints++;
-        }
-      }
-    }
-
-    if (totalCheckpoints == 0) return 0;
-    return ((completedCheckpoints / totalCheckpoints) * 100).round();
-  }
-
-  OrderStatus _determineStatus(
-    Map<String, dynamic> orderData,
-    int progress,
-    DateTime? dueDate,
-  ) {
-    // Check for overdue first
-    if (dueDate != null && dueDate.isBefore(DateTime.now()) && progress < 100) {
-      return OrderStatus.OVERDUE;
-    }
-
-    // Check for high priority (based on due date proximity)
-    if (dueDate != null) {
-      final daysUntilDue = dueDate.difference(DateTime.now()).inDays;
-      if (daysUntilDue <= 2 && progress < 100) {
-        return OrderStatus.HIGH_PRIORITY;
-      }
-    }
-
-    // Check operation statuses for rejection
-    final operations = orderData['operations'] as List? ?? [];
-    for (var op in operations) {
-      final checkpoints = op['checkpoints'] as List? ?? [];
-      for (var cp in checkpoints) {
-        if (cp['status'] == 'REJECTED' || cp['status'] == 'QC_REJECTED') {
-          return OrderStatus.NEEDS_ATTENTION;
-        }
-      }
-    }
-
-    // Progress-based status
-    if (progress == 0) return OrderStatus.PENDING;
-    if (progress == 100) return OrderStatus.COMPLETED;
-    return OrderStatus.IN_PROGRESS;
-  }
-
-  // Filter and search getters
   List<OrderCardModel> get filteredOrders {
-    // First apply status filter
-    var filtered = _applyStatusFilter();
+    var list = orders;
 
-    // Then apply search query
+    // FILTER: SEARCH
     if (searchQuery.value.isNotEmpty) {
-      filtered = filtered.where((order) {
-        final query = searchQuery.value.toLowerCase();
-        return order.orderName.toLowerCase().contains(query) ||
-            order.displayOrderId.toLowerCase().contains(query) ||
-            order.uniqueId.toLowerCase().contains(query);
-      }).toList();
+      final q = searchQuery.value.toLowerCase();
+      list = list
+          .where((o) {
+            return o.orderName.toLowerCase().contains(q) ||
+                o.uniqueId.toLowerCase().contains(q) ||
+                o.orderId.toLowerCase().contains(q);
+          })
+          .toList()
+          .obs;
     }
 
-    return filtered;
-  }
-
-  List<OrderCardModel> _applyStatusFilter() {
+    // FILTER: STATUS (derived ONLY from progress)
     switch (selectedFilter.value) {
       case 'Active':
-        return orders
-            .where(
-              (o) =>
-                  o.status == OrderStatus.IN_PROGRESS ||
-                  o.status == OrderStatus.HIGH_PRIORITY ||
-                  o.status == OrderStatus.NEEDS_ATTENTION,
-            )
-            .toList();
+        return list.where((o) => o.progress < 100).toList();
       case 'Completed':
-        return orders.where((o) => o.status == OrderStatus.COMPLETED).toList();
-      case 'Overdue':
-        return orders.where((o) => o.status == OrderStatus.OVERDUE).toList();
+        return list.where((o) => o.progress >= 100).toList();
       default:
-        return orders.toList();
+        return list;
     }
-  }
-
-  // Statistics getters
-  int get totalOrders => orders.length;
-
-  int get activeCount => orders
-      .where(
-        (o) =>
-            o.status == OrderStatus.IN_PROGRESS ||
-            o.status == OrderStatus.HIGH_PRIORITY ||
-            o.status == OrderStatus.NEEDS_ATTENTION,
-      )
-      .length;
-
-  int get completedCount =>
-      orders.where((o) => o.status == OrderStatus.COMPLETED).length;
-
-  int get overdueCount =>
-      orders.where((o) => o.status == OrderStatus.OVERDUE).length;
-
-  int get pendingCount =>
-      orders.where((o) => o.status == OrderStatus.PENDING).length;
-
-  // Search methods
-  void updateSearchQuery(String query) {
-    searchQuery.value = query;
-  }
-
-  void clearSearch() {
-    searchQuery.value = '';
-    searchController.clear();
-  }
-
-  // Filter methods
-  void setFilter(String filter) {
-    selectedFilter.value = filter;
-  }
-
-  // Refresh method
-  Future<void> refreshOrders() async {
-    await fetchOrders();
   }
 }

@@ -34,7 +34,6 @@ class BottomNavBar extends StatelessWidget {
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard_outlined, size: 20),
             activeIcon: Icon(Icons.dashboard),
-
             label: 'Home',
           ),
           BottomNavigationBarItem(

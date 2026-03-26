@@ -15,8 +15,8 @@ class BackgroundCircle extends StatelessWidget {
     this.left,
     this.bottom,
     this.right,
-    this.sizeMultiplier = 0.95, // Default size ratio
-    this.opacity = 0.08,        // Default subtle green
+    this.sizeMultiplier = 0.95, 
+    this.opacity = 0.08,        
   });
 
   @override
