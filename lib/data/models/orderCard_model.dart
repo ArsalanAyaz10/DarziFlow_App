@@ -7,7 +7,6 @@ class OrderCardModel {
 
   final DateTime? dueDate;
 
-  /// backend-provided progress (0–100 or 0–1 depending on API)
   final double progress;
 
   final List<OperationModel> operations;

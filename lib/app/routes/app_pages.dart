@@ -10,6 +10,7 @@ import 'package:dariziflow_app/features/forgotpassword/views/forgotPassword_scre
 import 'package:dariziflow_app/features/forgotpassword/views/resetPassword_screen.dart';
 import 'package:dariziflow_app/features/orders/views/OrderDetails_screen.dart';
 import 'package:dariziflow_app/features/orders/views/order_screen.dart';
+import 'package:dariziflow_app/features/orders/views/submitCheckpoint_screen.dart';
 import 'package:dariziflow_app/features/profile/bindings/editprofile_binding.dart';
 import 'package:dariziflow_app/features/profile/bindings/viewprofile_binding.dart';
 import 'package:dariziflow_app/features/profile/views/editprofile_screen.dart';
@@ -72,8 +73,13 @@ class AppPages {
 
     GetPage(
       name: Routes.orderDetails,
-      page: () => const OrderDetailsScreen(),
+      page: () => OrderDetailsScreen(),
       binding: OrderBinding(),
+    ),
+    GetPage(
+      binding: OrderBinding(),
+      name: Routes.submitCheckpoint,
+      page: () => const SubmitcheckpointScreen(),
     ),
   ];
 }

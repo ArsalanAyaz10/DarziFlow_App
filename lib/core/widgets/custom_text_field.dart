@@ -32,7 +32,7 @@ class CustomTextField extends StatelessWidget {
     final colors = theme.colorScheme;
     final hintColor = colors.onSurfaceVariant.withValues(alpha: 0.6);
     final iconColor = colors.onSurfaceVariant.withValues(alpha: 0.8);
-    final _ = colors.onSurface.withValues(alpha:0.7);
+    final _ = colors.onSurface.withValues(alpha: 0.7);
 
     return RepaintBoundary(
       child: Column(
@@ -43,6 +43,12 @@ class CustomTextField extends StatelessWidget {
             const SizedBox(height: 8),
           ],
           TextFormField(
+            onEditingComplete: () => FocusScope.of(context).nextFocus(),
+            onTapOutside: (PointerDownEvent event) {
+              FocusManager.instance.primaryFocus?.unfocus();
+            },
+
+            onFieldSubmitted: (value) => FocusScope.of(context).nextFocus(),
             controller: controller,
             obscureText: obscureText,
             keyboardType: keyboardType,

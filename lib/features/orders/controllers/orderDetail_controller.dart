@@ -11,7 +11,6 @@ class OrderDetailController extends GetxController {
   final OrderRepository repository;
   OrderDetailController(this.repository);
 
-  // Use the Model instead of raw Map for better UI binding
   var order = Rxn<OrderCardModel>();
   var isLoading = false.obs;
   var progress = 0.obs;
@@ -23,10 +22,9 @@ class OrderDetailController extends GetxController {
     super.onInit();
     final args = Get.arguments;
 
-    // Robust ID extraction
     if (args is OrderCardModel) {
       orderId = args.orderId;
-      order.value = args; // Initial data for instant load
+      order.value = args;
     } else if (args is Map && args.containsKey('orderId')) {
       orderId = args['orderId'].toString();
     } else {
@@ -56,10 +54,8 @@ class OrderDetailController extends GetxController {
       );
 
       if (specificOrderJson != null) {
-        // Map the JSON to our Model
         order.value = _mapToModel(specificOrderJson);
 
-        // Update computed values for UI alerts
         progress.value = _calculateProgress(order.value!);
         currentPhase.value = _calculateCurrentPhase(order.value!);
       }
@@ -70,13 +66,11 @@ class OrderDetailController extends GetxController {
     }
   }
 
-  // Helper to find the exact reason for REWORK
   HistoryItem? get latestRejection {
     if (order.value == null) return null;
     for (var op in order.value!.operations) {
       for (var cp in op.checkpoints) {
         if (cp.isRejected) {
-          // Return the most recent rejection in history
           return cp.history.reversed.firstWhere(
             (h) => h.action == "REJECT",
             orElse: () => cp.history.last,
@@ -99,15 +93,23 @@ class OrderDetailController extends GetxController {
       operations: (json['operations'] as List? ?? [])
           .map(
             (op) => OperationModel(
+              id: op['_id'] ?? '',
               name: op['name'] ?? '',
               status: op['status'] ?? 'PENDING',
               checkpoints: (op['checkpoints'] as List? ?? [])
                   .map(
                     (cp) => CheckpointModel(
+                      id: cp['_id'] ?? '',
                       name: cp['name'] ?? '',
                       status: cp['status'] ?? 'PENDING',
+                      submissionText: cp['submissionText'] ?? '',
                       qcRequired: cp['qcRequired'] ?? false,
-                      submissionFiles: [], // Map files if needed
+                      submissionType: _parseSubmissionType(
+                        cp['submissionType'],
+                      ),
+                      minUploads: cp['minUploads'] ?? 0,
+                      
+                      submissionFiles: [],
                       history: (cp['history'] as List? ?? [])
                           .map(
                             (h) => HistoryItem(
@@ -128,6 +130,19 @@ class OrderDetailController extends GetxController {
           .toList(),
     );
   }
+  static SubmissionType _parseSubmissionType(String? type) {
+    switch (type?.toLowerCase()) {
+      case 'image':
+        return SubmissionType.image;
+      case 'video':
+        return SubmissionType.video;
+      case 'document':
+        return SubmissionType.document;
+      case 'text':
+      default:
+        return SubmissionType.text;
+    }
+  }
 
   int _calculateProgress(OrderCardModel data) {
     int total = 0;
@@ -143,7 +158,7 @@ class OrderDetailController extends GetxController {
     for (var op in data.operations) {
       for (var cp in op.checkpoints) {
         if (cp.isRejected) return "REWORK REQUIRED";
-        if (cp.isPending) return op.name.toUpperCase();
+        if (cp.isQcPending) return op.name.toUpperCase();
       }
     }
     return "COMPLETED";

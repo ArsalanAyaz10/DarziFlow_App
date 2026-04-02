@@ -1,5 +1,4 @@
 import 'package:dariziflow_app/core/network/api_client.dart';
-import 'dart:developer' as dev;
 
 class OrderService {
   final ApiClient apiClient;
@@ -13,6 +12,20 @@ class OrderService {
 
   Future<dynamic> getDepartmentOrders(String deptID) async {
     final response = await apiClient.get("/stats/$deptID/active-workflows");
+    return response.data;
+  }
+
+  Future<dynamic> submitCheckpoint({
+    required String orderId,
+    required String opId,
+    required String chkId,
+    required Map<String, dynamic> data,
+  }) async {
+    // route = /orders/:orderId/workflow/:opId/checkpoints/:chkId/submit
+    final response = await apiClient.post(
+      '/$route/$orderId/workflow/$opId/checkpoints/$chkId/submit',
+      data: data,
+    );
     return response.data;
   }
 }

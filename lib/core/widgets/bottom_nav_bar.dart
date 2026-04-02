@@ -57,12 +57,14 @@ class BottomNavBar extends StatelessWidget {
   }
 
   void _handleNavigation(int index) {
+    if (index == currentIndex) return;
+
     switch (index) {
       case 0: // Dashboard
         Get.offAllNamed(Routes.deptartmentHead);
         break;
       case 1: // Orders
-        Get.toNamed(Routes.orders);
+        Get.offNamed(Routes.orders);
         break;
       case 2: // Workflows
         Get.toNamed('/workflows');

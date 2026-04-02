@@ -19,4 +19,25 @@ class OrderRepository {
       return [];
     }
   }
+
+  Future<bool> submitCheckpointData({
+    required String orderId,
+    required String opId,
+    required String chkId,
+    required String remarks,
+    required List<Map<String, dynamic>> evidence, // List of SubmissionFile maps
+  }) async {
+    try {
+      await service.submitCheckpoint(
+        orderId: orderId,
+        opId: opId,
+        chkId: chkId,
+        data: {"submissionText": remarks, "files": evidence},
+      );
+      return true;
+    } catch (e) {
+      dev.log("Repo Error submitting checkpoint: $e");
+      return false;
+    }
+  }
 }

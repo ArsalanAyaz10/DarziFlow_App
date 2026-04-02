@@ -1,5 +1,6 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/widgets/bottom_nav_bar.dart';
+import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
 import 'package:dariziflow_app/data/models/orderCard_model.dart';
 import 'package:dariziflow_app/features/orders/controllers/order_controller.dart';
 import 'package:flutter/material.dart';
@@ -11,11 +12,27 @@ class OrderScreen extends GetView<OrderController> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: _buildAppBar(context),
+      appBar: CustomAppBar(
+        title: 'Orders',
+        isTransparent:
+            false,
+        showBackButton:
+            false, 
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.notifications_outlined,
+              color: theme.iconTheme.color,
+            ),
+            onPressed: () {
+              // TODO: Notifications Feature
+            },
+          ),
+        ],
+      ),
       body: Obx(() {
         if (controller.isLoading.value && controller.orders.isEmpty) {
           return _buildLoadingState();
@@ -56,44 +73,40 @@ class OrderScreen extends GetView<OrderController> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return AppBar(
-      backgroundColor: theme.appBarTheme.backgroundColor,
-      elevation: 0,
-      title: Text(
-        'Orders',
-        style: theme.textTheme.headlineSmall?.copyWith(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      actions: [
-        IconButton(
-          icon: Icon(
-            Icons.notifications_outlined,
-            color: theme.iconTheme.color,
-          ),
-          onPressed: () {
-            // TODO Notifications Feature
-          },
-        ),
-      ],
-    );
-  }
-
   Widget _buildSearchBar(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
       child: Obx(
         () => TextField(
+          onTapOutside: (PointerDownEvent event) {
+            FocusManager.instance.primaryFocus?.unfocus();
+          },
           controller: controller.searchController,
           onChanged: (value) => controller.updateSearchQuery(value),
           decoration: InputDecoration(
+            enabled: true,
+            disabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: theme.colorScheme.outlineVariant,
+                width: 1,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: theme.colorScheme.onSurface,
+                width: 1,
+              ),
+            ),
             hintText: 'Search Orders',
             hintStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
             prefixIcon: Icon(
@@ -130,7 +143,6 @@ class OrderScreen extends GetView<OrderController> {
 
   Widget _buildFilterChips(BuildContext context) {
     final theme = Theme.of(context);
-
     return Container(
       height: 50,
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -186,7 +198,7 @@ class OrderScreen extends GetView<OrderController> {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: theme.dividerColor.withValues(alpha: 0.1),
+          color: theme.dividerColor.withValues(alpha: 0.9),
           width: 1,
         ),
         boxShadow: [
@@ -256,7 +268,7 @@ class OrderScreen extends GetView<OrderController> {
                   borderRadius: BorderRadius.circular(10),
                   child: LinearProgressIndicator(
                     value: order.progress / 100,
-                    backgroundColor: theme.colorScheme.surfaceVariant,
+                    backgroundColor: theme.colorScheme.surfaceContainerHighest,
                     valueColor: AlwaysStoppedAnimation<Color>(progressColor),
                     minHeight: 8,
                   ),
@@ -310,7 +322,7 @@ class OrderScreen extends GetView<OrderController> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(

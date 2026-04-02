@@ -1,7 +1,6 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/widgets/bottom_nav_bar.dart';
-import 'package:dariziflow_app/core/widgets/error_view.dart';
-import 'package:dariziflow_app/core/widgets/status_badge.dart';
+import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
 import 'package:dariziflow_app/features/deptHeadDashboard/controllers/deptHeadController.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -12,26 +11,41 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(56),
+        child: Obx(
+          () => CustomAppBar(
+            isDashboard: true,
+            isTransparent: true,
+            userAvatarUrl: controller.userAvatar.value,
+            title: controller.userName.value,
+            subtitle: controller.userRole.value,
+            actions: [
+              IconButton(
+                onPressed: () {},
+                icon: Icon(Icons.search, color: theme.colorScheme.onSurface),
+              ),
+              IconButton(
+                onPressed: () {},
+                icon: Icon(
+                  Icons.notifications_none,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
       body: Obx(() {
         if (controller.isLoading.value &&
             controller.processedActivities.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
-        if (controller.errorMessage.value.isNotEmpty) {
-          return ErrorView(
-            message: controller.errorMessage.value,
-            onRetry: controller.refreshDashboard,
-          );
-        }
-
         return Column(
           children: [
-            _buildAppBar(context),
             Expanded(
               child: RefreshIndicator(
                 onRefresh: controller.refreshDashboard,
@@ -65,67 +79,6 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
     );
   }
 
-  Widget _buildAppBar(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Obx(
-      () => AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 10),
-          child: InkWell(
-            onTap: () {
-              Get.toNamed("/profile");
-            },
-            child: CircleAvatar(
-              radius: 20,
-              backgroundColor: colors.onSurface.withValues(alpha: 0.1),
-              backgroundImage: controller.userAvatar.value.isNotEmpty
-                  ? NetworkImage(controller.userAvatar.value)
-                  : null,
-              child: controller.userAvatar.value.isEmpty
-                  ? Icon(Icons.person, size: 24, color: AppColors.primaryGreen)
-                  : null,
-            ),
-          ),
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              controller.userName.value,
-              style: const TextStyle(
-                color: AppColors.primaryGreen,
-                fontSize: 13,
-                letterSpacing: .5,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              controller.userRole.value,
-              style: TextStyle(
-                color: colors.onSurface,
-                fontSize: 9,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.search, color: colors.onSurface),
-          ),
-          IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.notifications_none, color: colors.onSurface),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildDeptHeader(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return Obx(
@@ -142,11 +95,32 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
               color: colors.onSurface,
             ),
           ),
-          StatusBadge(
-            status: controller.deptStatus.value.isEmpty
-                ? "Unknown Status"
-                : controller.deptStatus.value,
-            color: AppColors.primaryGreen,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.primaryGreen.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircleAvatar(
+                  radius: 4,
+                  backgroundColor: AppColors.primaryGreen,
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  controller.deptStatus.value.isEmpty
+                      ? "Unknown Status"
+                      : controller.deptStatus.value,
+                  style: TextStyle(
+                    color: AppColors.primaryGreen,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

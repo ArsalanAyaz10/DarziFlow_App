@@ -9,16 +9,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: 'DarziFlow',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      initialBinding: InitialBinding(),
-      getPages: AppPages.routes,
-      initialRoute: AppPages.initial,
-    
+    return SafeArea(
+      bottom: false,
+      left: false,
+      right: false,
+      top: false,
+      child: GetMaterialApp(
+        title: 'DarziFlow',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
+        initialBinding: InitialBinding(),
+        getPages: AppPages.routes,
+        initialRoute: AppPages.initial,
+      ),
     );
   }
 }

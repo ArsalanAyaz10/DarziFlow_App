@@ -5,18 +5,23 @@ import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:developer' as dev;
 
-
 class UploadService {
   final ApiClient apiClient;
   final Dio _dio = Dio();
 
   UploadService(this.apiClient);
 
-  Future<Map<String, dynamic>> getUploadSignature(String contextType) async {
+  Future<Map<String, dynamic>> getUploadSignature(
+    String contextType, {
+    String? orderId,
+  }) async {
     try {
       final response = await apiClient.post(
         "/upload/signature",
-        data: {"contextType": contextType},
+        data: {
+          "contextType": contextType,
+          if (orderId != null) "orderId": orderId,
+        },
       );
       return response.data;
     } catch (e) {
@@ -109,6 +114,25 @@ class UploadService {
       if (kDebugMode) {
         dev.log("Error updating local storage with avatar: $e");
       }
+    }
+  }
+
+  Future<Map<String, dynamic>> getCheckpointUploadSignature({
+    required String orderId,
+  }) async {
+    try {
+      // Explicitly creating the map to ensure keys are present
+      final Map<String, dynamic> body = {
+        "contextType": "checkpoint",
+        "orderId": orderId,
+      };
+
+      dev.log("Requesting Signature with Body: $body");
+
+      final response = await apiClient.post("/upload/signature", data: body);
+      return response.data;
+    } catch (e) {
+      throw Exception("Failed to get checkpoint signature: $e");
     }
   }
 }

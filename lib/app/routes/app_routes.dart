@@ -12,4 +12,5 @@ abstract class Routes {
   static const allActivities = '/all-activities';
   static const orders = '/orders';
   static const orderDetails = "/order-details";
+  static const submitCheckpoint = "/submit-checkpoint";
 }

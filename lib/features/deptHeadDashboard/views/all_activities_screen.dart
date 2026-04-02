@@ -1,4 +1,5 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
+import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
 import 'package:dariziflow_app/features/deptHeadDashboard/controllers/deptHeadController.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -8,22 +9,24 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
 
   @override
   Widget build(BuildContext context) {
-    // Get arguments passed from dashboard
     final arguments = Get.arguments as Map<String, dynamic>?;
     final initialActivities =
         arguments?['activities'] as List<Map<String, dynamic>>? ?? [];
 
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-
-    // Create a local observable for the selected filter
     final selectedFilter = 0.obs;
 
     return Scaffold(
       backgroundColor: colors.surfaceContainerLowest,
-      appBar: _buildAppBar(context, selectedFilter),
+      appBar: CustomAppBar(
+        title: "All Activities",
+        centerTitle: true,
+        isTransparent: false,
+        showBackButton: true,
+        onBackPress: () => Get.back(),
+      ),
       body: Obx(() {
-        // Use controller's processedActivities if available, otherwise use passed activities
         final activities = controller.processedActivities.isNotEmpty
             ? controller.processedActivities
             : initialActivities.obs;
@@ -36,7 +39,6 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
           return _buildEmptyState(context);
         }
 
-        // Filter logic
         final filteredActivities = _filterActivities(
           activities.toList(),
           selectedFilter.value,
@@ -51,7 +53,7 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
     List<Map<String, dynamic>> activities,
     int filterIndex,
   ) {
-    if (filterIndex == 0) return activities; // All
+    if (filterIndex == 0) return activities;
 
     final typeMappings = {
       1: 'movement',
@@ -67,27 +69,6 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
     }
 
     return activities;
-  }
-
-  PreferredSizeWidget _buildAppBar(BuildContext context, RxInt selectedFilter) {
-    final colors = Theme.of(context).colorScheme;
-    return AppBar(
-      backgroundColor: colors.surface,
-      elevation: 0,
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: colors.onSurface),
-        onPressed: () => Get.back(),
-      ),
-      title: Text(
-        "All Activities",
-        style: TextStyle(
-          color: colors.onSurface,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      centerTitle: true,
-    );
   }
 
   Widget _buildEmptyState(BuildContext context) {
@@ -317,7 +298,6 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Icon with colored background
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -328,7 +308,6 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
                 ),
                 const SizedBox(width: 16),
 
-                // Content
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -390,7 +369,6 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Handle bar
             Center(
               child: Container(
                 width: 40,

@@ -1,8 +1,9 @@
 import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:dariziflow_app/data/models/checkpointModel.dart'
-    show CheckpointModel;
+    show CheckpointModel, SubmissionType;
 import 'package:dariziflow_app/data/models/operationModel.dart';
 import 'package:dariziflow_app/data/models/orderCard_model.dart';
+import 'package:dariziflow_app/data/models/submissionModel.dart';
 import 'package:dariziflow_app/features/orders/repository/order_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
@@ -18,7 +19,6 @@ class OrderController extends GetxController {
   var isLoading = false.obs;
   var errorMessage = ''.obs;
 
-  // UI state only
   var selectedFilter = 'All'.obs;
   final List<String> filterOptions = ['All', 'Active', 'Completed'];
 
@@ -105,7 +105,6 @@ class OrderController extends GetxController {
   }
 
   OrderCardModel _mapOrder(Map<String, dynamic> json) {
-    // 1. Calculate the progress locally using your logic
     final calculatedProgress = _calculateProgress(json).toDouble();
 
     return OrderCardModel(
@@ -116,22 +115,39 @@ class OrderController extends GetxController {
           ? DateTime.tryParse(json['dueDate'].toString())
           : null,
 
-      // 2. Use the calculated progress instead of the backend's 0
       progress: calculatedProgress,
 
       operations: (json['operations'] as List? ?? [])
           .map(
             (op) => OperationModel(
+              id: op['_id'] ?? '',
               name: op['name'] ?? '',
               status: op['status'] ?? 'PENDING',
               checkpoints: (op['checkpoints'] as List? ?? [])
                   .map(
                     (cp) => CheckpointModel(
+                      id: cp['_id'] ?? '',
                       name: cp['name'] ?? '',
                       status: cp['status'] ?? 'PENDING',
+                      submissionText: cp['submissionText'] ?? '',
                       qcRequired: cp['qcRequired'] ?? false,
+                      minUploads: cp['minUploads'] ?? 0,
+                      submissionType: _parseSubmissionType(
+                        cp['submissionType'],
+                      ),
                       submissionFiles: [],
-                      history: [],
+                      history: (cp['history'] as List? ?? [])
+                          .map(
+                            (h) => HistoryItem(
+                              action: h['action'] ?? '',
+                              actedBy: h['actedBy'] ?? '',
+                              actedAt:
+                                  DateTime.tryParse(h['actedAt'] ?? '') ??
+                                  DateTime.now(),
+                              comment: h['comment'],
+                            ),
+                          )
+                          .toList(),
                     ),
                   )
                   .toList(),
@@ -141,10 +157,25 @@ class OrderController extends GetxController {
     );
   }
 
+  SubmissionType _parseSubmissionType(dynamic type) {
+    final typeStr = type?.toString().toLowerCase();
+    switch (typeStr) {
+      case 'image':
+        return SubmissionType.image;
+      case 'video':
+        return SubmissionType.video;
+      case 'document':
+      case 'doc':
+        return SubmissionType.document;
+      case 'text':
+      default:
+        return SubmissionType.text;
+    }
+  }
+
   List<OrderCardModel> get filteredOrders {
     var list = orders;
 
-    // FILTER: SEARCH
     if (searchQuery.value.isNotEmpty) {
       final q = searchQuery.value.toLowerCase();
       list = list
@@ -157,7 +188,6 @@ class OrderController extends GetxController {
           .obs;
     }
 
-    // FILTER: STATUS (derived ONLY from progress)
     switch (selectedFilter.value) {
       case 'Active':
         return list.where((o) => o.progress < 100).toList();

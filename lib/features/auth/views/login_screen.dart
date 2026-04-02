@@ -1,8 +1,8 @@
+import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/widgets/auth_bottom_link.dart';
 import 'package:dariziflow_app/core/widgets/auth_header.dart';
 import 'package:dariziflow_app/core/widgets/custom_elevated_button.dart';
 import 'package:dariziflow_app/core/widgets/custom_text_field.dart';
-import 'package:dariziflow_app/core/widgets/forgot_password.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/login_controller.dart';
@@ -76,7 +76,26 @@ class LoginScreen extends GetView<LoginController> {
                   ),
                 ),
 
-                const ForgotPasswordLink(),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => Get.toNamed('/forgot-password'),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 4,
+                      ),
+                    ),
+                    child: Text(
+                      "Forgot Password?",
+                      style: const TextStyle(
+                        color: AppColors.primaryGreen,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ),
 
                 const SizedBox(height: 20),
 
