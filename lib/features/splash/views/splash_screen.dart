@@ -1,5 +1,6 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/utils/fonts.dart';
+import 'package:dariziflow_app/core/utils/global.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
@@ -29,6 +30,30 @@ class _SplashScreenState extends State<SplashScreen> {
   );
 
   @override
+  void initState() {
+    super.initState();
+    _handleNavigation();
+  }
+
+  void _handleNavigation() {
+    bool isOnboardingDone = box.read('onboarding') ?? false;
+
+    Future.delayed(const Duration(seconds: 3), () {
+      if (isOnboardingDone) {
+        Get.offAllNamed('/login');
+      } else {
+        if (pageController.hasClients) {
+          pageController.animateToPage(
+            1,
+            duration: const Duration(milliseconds: 800),
+            curve: Curves.easeInOutCubic,
+          );
+        }
+      }
+    });
+  }
+
+  @override
   void dispose() {
     pageController.dispose();
     super.dispose();
@@ -50,7 +75,7 @@ class _SplashScreenState extends State<SplashScreen> {
               if (index == 1) {}
             },
             children: [
-              // Page 1: The Splash Content
+              // Page 1:  Splash Content
               SafeArea(
                 child: Column(
                   children: [
@@ -116,14 +141,13 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
               ),
 
-              // PAGE 2: Welcome/Onboarding Content
+              // PAGE 2: Welcome Content
               SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: Column(
                     children: [
                       const Spacer(flex: 2),
-                      // Central Icon Container
                       Container(
                         width: 90,
                         height: 90,
@@ -171,7 +195,10 @@ class _SplashScreenState extends State<SplashScreen> {
                       Column(
                         children: [
                           ElevatedButton(
-                            onPressed: () => Get.toNamed('/signup'),
+                            onPressed: () {
+                              Get.toNamed('/signup');
+                              box.write('onboarding', true);
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primaryGreen,
                               minimumSize: const Size(double.infinity, 56),
@@ -201,9 +228,11 @@ class _SplashScreenState extends State<SplashScreen> {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          // Login Button
                           OutlinedButton(
-                            onPressed: () => Get.toNamed('/login'),
+                            onPressed: () {
+                              Get.toNamed('/login');
+                              box.write('onboarding', true);
+                            },
                             style: OutlinedButton.styleFrom(
                               minimumSize: const Size(double.infinity, 56),
                               side: const BorderSide(
@@ -236,7 +265,6 @@ class _SplashScreenState extends State<SplashScreen> {
                         ],
                       ),
                       const SizedBox(height: 30),
-                      // Footer
                       RichText(
                         textAlign: TextAlign.center,
                         text: TextSpan(

@@ -1,17 +1,15 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
-import 'package:dariziflow_app/core/widgets/bottom_nav_bar.dart';
 import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
 import 'package:dariziflow_app/data/models/orderCard_model.dart';
-import 'package:dariziflow_app/features/orders/controllers/order_controller.dart';
+import 'package:dariziflow_app/features/orders/controllers/all_orders_controller.dart';
 import 'package:dariziflow_app/features/orders/widgets/order_card.dart';
 import 'package:dariziflow_app/features/orders/widgets/order_filter_chips.dart';
 import 'package:dariziflow_app/features/orders/widgets/order_search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:dariziflow_app/app/routes/app_pages.dart';
 
-class OrderScreen extends GetView<OrderController> {
-  const OrderScreen({super.key});
+class AllOrdersScreen extends GetView<AllOrdersController> {
+  const AllOrdersScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,21 +17,10 @@ class OrderScreen extends GetView<OrderController> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: CustomAppBar(
-        title: 'Orders',
+      appBar: const CustomAppBar(
+        title: 'All Orders',
         isTransparent: false,
-        showBackButton: false,
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.notifications_outlined,
-              color: theme.iconTheme.color,
-            ),
-            onPressed: () {
-              // TODO: Notifications Feature
-            },
-          ),
-        ],
+        showBackButton: true,
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
@@ -47,11 +34,7 @@ class OrderScreen extends GetView<OrderController> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: theme.colorScheme.error,
-                ),
+                Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
                 const SizedBox(height: 16),
                 Text(
                   controller.errorMessage.value,
@@ -62,11 +45,8 @@ class OrderScreen extends GetView<OrderController> {
                 ElevatedButton(
                   onPressed: controller.fetchOrders,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.error,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
-                    ),
+                    backgroundColor: AppColors.primaryGreen,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   ),
                   child: const Text('Retry'),
                 ),
@@ -83,15 +63,13 @@ class OrderScreen extends GetView<OrderController> {
                 Icon(
                   Icons.inbox_outlined,
                   size: 80,
-                  color: theme.colorScheme.onSurfaceVariant.withValues(
-                    alpha: 0.5,
-                  ),
+                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                 ),
                 const SizedBox(height: 16),
                 Text('No Orders Found', style: theme.textTheme.titleLarge),
                 const SizedBox(height: 8),
                 Text(
-                  'There are no active orders in your department',
+                  'There are no orders to display',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -113,8 +91,7 @@ class OrderScreen extends GetView<OrderController> {
             OrderFilterChips(
               filterOptions: controller.filterOptions,
               selectedFilter: controller.selectedFilter.value,
-              onFilterSelected: (filter) =>
-                  controller.selectedFilter.value = filter,
+              onFilterSelected: (filter) => controller.selectedFilter.value = filter,
             ),
             Expanded(
               child: RefreshIndicator(
@@ -135,7 +112,6 @@ class OrderScreen extends GetView<OrderController> {
                 ),
               ),
             ),
-            const BottomNavBar(currentIndex: 1),
           ],
         );
       }),
@@ -143,6 +119,53 @@ class OrderScreen extends GetView<OrderController> {
   }
 
   void _showOrderDetails(OrderCardModel order) {
-    Get.toNamed(Routes.orderDetails, arguments: order);
+    if (order.operations.isEmpty) {
+      _showNotStartedDialog(Get.context!);
+      return;
+    }
+    Get.toNamed("/order-details", arguments: {"orderId": order.orderId});
+  }
+
+  void _showNotStartedDialog(BuildContext context) {
+    final theme = Theme.of(context);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: theme.colorScheme.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        icon: Icon(
+          Icons.info_outline_rounded,
+          size: 48,
+          color: Colors.orange.shade400,
+        ),
+        title: Text(
+          'Workflow Not Started',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          'This order has not started its workflow in this department yet.',
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.primaryGreen,
+            ),
+            child: const Text(
+              'OK',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

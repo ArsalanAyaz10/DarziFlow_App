@@ -42,16 +42,133 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
           child: Column(
             children: [
               const SizedBox(height: 20),
-              _buildProfileHeader(context),
+              const ProfileHeader(),
               const SizedBox(height: 30),
-              _buildSectionTitle(context, "ACCOUNT DETAILS"),
+              
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "ACCOUNT DETAILS",
+                    style: TextStyle(
+                      color: colors.onSurfaceVariant,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ),
+              ),
               const SizedBox(height: 10),
-              _buildAccountSection(context),
+
+              Obx(
+                () => Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: colors.surface,
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: ProfileTile(
+                          icon: Icons.email_outlined,
+                          title: "Email Address",
+                          subtitle: controller.userEmail.value,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: colors.surface,
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: ProfileTile(
+                          icon: Icons.lock_outline,
+                          title: "Password",
+                          subtitle: controller.getPasswordUpdateText(),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: colors.surface,
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: const ProfileTile(
+                          icon: Icons.notifications_none,
+                          title: "Notifications",
+                          subtitle: "Manage alerts and news",
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
               const SizedBox(height: 20),
-              _buildSectionTitle(context, "SYSTEM"),
-              _buildSystemSection(context),
+              
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "SYSTEM",
+                    style: TextStyle(
+                      color: colors.onSurfaceVariant,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ),
+              ),
+// LANGUAGE SELECTION
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: colors.surface,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: const ProfileTile(
+                    icon: Icons.language,
+                    title: "Language",
+                    subtitle: "English (US)",
+                  ),
+                ),
+              ),
+              
               const SizedBox(height: 30),
-              _buildLogoutButton(context),
+// LOG OUT BUTTON
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: InkWell(
+                  onTap: () => controller.logout(),
+                  child: Container(
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: colors.error.withValues(alpha: 0.5)),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.logout, color: colors.error),
+                        const SizedBox(width: 10),
+                        Text(
+                          "Log Out",
+                          style: TextStyle(
+                            color: colors.error,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
               const SizedBox(height: 20),
             ],
           ),
@@ -59,8 +176,13 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
       ),
     );
   }
+}
 
-  Widget _buildProfileHeader(BuildContext context) {
+class ProfileHeader extends GetView<ViewprofileController> {
+  const ProfileHeader({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
@@ -77,7 +199,7 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
                     ? NetworkImage(controller.userAvatar.value)
                     : null,
                 child: controller.userAvatar.value.isEmpty
-                    ? Icon(
+                    ? const Icon(
                         Icons.person,
                         size: 60,
                         color: AppColors.primaryGreen,
@@ -102,7 +224,7 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
             children: [
               Text(
                 controller.userRole.value,
-                style: TextStyle(
+                style: const TextStyle(
                   color: AppColors.primaryGreen,
                   fontWeight: FontWeight.w500,
                   fontSize: 10,
@@ -131,112 +253,22 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
       ),
     );
   }
+}
 
-  Widget _buildSectionTitle(BuildContext context, String title) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
+class ProfileTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          title,
-          style: TextStyle(
-            color: colors.onSurfaceVariant,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
-          ),
-        ),
-      ),
-    );
-  }
+  const ProfileTile({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
 
-  Widget _buildAccountSection(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
-    return Obx(
-      () => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: _profileTile(
-                context,
-                Icons.email_outlined,
-                "Email Address",
-                controller.userEmail.value,
-              ),
-            ),
-
-            const SizedBox(height: 10), // Space between containers
-            // Password Container
-            Obx(
-              () => Container(
-                decoration: BoxDecoration(
-                  color: colors.surface,
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: _profileTile(
-                  context,
-                  Icons.lock_outline,
-                  "Password",
-                  controller.getPasswordUpdateText(),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Container(
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: _profileTile(
-                context,
-                Icons.notifications_none,
-                "Notifications",
-                "Manage alerts and news",
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSystemSection(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: _profileTile(
-          context,
-          Icons.language,
-          "Language",
-          "English (US)",
-        ),
-      ),
-    );
-  }
-
-  Widget _profileTile(
-    BuildContext context,
-    IconData icon,
-    String title,
-    String subtitle,
-  ) {
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
@@ -263,39 +295,6 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
       ),
       trailing: Icon(Icons.chevron_right, color: colors.onSurfaceVariant),
       onTap: () {},
-    );
-  }
-
-  Widget _buildLogoutButton(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: InkWell(
-        onTap: () => controller.logout(),
-        child: Container(
-          padding: const EdgeInsets.all(15),
-          decoration: BoxDecoration(
-            border: Border.all(color: colors.error.withValues(alpha: 0.5)),
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.logout, color: colors.error),
-              const SizedBox(width: 10),
-              Text(
-                "Log Out",
-                style: TextStyle(
-                  color: colors.error,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

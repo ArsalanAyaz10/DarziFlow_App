@@ -9,6 +9,23 @@ class OrderRepository {
 
   OrderRepository(this.service);
 
+  Future<dynamic> fetchOrderById(String orderID) async {
+    try {
+      final response = await service.getOrderbyID(orderID);
+      if (response != null && response.statusCode == 200) {
+        return response.data;
+      } else {
+        if (kDebugMode) {
+          dev.log("Failed to fetch order. Status: ${response?.statusCode}");
+        }
+        return null;
+      }
+    } catch (e) {
+      if (kDebugMode) dev.log("Error fetching order by ID ($orderID): $e");
+      return null;
+    }
+  }
+
   Future<List<dynamic>> fetchActiveWorkflows(String id) async {
     try {
       final data = await service.getDepartmentOrders(id);
@@ -16,6 +33,17 @@ class OrderRepository {
       return data["orders"] ?? [];
     } catch (e) {
       if (kDebugMode) dev.log("Error fetching active workflows: $e");
+      return [];
+    }
+  }
+
+  Future<List<dynamic>> fetchAllWorkflows(String id) async {
+    try {
+      final data = await service.getAllDepartmentOrders(id);
+
+      return data["orders"] ?? [];
+    } catch (e) {
+      if (kDebugMode) dev.log("Error fetching all workflows: $e");
       return [];
     }
   }

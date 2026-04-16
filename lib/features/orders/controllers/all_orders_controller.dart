@@ -6,13 +6,12 @@ import 'package:dariziflow_app/data/models/orderCard_model.dart';
 import 'package:dariziflow_app/data/models/submissionModel.dart';
 import 'package:dariziflow_app/features/orders/repository/order_repository.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_rx/src/rx_types/rx_types.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import 'package:get/get.dart';
 
-class OrderController extends GetxController {
+class AllOrdersController extends GetxController {
   final OrderRepository repository;
 
-  OrderController(this.repository);
+  AllOrdersController(this.repository);
 
   var orders = <OrderCardModel>[].obs;
 
@@ -92,7 +91,7 @@ class OrderController extends GetxController {
         return;
       }
 
-      final response = await repository.fetchActiveWorkflows(deptId);
+      final response = await repository.fetchAllWorkflows(deptId);
 
       final List data = response;
 
@@ -108,25 +107,21 @@ class OrderController extends GetxController {
     final calculatedProgress = _calculateProgress(json).toDouble();
 
     return OrderCardModel(
-      overallStatus: json['overallStatus'] ?? 'PENDING',
-      createdAt: json['createdAt'] != null
-          ? DateTime.tryParse(json['createdAt'].toString())
-          : null,
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.tryParse(json['updatedAt'].toString())
-          : null,
-      clientName: json['clientName'] ?? 'Unknown Client',
-      clientEmail: json['clientEmail'] ?? 'No email provided',
-      clientId: json['clientId']?.toString(),
       orderId: json['_id'] ?? '',
       orderName: json['orderName'] ?? 'Unknown Order',
       uniqueId: json['orderUniqueId'] ?? '',
       dueDate: json['dueDate'] != null
           ? DateTime.tryParse(json['dueDate'].toString())
           : null,
-
       progress: calculatedProgress,
-
+      clientName: json['clientName'] ?? 'Unknown Client',
+      clientEmail: json['clientEmail'] ?? '',
+      clientId: json['clientId'],
+      amount: json['amount'] ?? 0,
+      currency: json['currency'] ?? 'Rs',
+      createdAt: json['createdAt'] ?? '',
+      updatedAt: json['createdAt'] ?? '',
+      overallStatus: json['overallStatus'] ?? 'PENDING',
       operations: (json['operations'] as List? ?? [])
           .map(
             (op) => OperationModel(

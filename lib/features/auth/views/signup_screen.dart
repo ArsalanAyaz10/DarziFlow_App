@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dariziflow_app/core/widgets/custom_text_field.dart';
 import 'package:dariziflow_app/core/widgets/custom_dropdown.dart';
-import 'package:dariziflow_app/core/widgets/auth_header.dart';
-import 'package:dariziflow_app/core/widgets/auth_bottom_link.dart';
+import 'package:dariziflow_app/features/auth/widgets/auth_header.dart';
+import 'package:dariziflow_app/features/forgotpassword/widgets/auth_bottom_link.dart';
 import 'package:dariziflow_app/core/widgets/custom_elevated_button.dart';
 import '../controllers/signup_controller.dart';
 

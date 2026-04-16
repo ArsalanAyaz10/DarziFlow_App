@@ -8,7 +8,10 @@ import 'package:dariziflow_app/features/deptHeadDashboard/views/dashboard_screen
 import 'package:dariziflow_app/features/forgotpassword/bindings/password_binding.dart';
 import 'package:dariziflow_app/features/forgotpassword/views/forgotPassword_screen.dart';
 import 'package:dariziflow_app/features/forgotpassword/views/resetPassword_screen.dart';
-import 'package:dariziflow_app/features/orders/views/OrderDetails_screen.dart';
+import 'package:dariziflow_app/features/orders/bindings/all_orders_binding.dart';
+import 'package:dariziflow_app/features/orders/views/OrderWorkflow_screen.dart';
+import 'package:dariziflow_app/features/orders/views/all_orders_screen.dart';
+import 'package:dariziflow_app/features/orders/views/order_detail_screen.dart';
 import 'package:dariziflow_app/features/orders/views/order_screen.dart';
 import 'package:dariziflow_app/features/orders/views/submitCheckpoint_screen.dart';
 import 'package:dariziflow_app/features/profile/bindings/editprofile_binding.dart';
@@ -66,16 +69,26 @@ class AppPages {
 
     GetPage(name: '/all-activities', page: () => const AllActivitiesScreen()),
     GetPage(
+      name: Routes.allOrders,
+      page: () => const AllOrdersScreen(),
+      binding: AllOrdersBinding(),
+    ),
+    GetPage(
       name: Routes.orders,
       page: () => const OrderScreen(),
       binding: OrderBinding(),
     ),
-
     GetPage(
       name: Routes.orderDetails,
-      page: () => OrderDetailsScreen(),
+      page: () => OrderDetailScreen(),
       binding: OrderBinding(),
     ),
+    GetPage(
+      name: Routes.workflow,
+      page: () => OrderWorkflowScreen(),
+      binding: OrderBinding(),
+    ),
+
     GetPage(
       binding: OrderBinding(),
       name: Routes.submitCheckpoint,

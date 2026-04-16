@@ -6,8 +6,16 @@ class OrderCardModel {
   final String uniqueId;
 
   final DateTime? dueDate;
-
   final double progress;
+
+  final String clientName;
+  final String clientEmail;
+  final String? clientId;
+  final int amount;
+  final String currency;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final String overallStatus;
 
   final List<OperationModel> operations;
 
@@ -18,6 +26,14 @@ class OrderCardModel {
     required this.progress,
     required this.operations,
     this.dueDate,
+    required this.clientName,
+    required this.clientEmail,
+    required this.overallStatus,
+    this.clientId,
+    this.amount = 0,
+    this.currency = 'Rs',
+    required this.createdAt,
+    required this.updatedAt,
   });
 
   String get displayOrderId =>

@@ -1,6 +1,6 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/utils/fonts.dart';
-import 'package:dariziflow_app/core/widgets/auth_bottom_link.dart';
+import 'package:dariziflow_app/features/forgotpassword/widgets/auth_bottom_link.dart';
 import 'package:dariziflow_app/core/widgets/custom_elevated_button.dart';
 import 'package:dariziflow_app/core/widgets/custom_text_field.dart';
 import 'package:dariziflow_app/features/forgotpassword/controllers/password_controller.dart';
