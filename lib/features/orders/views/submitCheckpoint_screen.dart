@@ -128,9 +128,9 @@ class SubmitcheckpointScreen extends GetView<CheckpointController> {
                     itemBuilder: (context, index) {
                       if (index == controller.pickedImages.length &&
                           index < 10) {
-                        return _buildAddButton();
+                        return AddButton();
                       }
-                      return _buildImagePreview(index);
+                      return ImagePreview(index);
                     },
                   ),
                 ),
@@ -200,7 +200,7 @@ class SubmitcheckpointScreen extends GetView<CheckpointController> {
     );
   }
 
-  Widget _buildImagePreview(int index) {
+  Widget ImagePreview(int index) {
     return Container(
       margin: const EdgeInsets.only(right: 12),
       width: 100,
@@ -232,7 +232,7 @@ class SubmitcheckpointScreen extends GetView<CheckpointController> {
     );
   }
 
-  Widget _buildAddButton() {
+  Widget AddButton() {
     return DottedBorder(
       child: GestureDetector(
         onTap: () => controller.pickImage(),

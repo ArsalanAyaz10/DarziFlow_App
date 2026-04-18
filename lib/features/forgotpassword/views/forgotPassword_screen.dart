@@ -27,7 +27,19 @@ class ForgotpasswordScreen extends GetView<PasswordController> {
                 const SizedBox(height: 60),
                 _buildHeader(context),
                 const SizedBox(height: 40),
-                _buildDescription(context),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    "Enter the email address associated with your DarziFlow account and we'll send you a link to reset your password.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: AppFonts.outfit,
+                      fontSize: 14,
+                      color: colors.onSurfaceVariant,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 30),
                 CustomTextField(
                   controller: controller.emailController,
@@ -103,24 +115,6 @@ class ForgotpasswordScreen extends GetView<PasswordController> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildDescription(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Text(
-        "Enter the email address associated with your DarziFlow account and we'll send you a link to reset your password.",
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontFamily: AppFonts.outfit,
-          fontSize: 14,
-          color: colors.onSurfaceVariant,
-          height: 1.5,
-        ),
-      ),
     );
   }
 

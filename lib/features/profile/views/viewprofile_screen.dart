@@ -1,6 +1,7 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/utils/fonts.dart';
 import 'package:dariziflow_app/features/profile/controllers/viewProfile_controller.dart';
+import 'package:dariziflow_app/features/profile/widgets/profile_shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -37,7 +38,12 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
+      body: Obx(() {
+        if (controller.userName.value.isEmpty &&
+            controller.userEmail.value.isEmpty) {
+          return const ProfileShimmer();
+        }
+        return SingleChildScrollView(
         child: SafeArea(
           child: Column(
             children: [
@@ -173,7 +179,8 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
             ],
           ),
         ),
-      ),
+      );
+      }),
     );
   }
 }

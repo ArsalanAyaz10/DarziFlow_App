@@ -3,14 +3,10 @@ import 'package:dariziflow_app/data/models/orderCard_model.dart';
 import 'package:flutter/material.dart';
 
 class OrderCard extends StatelessWidget {
-  final OrderCardModel order;
+  final OrderModel order;
   final VoidCallback onTap;
 
-  const OrderCard({
-    super.key,
-    required this.order,
-    required this.onTap,
-  });
+  const OrderCard({super.key, required this.order, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +135,7 @@ class OrderCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge(ThemeData theme, OrderCardModel order) {
+  Widget _buildStatusBadge(ThemeData theme, OrderModel order) {
     final bool isCompleted = order.progress >= 100;
     final bool isNotStarted = order.operations.isEmpty;
 

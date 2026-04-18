@@ -25,10 +25,8 @@ class DepartmentDetailsController extends GetxController {
   Future<void> fetchDetails() async {
     isLoading.value = true;
     try {
-      // First attempt to fetch using the existing repo method
       var data = await repository.fetchDepartmentById(departmentId);
       
-      // Some backends return the direct object instead of wrapping it in {"department": {...}}
       if (data.isEmpty) {
         final rawResponse = await repository.service.getDepartmentById(departmentId);
         if (rawResponse is Map<String, dynamic>) {
@@ -45,10 +43,10 @@ class DepartmentDetailsController extends GetxController {
       status.value = data['status'] ?? 'Unknown';
 
       if (data['departmentHead'] != null) {
-        managerName.value = data['departmentHead']['name'] ?? 'Unknown Manager';
+        managerName.value = data['departmentHead']['name'] ?? 'Department Head';
         managerEmail.value = data['departmentHead']['email'] ?? '';
       } else {
-        managerName.value = 'Unknown Manager';
+        managerName.value = 'Department Head';
         managerEmail.value = 'No email available';
       }
 

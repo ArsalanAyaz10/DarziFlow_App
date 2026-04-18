@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dariziflow_app/core/network/api_client.dart';
 import 'package:dariziflow_app/core/storage/storage.dart';
+import 'package:dariziflow_app/data/models/auth_model.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:developer' as dev;
 
@@ -105,10 +106,11 @@ class UploadService {
     String publicId,
   ) async {
     try {
-      final user = await AppStorage.getUser();
+      final user = await AppStorage.getAuthUser();
       if (user != null) {
-        user['avatar'] = {'url': url, 'publicId': publicId};
-        await AppStorage.saveUser(user);
+        await AppStorage.saveAuthUser(user.copyWith(
+          avatar: AvatarModel(url: url, publicId: publicId),
+        ));
       }
     } catch (e) {
       if (kDebugMode) {

@@ -47,17 +47,19 @@ class ViewprofileController extends GetxController {
 
   Future<void> loadUserInfo() async {
     try {
-      final user = await AppStorage.getUser();
-      userName.value = user?['name'] ?? 'User';
-      userRole.value = formatUserRole(user?['role']);
-      userEmail.value = user?['email'] ?? 'No email found';
-      passwordUpdatedAt.value = user?['passwordUpdatedAt'] ?? 'Not set';
-
-      if (user != null && user['avatar'] != null) {
-        userAvatar.value = user['avatar']['url'] ?? '';
-      } else {
+      final user = await AppStorage.getAuthUser();
+      if (user == null) {
+        userName.value = 'User';
+        userRole.value = 'Unknown Role';
+        userEmail.value = 'No email found';
         userAvatar.value = '';
+        return;
       }
+      userName.value = user.name.isNotEmpty ? user.name : 'User';
+      userRole.value = user.formattedRole;
+      userEmail.value = user.email.isNotEmpty ? user.email : 'No email found';
+      passwordUpdatedAt.value = user.passwordUpdatedAt ?? '';
+      userAvatar.value = user.avatarUrl;
     } catch (e) {
       if (kDebugMode) {
         print("Error loading user info: $e");

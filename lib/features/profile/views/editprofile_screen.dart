@@ -6,6 +6,7 @@ import 'package:dariziflow_app/features/profile/widgets/profile_photo_picker.dar
 import 'package:dariziflow_app/features/profile/widgets/profile_section_header.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
 
 class EditProfileScreen extends GetView<EditProfileController> {
   const EditProfileScreen({super.key});
@@ -208,8 +209,40 @@ class EditProfileScreen extends GetView<EditProfileController> {
             if (controller.isUploading.value || controller.isLoading.value)
               Container(
                 color: colors.onSurface.withValues(alpha: 0.3),
-                child: const Center(
-                  child: CircularProgressIndicator(color: AppColors.primaryGreen),
+                child: Center(
+                  child: Shimmer(
+                    duration: const Duration(seconds: 2),
+                    color: Colors.white,
+                    colorOpacity: 0.3,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 20,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.surface,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const CircularProgressIndicator(
+                            color: AppColors.primaryGreen,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            controller.isUploading.value
+                                ? "Uploading..."
+                                : "Saving...",
+                            style: TextStyle(
+                              color: colors.onSurface,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
           ],

@@ -92,7 +92,7 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
 
             const SizedBox(height: 16),
 
-            // Password Requirement Hint
+            // PasswordHint
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -113,7 +113,7 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
 
             const SizedBox(height: 40),
 
-            // Reset Password Button
+            // Reset Button
             Obx(
               () => CustomElevatedButton(
                 onPressed: () => controller.resetPassword(),

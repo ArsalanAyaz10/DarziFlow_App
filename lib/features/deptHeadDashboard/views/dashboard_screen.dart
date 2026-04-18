@@ -2,10 +2,7 @@ import 'package:dariziflow_app/core/widgets/bottom_nav_bar.dart';
 import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
 import 'package:dariziflow_app/features/deptHeadDashboard/controllers/deptHeadController.dart';
 import 'package:dariziflow_app/features/deptHeadDashboard/controllers/department_details_controller.dart';
-import 'package:dariziflow_app/features/deptHeadDashboard/widgets/department_header.dart';
-import 'package:dariziflow_app/features/deptHeadDashboard/views/department_details_screen.dart';
-import 'package:dariziflow_app/features/deptHeadDashboard/widgets/performance_summary_panel.dart';
-import 'package:dariziflow_app/features/deptHeadDashboard/widgets/recent_activity_panel.dart';
+import 'package:dariziflow_app/features/deptHeadDashboard/widgets/dashboard_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -50,7 +47,7 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
       body: Obx(() {
         if (controller.isLoading.value &&
             controller.processedActivities.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
+          return const DashboardShimmer();
         }
         return Column(
           children: [

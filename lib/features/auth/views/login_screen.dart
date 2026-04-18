@@ -103,7 +103,11 @@ class LoginScreen extends GetView<LoginController> {
                   () => CustomElevatedButton(
                     onPressed: controller.isLoading.value
                         ? null
-                        : _handleLoginSubmit,
+                        : () {
+                            if (controller.formKey.currentState!.validate()) {
+                              controller.handleLogin();
+                            }
+                          },
                     text: "Login",
                     icon: Icons.arrow_forward,
                     isLoading: controller.isLoading.value,
@@ -125,11 +129,5 @@ class LoginScreen extends GetView<LoginController> {
         ),
       ),
     );
-  }
-
-  void _handleLoginSubmit() {
-    if (controller.formKey.currentState!.validate()) {
-      controller.handleLogin();
-    }
   }
 }

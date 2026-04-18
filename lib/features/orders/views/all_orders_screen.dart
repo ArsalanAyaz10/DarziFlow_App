@@ -4,6 +4,7 @@ import 'package:dariziflow_app/data/models/orderCard_model.dart';
 import 'package:dariziflow_app/features/orders/controllers/all_orders_controller.dart';
 import 'package:dariziflow_app/features/orders/widgets/order_card.dart';
 import 'package:dariziflow_app/features/orders/widgets/order_filter_chips.dart';
+import 'package:dariziflow_app/features/orders/widgets/order_list_shimmer.dart';
 import 'package:dariziflow_app/features/orders/widgets/order_search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -24,9 +25,7 @@ class AllOrdersScreen extends GetView<AllOrdersController> {
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(
-            child: CircularProgressIndicator(color: AppColors.primaryGreen),
-          );
+          return const OrderListShimmer();
         }
 
         if (controller.errorMessage.value.isNotEmpty) {
@@ -34,7 +33,11 @@ class AllOrdersScreen extends GetView<AllOrdersController> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
+                Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: theme.colorScheme.error,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   controller.errorMessage.value,
@@ -46,7 +49,10 @@ class AllOrdersScreen extends GetView<AllOrdersController> {
                   onPressed: controller.fetchOrders,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryGreen,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
                   ),
                   child: const Text('Retry'),
                 ),
@@ -63,7 +69,9 @@ class AllOrdersScreen extends GetView<AllOrdersController> {
                 Icon(
                   Icons.inbox_outlined,
                   size: 80,
-                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                  color: theme.colorScheme.onSurfaceVariant.withValues(
+                    alpha: 0.5,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Text('No Orders Found', style: theme.textTheme.titleLarge),
@@ -84,14 +92,15 @@ class AllOrdersScreen extends GetView<AllOrdersController> {
           children: [
             OrderSearchBar(
               searchController: controller.searchController,
-              onChanged: (value) => controller.updateSearchQuery(value),
+              onChanged: (value) => controller.updateSearchBar(value),
               searchQuery: controller.searchQuery.value,
               onClear: () => controller.clearSearch(),
             ),
             OrderFilterChips(
               filterOptions: controller.filterOptions,
               selectedFilter: controller.selectedFilter.value,
-              onFilterSelected: (filter) => controller.selectedFilter.value = filter,
+              onFilterSelected: (filter) =>
+                  controller.selectedFilter.value = filter,
             ),
             Expanded(
               child: RefreshIndicator(
@@ -118,7 +127,7 @@ class AllOrdersScreen extends GetView<AllOrdersController> {
     );
   }
 
-  void _showOrderDetails(OrderCardModel order) {
+  void _showOrderDetails(OrderModel order) {
     if (order.operations.isEmpty) {
       _showNotStartedDialog(Get.context!);
       return;

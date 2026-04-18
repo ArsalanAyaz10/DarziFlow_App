@@ -70,7 +70,22 @@ class SignupScreen extends GetView<SignupController> {
                 ),
                 const SizedBox(height: 15),
 
-                _buildRoleDropdown(),
+                Obx(
+                  () => CustomDropdown<UserRole>(
+                    value: controller.selectedRole.value,
+                    hint: "Select your role",
+                    prefixIcon: Icons.badge_outlined,
+                    label: "ROLE",
+                    showLabel: true,
+                    items: [UserRole.qcMember, UserRole.departmenthead]
+                        .map((role) => DropdownMenuItem<UserRole>(
+                              value: role,
+                              child: Text(getRoleString(role)),
+                            ))
+                        .toList(),
+                    onChanged: (value) => controller.selectedRole.value = value,
+                  ),
+                ),
                 const SizedBox(height: 15),
 
                 Obx(
@@ -137,7 +152,21 @@ class SignupScreen extends GetView<SignupController> {
                   () => CustomElevatedButton(
                     onPressed: controller.isLoading.value
                         ? null
-                        : _handleFormSubmit,
+                        : () {
+                            if (_formKey.currentState!.validate()) {
+                              if (controller.selectedRole.value == null) {
+                                Get.snackbar(
+                                  "Role Required",
+                                  "Please select a user role to continue",
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  backgroundColor: Colors.redAccent,
+                                  colorText: Colors.white,
+                                );
+                                return;
+                              }
+                              controller.handleSignUp();
+                            }
+                          },
                     text: "Create Account",
                     icon: Icons.arrow_forward,
                     isLoading: controller.isLoading.value,
@@ -155,43 +184,6 @@ class SignupScreen extends GetView<SignupController> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  void _handleFormSubmit() {
-    if (_formKey.currentState!.validate()) {
-      if (controller.selectedRole.value == null) {
-        Get.snackbar(
-          "Role Required",
-          "Please select a user role to continue",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.redAccent,
-          colorText: Colors.white,
-        );
-        return;
-      }
-      controller.handleSignUp();
-    }
-  }
-
-  Widget _buildRoleDropdown() {
-    final roleOptions = [UserRole.qcMember, UserRole.departmenthead];
-
-    return Obx(
-      () => CustomDropdown<UserRole>(
-        value: controller.selectedRole.value,
-        hint: "Select your role",
-        prefixIcon: Icons.badge_outlined,
-        label: "ROLE",
-        showLabel: true,
-        items: roleOptions.map((role) {
-          return DropdownMenuItem<UserRole>(
-            value: role,
-            child: Text(getRoleString(role)),
-          );
-        }).toList(),
-        onChanged: (value) => controller.selectedRole.value = value,
       ),
     );
   }

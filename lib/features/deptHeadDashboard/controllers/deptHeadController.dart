@@ -74,26 +74,13 @@ class DeptHeadController extends GetxController {
 
   Future<void> _loadUserInfo() async {
     try {
-      final user = await AppStorage.getUser();
-      userName.value = user?['name'] ?? 'User';
-      userRole.value = _formatUserRole(user?['role'] ?? '');
-      _loadUserAvatar(user);
+      final user = await AppStorage.getAuthUser();
+      if (user == null) return;
+      userName.value = user.name.isNotEmpty ? user.name : 'User';
+      userRole.value = user.formattedRole;
+      userAvatar.value = user.avatarUrl;
     } catch (e) {
       if (kDebugMode) dev.log("Error loading user info: $e");
-    }
-  }
-
-  void _loadUserAvatar(Map<String, dynamic>? user) {
-    if (user != null && user['avatar'] != null) {
-      if (user['avatar'] is Map) {
-        userAvatar.value = user['avatar']['url'] ?? '';
-      } else if (user['avatar'] is String) {
-        userAvatar.value = user['avatar'];
-      } else {
-        userAvatar.value = '';
-      }
-    } else {
-      userAvatar.value = '';
     }
   }
 
@@ -104,9 +91,9 @@ class DeptHeadController extends GetxController {
     try {
       await _loadUserInfo();
 
-      final user = await AppStorage.getUser();
-      if (user != null && user['department'] != null) {
-        departmentId.value = user['department'];
+      final user = await AppStorage.getAuthUser();
+      if (user != null && user.department != null) {
+        departmentId.value = user.department!;
       }
 
       await _loadAllDepartmentStats();
@@ -240,10 +227,8 @@ class DeptHeadController extends GetxController {
 
   Future<String?> _getUserDepartmentId() async {
     try {
-      final user = await AppStorage.getUser();
-      if (user != null && user['department'] != null) {
-        return user['department'].toString();
-      }
+      final user = await AppStorage.getAuthUser();
+      return user?.department;
     } catch (e) {
       if (kDebugMode) dev.log("Error getting user department: $e");
     }
@@ -548,18 +533,5 @@ class DeptHeadController extends GetxController {
     if (diff.inHours < 24) return '${diff.inHours}h ago';
     if (diff.inDays < 7) return '${diff.inDays}d ago';
     return '${date.day}/${date.month}/${date.year}';
-  }
-
-  String _formatUserRole(String role) {
-    switch (role) {
-      case 'CLIENT':
-        return 'Client';
-      case 'DEPARTMENT_HEAD':
-        return 'Department Head';
-      case 'QC_MEMBER':
-        return 'QC Member';
-      default:
-        return 'Unknown Role';
-    }
   }
 }

@@ -1,3 +1,4 @@
+import 'package:dariziflow_app/data/models/auth_model.dart';
 import 'package:dariziflow_app/features/auth/service/auth_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cookie_jar/cookie_jar.dart';
@@ -36,7 +37,7 @@ class AuthRepository {
     );
   }
 
-  Future<String> login(String email, String password) async {
+  Future<AuthModel> login(String email, String password) async {
     final response = await authService.login(email: email, password: password);
     final data = response.data;
 
@@ -45,13 +46,12 @@ class AuthRepository {
     }
 
     final accessToken = data["accessToken"];
-    final user = data["user"];
-    final role = user["role"];
+    final authUser = AuthModel.fromJson(Map<String, dynamic>.from(data["user"]));
 
     await AppStorage.saveAccessToken(accessToken);
-    await AppStorage.saveUser(user);
+    await AppStorage.saveAuthUser(authUser);
 
-    return role;
+    return authUser;
   }
 
   Future<void> logout(PersistCookieJar cookieJar) async {
@@ -71,9 +71,17 @@ class AuthRepository {
       final profileData = response.data;
 
       if (profileData != null && profileData['user'] != null) {
-        final existingUser = await AppStorage.getUser();
-        final updatedUser = {...?existingUser, ...profileData['user']};
-        await AppStorage.saveUser(updatedUser);
+        final freshUser = AuthModel.fromJson(
+          Map<String, dynamic>.from(profileData['user']),
+        );
+        final existing = await AppStorage.getAuthUser();
+        if (existing != null) {
+          await AppStorage.saveAuthUser(freshUser.copyWith(
+            department: freshUser.department ?? existing.department,
+          ));
+        } else {
+          await AppStorage.saveAuthUser(freshUser);
+        }
       }
     } catch (e) {
       if (kDebugMode) {

@@ -1,8 +1,7 @@
-import 'package:dariziflow_app/core/storage/storage.dart';
+
 import 'package:dariziflow_app/data/models/checkpointModel.dart';
 import 'package:dariziflow_app/data/models/operationModel.dart';
 import 'package:dariziflow_app/data/services/upload_service.dart';
-import 'package:dariziflow_app/features/deptHeadDashboard/repositories/department_repository.dart';
 import 'package:dariziflow_app/features/orders/repository/order_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -20,12 +19,10 @@ class CheckpointController extends GetxController {
   TextEditingController remarksController = TextEditingController();
 
   final OrderRepository orderRepository;
-  final DepartmentRepository departmentRepository;
   final UploadService uploadService;
 
   CheckpointController(
     this.orderRepository,
-    this.departmentRepository,
     this.uploadService,
   );
 
@@ -37,7 +34,6 @@ class CheckpointController extends GetxController {
   var checkpointDescription = ''.obs;
   var minUploads = 0.obs;
   var SubmissionTypes = [];
-  var dept;
 
   // Image variables
   var pickedImages = <File>[].obs;
@@ -55,55 +51,10 @@ class CheckpointController extends GetxController {
     if (orderId.isEmpty) {
       dev.log("LOG: orderId passed to SubmitCheckpoint is empty or null");
     }
-    _loadAllDepartmentStats();
-  }
-
-  Future<void> _loadAllDepartmentStats() async {
-    try {
-      final data = await departmentRepository.fetchOverview();
-      dept = data['department'] ?? {};
-      _extractCheckpointData();
-    } catch (e) {
-      dev.log("Error fetching department stats: $e");
-    }
-  }
-
-  void _extractCheckpointData() {
-    if (dept == null || dept['operations'] == null) {
-      dev.log("DEBUG: Dept or Operations list is null");
-      return;
-    }
-
-    final List operations = dept['operations'];
-    final matchingOp = operations.firstWhere((o) {
-      final String jsonOpId = o['_id'] is Map
-          ? o['_id']['\$oid']
-          : o['_id'].toString();
-      return jsonOpId == op.id;
-    }, orElse: () => null);
-
-    if (matchingOp != null) {
-      final List checkpoints = matchingOp['checkpoints'] ?? [];
-
-      final matchingCk = checkpoints.firstWhere((c) {
-        final String jsonCkId = c['_id'] is Map
-            ? c['_id']['\$oid']
-            : c['_id'].toString();
-        return jsonCkId == ck.id;
-      }, orElse: () => null);
-
-      if (matchingCk != null) {
-        minUploads.value =
-            int.tryParse(matchingCk['minRequiredUploads']?.toString() ?? '0') ??
-            0;
-
-        SubmissionTypes = matchingCk['allowedSubmissionTypes'] ?? [];
-        checkpointDescription.value =
-            matchingCk['description'] ?? "No Description Provided";
-      }
-    } else {
-      dev.log("Operation ID ${op.id} not found in department JSON.");
-    }
+    
+    minUploads.value = ck.minUploads;
+    checkpointDescription.value = ck.submissionText.isNotEmpty ? ck.submissionText : "No Description Provided";
+    SubmissionTypes = [ck.submissionType];
   }
 
   Future<void> pickImage() async {

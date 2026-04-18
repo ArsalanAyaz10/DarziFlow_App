@@ -41,7 +41,7 @@ class StatTile extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min, // Added to prevent overflow in constrained spaces
+          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               children: [
@@ -68,45 +68,40 @@ class StatTile extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            _buildBottomText(colors),
+            if (showTrend)
+              Row(
+                children: [
+                  Icon(
+                    trendIcon ??
+                        (subText.startsWith('+')
+                            ? Icons.trending_up
+                            : Icons.trending_down),
+                    size: 14,
+                    color: color,
+                  ),
+                  const SizedBox(width: 2),
+                  Text(
+                    subText,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              )
+            else
+              Text(
+                subText,
+                style: TextStyle(
+                  color: colors.onSurfaceVariant,
+                  fontSize: 12,
+                ),
+              ),
           ],
         ),
       ),
       ),
     );
-  }
-
-  Widget _buildBottomText(ColorScheme colors) {
-    if (showTrend) {
-      return Row(
-        children: [
-          Icon(
-            trendIcon ??
-                (subText.startsWith('+')
-                    ? Icons.trending_up
-                    : Icons.trending_down),
-            size: 14,
-            color: color,
-          ),
-          const SizedBox(width: 2),
-          Text(
-            subText,
-            style: TextStyle(
-              color: color,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      );
-    } else {
-      return Text(
-        subText,
-        style: TextStyle(
-          color: colors.onSurfaceVariant,
-          fontSize: 12,
-        ),
-      );
-    }
   }
 }

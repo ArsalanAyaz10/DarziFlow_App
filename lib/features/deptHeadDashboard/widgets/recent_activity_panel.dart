@@ -67,7 +67,6 @@ class RecentActivityPanel extends StatelessWidget {
   }
 }
 
-/// A single activity item displayed in the recent activity list.
 class ActivityTile extends StatelessWidget {
   final Map<String, dynamic> activity;
 
@@ -76,9 +75,79 @@ class ActivityTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final type = _determineActivityType();
-    final iconData = _determineActivityIcon(type);
-    final color = _determineActivityColor(type);
+
+    String type = activity['type'] ?? '';
+    if (type.isEmpty) {
+      final action = activity['action'] ?? '';
+      final message = (activity['message'] ?? '').toString().toLowerCase();
+
+      if (message.contains('material') || message.contains('alert')) {
+        type = 'alert';
+      } else if (action == 'ASSIGN' || message.contains('assigned')) {
+        type = 'assignment';
+      } else if (action == 'MOVE' || message.contains('moved')) {
+        type = 'movement';
+      } else if (action == 'SUBMIT') {
+        type = 'submission';
+      } else if (action == 'APPROVE') {
+        type = 'approval';
+      } else if (action == 'REJECT') {
+        type = 'rejection';
+      } else {
+        type = 'default';
+      }
+    }
+
+    // Determine icon
+    IconData iconData;
+    switch (type) {
+      case 'movement':
+        iconData = Icons.swap_horiz;
+        break;
+      case 'alert':
+        iconData = Icons.warning_amber_rounded;
+        break;
+      case 'assignment':
+        iconData = Icons.person_add_alt;
+        break;
+      case 'submission':
+        iconData = Icons.upload_file;
+        break;
+      case 'approval':
+        iconData = Icons.check_circle;
+        break;
+      case 'rejection':
+        iconData = Icons.cancel;
+        break;
+      default:
+        iconData = Icons.circle;
+        break;
+    }
+
+    Color color;
+    switch (type) {
+      case 'movement':
+        color = Colors.blue;
+        break;
+      case 'alert':
+        color = Colors.orange;
+        break;
+      case 'assignment':
+        color = Colors.purple;
+        break;
+      case 'submission':
+        color = AppColors.primaryGreen;
+        break;
+      case 'approval':
+        color = Colors.green;
+        break;
+      case 'rejection':
+        color = Colors.red;
+        break;
+      default:
+        color = Colors.grey;
+        break;
+    }
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -133,59 +202,5 @@ class ActivityTile extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _determineActivityType() {
-    if (activity['type'] != null) return activity['type'];
-    final action = activity['action'] ?? '';
-    final message = (activity['message'] ?? '').toString().toLowerCase();
-
-    if (message.contains('material') || message.contains('alert')) {
-      return 'alert';
-    }
-    if (action == 'ASSIGN' || message.contains('assigned')) return 'assignment';
-    if (action == 'MOVE' || message.contains('moved')) return 'movement';
-    if (action == 'SUBMIT') return 'submission';
-    if (action == 'APPROVE') return 'approval';
-    if (action == 'REJECT') return 'rejection';
-    return 'default';
-  }
-
-  IconData _determineActivityIcon(String type) {
-    switch (type) {
-      case 'movement':
-        return Icons.swap_horiz;
-      case 'alert':
-        return Icons.warning_amber_rounded;
-      case 'assignment':
-        return Icons.person_add_alt;
-      case 'submission':
-        return Icons.upload_file;
-      case 'approval':
-        return Icons.check_circle;
-      case 'rejection':
-        return Icons.cancel;
-      default:
-        return Icons.circle;
-    }
-  }
-
-  Color _determineActivityColor(String type) {
-    switch (type) {
-      case 'movement':
-        return Colors.blue;
-      case 'alert':
-        return Colors.orange;
-      case 'assignment':
-        return Colors.purple;
-      case 'submission':
-        return AppColors.primaryGreen;
-      case 'approval':
-        return Colors.green;
-      case 'rejection':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
   }
 }

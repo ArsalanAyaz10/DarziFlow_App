@@ -36,191 +36,146 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
         }
 
         if (activities.isEmpty) {
-          return _buildEmptyState(context);
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: colors.surfaceContainer,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.history,
+                    size: 50,
+                    color: colors.onSurfaceVariant.withValues(alpha: 0.5),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  "No Activities Yet",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: colors.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Activities from your department\nwill appear here",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14, color: colors.onSurfaceVariant),
+                ),
+                const SizedBox(height: 30),
+                ElevatedButton(
+                  onPressed: () => controller.refreshDashboard(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryGreen,
+                    foregroundColor: colors.onPrimary,
+                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text("Refresh"),
+                ),
+              ],
+            ),
+          );
         }
 
-        final filteredActivities = _filterActivities(
-          activities.toList(),
-          selectedFilter.value,
-        );
+        List<Map<String, dynamic>> filteredActivities = activities.toList();
+        if (selectedFilter.value != 0) {
+          final typeMappings = {
+            1: 'movement',
+            2: 'alert',
+            3: 'assignment',
+            4: 'submission',
+          };
+          final filterType = typeMappings[selectedFilter.value];
+          if (filterType != null) {
+            filteredActivities = filteredActivities
+                .where((a) => a['type'] == filterType)
+                .toList();
+          }
+        }
 
-        return _buildActivityList(context, filteredActivities, selectedFilter);
-      }),
-    );
-  }
-
-  List<Map<String, dynamic>> _filterActivities(
-    List<Map<String, dynamic>> activities,
-    int filterIndex,
-  ) {
-    if (filterIndex == 0) return activities;
-
-    final typeMappings = {
-      1: 'movement',
-      2: 'alert',
-      3: 'assignment',
-      4: 'submission',
-    };
-
-    final filterType = typeMappings[filterIndex];
-
-    if (filterType != null) {
-      return activities.where((a) => a['type'] == filterType).toList();
-    }
-
-    return activities;
-  }
-
-  Widget _buildEmptyState(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: colors.surfaceContainer,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.history,
-              size: 50,
-              color: colors.onSurfaceVariant.withValues(alpha: 0.5),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            "No Activities Yet",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: colors.onSurface,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "Activities from your department\nwill appear here",
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14, color: colors.onSurfaceVariant),
-          ),
-          const SizedBox(height: 30),
-          ElevatedButton(
-            onPressed: () => controller.refreshDashboard(),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryGreen,
-              foregroundColor: colors.onPrimary,
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+        return Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              color: colors.surface,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: Row(
+                  children: [
+                    _buildFilterChip(context, "All", 0, selectedFilter),
+                    const SizedBox(width: 8),
+                    _buildFilterChip(context, "Movement", 1, selectedFilter),
+                    const SizedBox(width: 8),
+                    _buildFilterChip(context, "Alerts", 2, selectedFilter),
+                    const SizedBox(width: 8),
+                    _buildFilterChip(context, "Assignments", 3, selectedFilter),
+                    const SizedBox(width: 8),
+                    _buildFilterChip(context, "Submissions", 4, selectedFilter),
+                  ],
+                ),
               ),
             ),
-            child: const Text("Refresh"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActivityList(
-    BuildContext context,
-    List<Map<String, dynamic>> activities,
-    RxInt selectedFilter,
-  ) {
-    return Column(
-      children: [
-        _buildFilterBar(context, selectedFilter),
-        Expanded(
-          child: RefreshIndicator(
-            onRefresh: controller.refreshDashboard,
-            color: AppColors.primaryGreen,
-            child: activities.isEmpty
-                ? _buildEmptyFilteredState(context, selectedFilter)
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: activities.length,
-                    itemBuilder: (context, index) {
-                      final activity = activities[index];
-
-                      return AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _buildActivityCard(context, activity),
-                      );
-                    },
-                  ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEmptyFilteredState(BuildContext context, RxInt selectedFilter) {
-    final colors = Theme.of(context).colorScheme;
-    final filterNames = [
-      'All',
-      'Movement',
-      'Alerts',
-      'Assignments',
-      'Submissions',
-    ];
-    final name = filterNames[selectedFilter.value];
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.search_off,
-            size: 60,
-            color: colors.onSurfaceVariant.withValues(alpha: 0.4),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            "No $name Activities",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: colors.onSurfaceVariant,
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: controller.refreshDashboard,
+                color: AppColors.primaryGreen,
+                child: filteredActivities.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.search_off,
+                              size: 60,
+                              color: colors.onSurfaceVariant.withValues(alpha: 0.4),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              "No ${['All', 'Movement', 'Alerts', 'Assignments', 'Submissions'][selectedFilter.value]} Activities",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: colors.onSurfaceVariant,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            TextButton(
+                              onPressed: () => selectedFilter.value = 0,
+                              child: const Text(
+                                "Clear Filters",
+                                style: TextStyle(color: AppColors.primaryGreen),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: filteredActivities.length,
+                        itemBuilder: (context, index) {
+                          final activity = filteredActivities[index];
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _buildActivityCard(context, activity),
+                          );
+                        },
+                      ),
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          TextButton(
-            onPressed: () => selectedFilter.value = 0,
-            child: Text(
-              "Clear Filters",
-              style: TextStyle(color: AppColors.primaryGreen),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilterBar(BuildContext context, RxInt selectedFilter) {
-    final colors = Theme.of(context).colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      color: colors.surface,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        child: Row(
-          children: [
-            _buildFilterChip(context, "All", 0, selectedFilter),
-            const SizedBox(width: 8),
-            _buildFilterChip(context, "Movement", 1, selectedFilter),
-            const SizedBox(width: 8),
-            _buildFilterChip(context, "Alerts", 2, selectedFilter),
-            const SizedBox(width: 8),
-            _buildFilterChip(context, "Assignments", 3, selectedFilter),
-            const SizedBox(width: 8),
-            _buildFilterChip(context, "Submissions", 4, selectedFilter),
           ],
-        ),
-      ),
+        );
+      }),
     );
   }
 
@@ -307,7 +262,6 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
                   child: Icon(iconData, color: color, size: 22),
                 ),
                 const SizedBox(width: 16),
-
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -329,9 +283,6 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
                           height: 1.3,
                         ),
                       ),
-                      if (activity['orderId'] != null) ...[
-                        const SizedBox(height: 10),
-                      ],
                     ],
                   ),
                 ),
@@ -465,7 +416,7 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
           SizedBox(
             width: 90,
             child: Text(
-              label,
+               label,
               style: TextStyle(
                 color: colors.onSurfaceVariant,
                 fontSize: 13,

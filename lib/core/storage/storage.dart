@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:dariziflow_app/data/models/auth_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AppStorage {
@@ -13,6 +14,8 @@ class AppStorage {
     return await _storage.read(key: "accessToken");
   }
 
+  // ─── Raw Map methods (kept for backward compatibility) ───
+
   static Future<void> saveUser(Map<dynamic, dynamic> user) async {
     final userJson = jsonEncode(user);
     await _storage.write(key: "user", value: userJson);
@@ -24,6 +27,27 @@ class AppStorage {
     return jsonDecode(userString);
   }
 
+  // ─── Typed AuthModel methods ───
+
+  /// Save an [AuthModel] to secure storage.
+  static Future<void> saveAuthUser(AuthModel user) async {
+    final userJson = jsonEncode(user.toJson());
+    await _storage.write(key: "user", value: userJson);
+  }
+
+  /// Retrieve the stored user as a typed [AuthModel].
+  /// Returns null if no user is stored or parsing fails.
+  static Future<AuthModel?> getAuthUser() async {
+    final userString = await _storage.read(key: "user");
+    if (userString == null) return null;
+    try {
+      final Map<String, dynamic> json = jsonDecode(userString);
+      return AuthModel.fromJson(json);
+    } catch (_) {
+      return null;
+    }
+  }
+
   static Future<void> saveUserRole(String role) async {
     await _storage.write(key: "role", value: role);
   }
@@ -31,14 +55,6 @@ class AppStorage {
   static Future<String?> getUserRole() async {
     return await _storage.read(key: "role");
   }
-
-  // static Future<void> saveDeptID(String deptID) async {
-  //   await _storage.write(key: "departmentID", value: deptID);
-  // }
-
-  // static Future<String?> getDeptID() async {
-  //   return await _storage.read(key: "departmentID");
-  // }
 
   static Future<void> clearTokens() async {
     await _storage.deleteAll();

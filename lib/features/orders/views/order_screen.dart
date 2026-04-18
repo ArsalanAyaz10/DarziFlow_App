@@ -5,6 +5,7 @@ import 'package:dariziflow_app/data/models/orderCard_model.dart';
 import 'package:dariziflow_app/features/orders/controllers/order_controller.dart';
 import 'package:dariziflow_app/features/orders/widgets/order_card.dart';
 import 'package:dariziflow_app/features/orders/widgets/order_filter_chips.dart';
+import 'package:dariziflow_app/features/orders/widgets/order_list_shimmer.dart';
 import 'package:dariziflow_app/features/orders/widgets/order_search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -37,9 +38,7 @@ class OrderScreen extends GetView<OrderController> {
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(
-            child: CircularProgressIndicator(color: AppColors.primaryGreen),
-          );
+          return const OrderListShimmer();
         }
 
         if (controller.errorMessage.value.isNotEmpty) {
@@ -128,7 +127,7 @@ class OrderScreen extends GetView<OrderController> {
                       padding: const EdgeInsets.only(bottom: 16),
                       child: OrderCard(
                         order: order,
-                        onTap: () => _showOrderDetails(order),
+                        onTap: () => showOrderDetails(order),
                       ),
                     );
                   },
@@ -142,7 +141,7 @@ class OrderScreen extends GetView<OrderController> {
     );
   }
 
-  void _showOrderDetails(OrderCardModel order) {
+  void showOrderDetails(OrderModel order) {
     Get.toNamed(Routes.orderDetails, arguments: order);
   }
 }

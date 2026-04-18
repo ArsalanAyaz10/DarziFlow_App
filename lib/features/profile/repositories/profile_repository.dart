@@ -1,4 +1,5 @@
 import 'package:dariziflow_app/core/storage/storage.dart';
+import 'package:dariziflow_app/data/models/auth_model.dart';
 import 'package:dariziflow_app/features/profile/services/profile_service.dart';
 
 class ProfileRepository {
@@ -14,11 +15,12 @@ class ProfileRepository {
     try {
       await service.updateProfile(name: name, email: email);
 
-      final user = await AppStorage.getUser();
+      final user = await AppStorage.getAuthUser();
       if (user != null) {
-        user['name'] = name;
-        user['email'] = email;
-        await AppStorage.saveUser(user);
+        await AppStorage.saveAuthUser(user.copyWith(
+          name: name,
+          email: email,
+        ));
       }
     } catch (e) {
       throw Exception("Failed to update profile: $e");
@@ -54,7 +56,10 @@ class ProfileRepository {
     try {
       final data = await service.getUserProfile();
       if (data != null && data['user'] != null) {
-        await AppStorage.saveUser(data['user']);
+        final freshUser = AuthModel.fromJson(
+          Map<String, dynamic>.from(data['user']),
+        );
+        await AppStorage.saveAuthUser(freshUser);
         return data['user'];
       }
       return null;

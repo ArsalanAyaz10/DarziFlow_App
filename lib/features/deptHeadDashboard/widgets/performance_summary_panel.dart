@@ -51,7 +51,6 @@ class PerformanceSummaryPanel extends StatelessWidget {
   }
 }
 
-/// The gradient card showing department performance / efficiency score.
 class _EfficiencyScoreCard extends StatelessWidget {
   final DeptHeadController controller;
   final ColorScheme colors;
@@ -95,147 +94,157 @@ class _EfficiencyScoreCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildLabels(),
-              _buildCircularProgress(),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Department Performance",
+                    style: TextStyle(
+                      color: isDark
+                          ? colors.onPrimaryContainer.withValues(alpha: 0.7)
+                          : Colors.white70,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Efficiency Score",
+                    style: TextStyle(
+                      color: isDark ? colors.onPrimaryContainer : AppColors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? colors.onSurface.withValues(alpha: 0.1)
+                          : AppColors.black.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      "Quality: ${controller.qualityScore.value}%",
+                      style: TextStyle(
+                        color: isDark ? colors.onPrimaryContainer : AppColors.white,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  SizedBox(
+                    height: 70,
+                    width: 70,
+                    child: CircularProgressIndicator(
+                      value: controller.efficiencyScore.value / 100,
+                      strokeWidth: 6,
+                      backgroundColor:
+                          (isDark ? colors.onPrimaryContainer : AppColors.white)
+                              .withValues(alpha: 0.2),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        isDark ? colors.onPrimaryContainer : Colors.white,
+                      ),
+                    ),
+                  ),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "${controller.efficiencyScore.value}",
+                        style: TextStyle(
+                          color: isDark ? colors.onPrimaryContainer : AppColors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        "%",
+                        style: TextStyle(
+                          color: isDark
+                              ? colors.onPrimaryContainer.withValues(alpha: 0.7)
+                              : Colors.white70,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ],
           ),
           const SizedBox(height: 15),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildMetricColumn(
-                "Operations",
-                "${controller.completedOps.value}/${controller.totalOperationsHandled.value}",
-                Icons.checklist,
+              // Operations
+              Column(
+                children: [
+                  Icon(
+                    Icons.checklist,
+                    color: isDark
+                        ? colors.onPrimaryContainer.withValues(alpha: 0.7)
+                        : Colors.white70,
+                    size: 16,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "${controller.completedOps.value}/${controller.totalOperationsHandled.value}",
+                    style: TextStyle(
+                      color: isDark ? colors.onPrimaryContainer : AppColors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    "Operations",
+                    style: TextStyle(
+                      color: isDark
+                          ? colors.onPrimaryContainer.withValues(alpha: 0.7)
+                          : Colors.white70,
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
               ),
-              _buildMetricColumn(
-                "Checkpoints",
-                "${controller.completedCheckpoints.value}/${controller.totalCheckpoints.value}",
-                Icons.task_alt,
+              // Checkpoints
+              Column(
+                children: [
+                  Icon(
+                    Icons.task_alt,
+                    color: isDark
+                        ? colors.onPrimaryContainer.withValues(alpha: 0.7)
+                        : Colors.white70,
+                    size: 16,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "${controller.completedCheckpoints.value}/${controller.totalCheckpoints.value}",
+                    style: TextStyle(
+                      color: isDark ? colors.onPrimaryContainer : AppColors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    "Checkpoints",
+                    style: TextStyle(
+                      color: isDark
+                          ? colors.onPrimaryContainer.withValues(alpha: 0.7)
+                          : Colors.white70,
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildLabels() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Department Performance",
-          style: TextStyle(
-            color: isDark
-                ? colors.onPrimaryContainer.withValues(alpha: 0.7)
-                : Colors.white70,
-            fontSize: 13,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          "Efficiency Score",
-          style: TextStyle(
-            color: isDark ? colors.onPrimaryContainer : AppColors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: isDark
-                ? colors.onSurface.withValues(alpha: 0.1)
-                : AppColors.black.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            "Quality: ${controller.qualityScore.value}%",
-            style: TextStyle(
-              color: isDark ? colors.onPrimaryContainer : AppColors.white,
-              fontSize: 11,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCircularProgress() {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        SizedBox(
-          height: 70,
-          width: 70,
-          child: CircularProgressIndicator(
-            value: controller.efficiencyScore.value / 100,
-            strokeWidth: 6,
-            backgroundColor:
-                (isDark ? colors.onPrimaryContainer : AppColors.white)
-                    .withValues(alpha: 0.2),
-            valueColor: AlwaysStoppedAnimation<Color>(
-              isDark ? colors.onPrimaryContainer : Colors.white,
-            ),
-          ),
-        ),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              "${controller.efficiencyScore.value}",
-              style: TextStyle(
-                color: isDark ? colors.onPrimaryContainer : AppColors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              "%",
-              style: TextStyle(
-                color: isDark
-                    ? colors.onPrimaryContainer.withValues(alpha: 0.7)
-                    : Colors.white70,
-                fontSize: 10,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMetricColumn(String label, String value, IconData icon) {
-    return Column(
-      children: [
-        Icon(
-          icon,
-          color: isDark
-              ? colors.onPrimaryContainer.withValues(alpha: 0.7)
-              : Colors.white70,
-          size: 16,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            color: isDark ? colors.onPrimaryContainer : AppColors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            color: isDark
-                ? colors.onPrimaryContainer.withValues(alpha: 0.7)
-                : Colors.white70,
-            fontSize: 10,
-          ),
-        ),
-      ],
     );
   }
 }

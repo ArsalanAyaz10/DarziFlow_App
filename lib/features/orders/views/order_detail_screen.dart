@@ -1,4 +1,5 @@
 import 'package:dariziflow_app/features/orders/controllers/orderDetail_controller.dart';
+import 'package:dariziflow_app/features/orders/widgets/order_detail_shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
@@ -32,9 +33,7 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
       ),
       body: Obx(() {
         if (controller.isLoading.value && controller.order.value == null) {
-          return const Center(
-            child: CircularProgressIndicator(color: brandGreen),
-          );
+          return const OrderDetailShimmer();
         }
 
         final order = controller.order.value;
@@ -90,7 +89,7 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    _buildActiveStatusBadge(order.overallStatus, colors),
+                    ActiveStatusBadge(order.overallStatus, colors),
                   ],
                 ),
                 const SizedBox(height: 24),
@@ -140,7 +139,7 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
                 Row(
                   children: [
                     Expanded(
-                      child: _buildDateInfoBox(
+                      child: DateBox(
                         "CREATED AT",
                         createdAtStr,
                         colors,
@@ -148,7 +147,7 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: _buildDateInfoBox("DUE DATE", dueDateStr, colors),
+                      child: DateBox("DUE DATE", dueDateStr, colors),
                     ),
                   ],
                 ),
@@ -261,9 +260,9 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
     );
   }
 
-  // PRIVATE  mthds
+//mthds
 
-  Widget _buildActiveStatusBadge(String status, ColorScheme colors) {
+  Widget ActiveStatusBadge(String status, ColorScheme colors) {
     if (status == 'null' || status.isEmpty) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -323,7 +322,7 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
     );
   }
 
-  Widget _buildDateInfoBox(String label, String date, ColorScheme colors) {
+  Widget DateBox(String label, String date, ColorScheme colors) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(

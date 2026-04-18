@@ -20,7 +20,10 @@ class DepartmentRepository {
   Future<Map<String, dynamic>> fetchDepartmentById(String id) async {
     try {
       final data = await service.getDepartmentById(id);
-      return data["department"] ?? {};
+      if (data is Map<String, dynamic>) {
+        return data.containsKey("department") ? data["department"] : data;
+      }
+      return {};
     } catch (e) {
       if (kDebugMode) dev.log("Error fetching department by id: $e");
       return {};

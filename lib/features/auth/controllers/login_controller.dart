@@ -34,11 +34,11 @@ class LoginController extends GetxController {
 
     try {
       isLoading.value = true;
-      final String role = await authRepository.login(
+      final authUser = await authRepository.login(
         emailController.text.trim(),
         passwordController.value.text.trim(),
       );
-      RoleRouter.route(role);
+      RoleRouter.route(authUser.role);
     } catch (e) {
       Get.snackbar(
         "Login Failed",
