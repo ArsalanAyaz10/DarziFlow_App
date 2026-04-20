@@ -1,0 +1,68 @@
+import 'package:dariziflow_app/features/qcDashboard/service/qc_service.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:developer' as dev;
+
+class QcRepository {
+  final QcService service;
+
+  QcRepository(this.service);
+
+  Future<Map<String, dynamic>> fetchStats() async {
+    try {
+      final data = await service.getStats();
+      return data ?? {};
+    } catch (e) {
+      if (kDebugMode) dev.log("Error fetching QC stats: $e");
+      return {};
+    }
+  }
+
+  Future<List<dynamic>> fetchPendingSubmissions() async {
+    try {
+      final data = await service.getPendingSubmissions();
+      return data["data"] ?? [];
+    } catch (e) {
+      if (kDebugMode) dev.log("Error fetching pending submissions: $e");
+      return [];
+    }
+  }
+
+  Future<List<String>> fetchRejectionReasons() async {
+    try {
+      final data = await service.getRejectionReasons();
+      return List<String>.from(data["data"] ?? []);
+    } catch (e) {
+      if (kDebugMode) dev.log("Error fetching rejection reasons: $e");
+      return [];
+    }
+  }
+
+  Future<bool> approveSubmission({
+    required String orderId,
+    required String opId,
+    required String chkId,
+  }) async {
+    try {
+      await service.approve(orderId: orderId, opId: opId, chkId: chkId);
+      return true;
+    } catch (e) {
+      if (kDebugMode) dev.log("Error approving submission: $e");
+      return false;
+    }
+  }
+
+  Future<bool> rejectSubmission({
+    required String orderId,
+    required String opId,
+    required String chkId,
+    required String comment,
+  }) async {
+    try {
+      await service.reject(orderId: orderId, opId: opId, chkId: chkId, comment: comment);
+      return true;
+    } catch (e) {
+      if (kDebugMode) dev.log("Error rejecting submission: $e");
+      return false;
+    }
+  }
+}

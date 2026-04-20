@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:dariziflow_app/core/utils/colors.dart';
 
 class CustomElevatedButton extends StatelessWidget {
   final VoidCallback? onPressed;
@@ -7,6 +6,7 @@ class CustomElevatedButton extends StatelessWidget {
   final IconData? icon;
   final bool isLoading;
   final Color? backgroundColor;
+  final Color? foregroundColor;
   final double height;
   final double borderRadius;
 
@@ -17,16 +17,32 @@ class CustomElevatedButton extends StatelessWidget {
     this.icon,
     this.isLoading = false,
     this.backgroundColor,
+    this.foregroundColor,
     this.height = 56,
     this.borderRadius = 12,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    final effectiveBackgroundColor = backgroundColor ?? colors.primary;
+
+    // Determine responsive foreground color if not provided
+    final effectiveForegroundColor = foregroundColor ??
+        (effectiveBackgroundColor == colors.primary
+            ? colors.onPrimary
+            : (ThemeData.estimateBrightnessForColor(effectiveBackgroundColor) ==
+                    Brightness.dark
+                ? Colors.white
+                : Colors.black87));
+
     return ElevatedButton(
       onPressed: isLoading ? null : onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: backgroundColor ?? AppColors.primaryGreen,
+        backgroundColor: effectiveBackgroundColor,
+        foregroundColor: effectiveForegroundColor,
         minimumSize: Size(double.infinity, height),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(borderRadius),
@@ -34,11 +50,11 @@ class CustomElevatedButton extends StatelessWidget {
         elevation: 0,
       ),
       child: isLoading
-          ? const SizedBox(
+          ? SizedBox(
               height: 24,
               width: 24,
               child: CircularProgressIndicator(
-                color: Colors.white,
+                color: effectiveForegroundColor,
                 strokeWidth: 2,
               ),
             )
@@ -47,15 +63,15 @@ class CustomElevatedButton extends StatelessWidget {
               children: [
                 Text(
                   text,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: effectiveForegroundColor,
                   ),
                 ),
                 if (icon != null) ...[
                   const SizedBox(width: 8),
-                  Icon(icon, color: Colors.white, size: 18),
+                  Icon(icon, color: effectiveForegroundColor, size: 18),
                 ],
               ],
             ),

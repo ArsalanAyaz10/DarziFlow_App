@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import '../../../core/network/api_client.dart';
+import 'dart:developer' as dev;
+
 
 class DepartmentService {
   final ApiClient apiClient;
-
+  static final route = "departments";
   DepartmentService(this.apiClient);
 
   Future<dynamic> getDepartments() async {
@@ -12,12 +14,12 @@ class DepartmentService {
   }
 
   Future<dynamic> getDepartmentById(String deptId) async {
-    final response = await apiClient.get("/departments/$deptId");
+    final response = await apiClient.get("/$route/$deptId");
     return response.data;
   }
 
   Future<dynamic> getDepartmentOverview() async {
-    final response = await apiClient.get("/departments/overview");
+    final response = await apiClient.get("/$route/overview");
     return response.data;
   }
 
@@ -32,7 +34,7 @@ class DepartmentService {
       return overview['templateStats'] ??
           {'totalOperations': 0, 'totalCheckpoints': 0};
     } catch (e) {
-      if (kDebugMode) print("Error in getTemplateStats: $e");
+      if (kDebugMode) dev.log("Error in getTemplateStats: $e");
       return {'totalOperations': 0, 'totalCheckpoints': 0};
     }
   }
@@ -43,7 +45,7 @@ class DepartmentService {
       return overview['orderStats'] ??
           {'totalOrders': 0, 'inProgress': 0, 'pending': 0, 'completed': 0};
     } catch (e) {
-      if (kDebugMode) print("Error in getOrderStats: $e");
+      if (kDebugMode) dev.log("Error in getOrderStats: $e");
       return {'totalOrders': 0, 'inProgress': 0, 'pending': 0, 'completed': 0};
     }
   }
@@ -60,7 +62,7 @@ class DepartmentService {
             'rejected': 0,
           };
     } catch (e) {
-      if (kDebugMode) print("Error in getOperationStats: $e");
+      if (kDebugMode) dev.log("Error in getOperationStats: $e");
       return {
         'totalOperationsHandled': 0,
         'completed': 0,

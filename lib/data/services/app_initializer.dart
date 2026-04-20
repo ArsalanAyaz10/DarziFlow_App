@@ -9,7 +9,7 @@ import 'package:get/get_instance/src/extension_instance.dart';
 
 Future<void> appInitializer() async {
   
-  // Lazy load DeeplinkService
+  // Load DeeplinkService
   Get.lazyPut<DeeplinkService>(() => DeeplinkService());
 
   // Initialize ApiService
@@ -19,11 +19,9 @@ Future<void> appInitializer() async {
   });
   Get.put<ApiService>(apiService, permanent: true);
 
-  // Initialize ApiClient with the Dio instance from ApiService
   final apiClient = ApiClient(apiService.dio);
   Get.put<ApiClient>(apiClient, permanent: true);
 
-  // Lazy load AuthService and AuthRepository
   Get.lazyPut<AuthService>(() => AuthService(apiClient: Get.find()));
   Get.lazyPut<AuthRepository>(() => AuthRepository(authService: Get.find()));
 }

@@ -1,5 +1,6 @@
 import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:dariziflow_app/core/utils/colors.dart';
+import 'package:dariziflow_app/core/utils/global.dart';
 import 'package:dariziflow_app/data/services/cookie_service.dart';
 import 'package:dariziflow_app/features/auth/repositories/auth_repository.dart';
 import 'package:flutter/foundation.dart';
@@ -47,17 +48,19 @@ class ViewprofileController extends GetxController {
 
   Future<void> loadUserInfo() async {
     try {
-      final user = await AppStorage.getUser();
-      userName.value = user?['name'] ?? 'User';
-      userRole.value = formatUserRole(user?['role']);
-      userEmail.value = user?['email'] ?? 'No email found';
-      passwordUpdatedAt.value = user?['passwordUpdatedAt'] ?? 'Not set';
-
-      if (user != null && user['avatar'] != null) {
-        userAvatar.value = user['avatar']['url'] ?? '';
-      } else {
+      final user = await AppStorage.getAuthUser();
+      if (user == null) {
+        userName.value = 'User';
+        userRole.value = 'Unknown Role';
+        userEmail.value = 'No email found';
         userAvatar.value = '';
+        return;
       }
+      userName.value = user.name.isNotEmpty ? user.name : 'User';
+      userRole.value = user.formattedRole;
+      userEmail.value = user.email.isNotEmpty ? user.email : 'No email found';
+      passwordUpdatedAt.value = user.passwordUpdatedAt ?? '';
+      userAvatar.value = user.avatarUrl;
     } catch (e) {
       if (kDebugMode) {
         print("Error loading user info: $e");
@@ -124,6 +127,9 @@ class ViewprofileController extends GetxController {
 
       final cookieJar = await _cookieService.cookieJar;
       await authRepository.logout(cookieJar);
+
+      // Clear remember me so user won't be auto-logged-in next time
+      box.remove('remember_me');
 
       await Future.delayed(const Duration(milliseconds: 500));
       Get.offAllNamed('/splash');

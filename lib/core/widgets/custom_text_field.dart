@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:dariziflow_app/core/utils/colors.dart';
 
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -31,70 +30,71 @@ class CustomTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
+    final hintColor = colors.onSurfaceVariant.withValues(alpha: 0.6);
+    final iconColor = colors.onSurfaceVariant.withValues(alpha: 0.8);
+    final _ = colors.onSurface.withValues(alpha: 0.7);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (showLabel && label != null) ...[
-          _buildLabel(label!, context),
-          const SizedBox(height: 8),
-        ],
-        TextFormField(
-          controller: controller,
-          obscureText: obscureText,
-          keyboardType: keyboardType,
-          validator: validator,
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          style: TextStyle(fontSize: 14, color: colors.onSurface),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: colors.surfaceContainerHighest,
-            hintText: hint,
-            hintStyle: TextStyle(
-              color: colors.onSurfaceVariant.withValues(alpha: 0.6),
-              fontSize: 14,
-            ),
-            prefixIcon: Icon(
-              icon,
-              color: colors.onSurfaceVariant.withValues(alpha: 0.8),
-              size: 18,
-            ),
-            suffixIcon: suffixIcon != null
-                ? IconButton(
-                    icon: Icon(
-                      suffixIcon,
-                      color: colors.onSurfaceVariant.withValues(alpha: 0.8),
-                      size: 18,
-                    ),
-                    onPressed: onSuffixTap,
-                  )
-                : null,
-            contentPadding: const EdgeInsets.symmetric(
-              vertical: 18,
-              horizontal: 16,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: colors.primary,
-                width: 1,
+    return RepaintBoundary(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (showLabel && label != null) ...[
+            _buildLabel(label!, context),
+            const SizedBox(height: 8),
+          ],
+          TextFormField(
+            onEditingComplete: () => FocusScope.of(context).nextFocus(),
+            onTapOutside: (PointerDownEvent event) {
+              FocusManager.instance.primaryFocus?.unfocus();
+            },
+
+            onFieldSubmitted: (value) => FocusScope.of(context).nextFocus(),
+            controller: controller,
+            obscureText: obscureText,
+            keyboardType: keyboardType,
+            validator: validator,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            style: TextStyle(fontSize: 14, color: colors.onSurface),
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: colors.surfaceContainerHighest,
+              hintText: hint,
+              hintStyle: TextStyle(color: hintColor, fontSize: 14),
+              prefixIcon: Icon(icon, color: iconColor, size: 18),
+              suffixIcon: suffixIcon != null
+                  ? IconButton(
+                      icon: Icon(
+                        suffixIcon,
+                        color: colors.onSurfaceVariant.withValues(alpha: 0.8),
+                        size: 18,
+                      ),
+                      onPressed: onSuffixTap,
+                    )
+                  : null,
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 18,
+                horizontal: 16,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: colors.primary, width: 1),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Colors.redAccent, width: 1),
               ),
             ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.redAccent, width: 1),
-            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

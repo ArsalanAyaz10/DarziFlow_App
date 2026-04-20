@@ -1,8 +1,8 @@
-import 'package:dariziflow_app/core/widgets/auth_bottom_link.dart';
-import 'package:dariziflow_app/core/widgets/auth_header.dart';
+import 'package:dariziflow_app/core/utils/colors.dart';
+import 'package:dariziflow_app/features/forgotpassword/widgets/auth_bottom_link.dart';
+import 'package:dariziflow_app/features/auth/widgets/auth_header.dart';
 import 'package:dariziflow_app/core/widgets/custom_elevated_button.dart';
 import 'package:dariziflow_app/core/widgets/custom_text_field.dart';
-import 'package:dariziflow_app/core/widgets/forgot_password.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/login_controller.dart';
@@ -24,10 +24,12 @@ class LoginScreen extends GetView<LoginController> {
             key: controller.formKey,
             child: Column(
               children: [
-                const AuthHeader(
-                  title: "Welcome Back",
-                  subtitle: "Log in to manage your production flow",
-                  icon: Icons.archive_outlined,
+                RepaintBoundary(
+                  child: const AuthHeader(
+                    title: "Welcome Back",
+                    subtitle: "Log in to manage your production flow",
+                    icon: Icons.archive_outlined,
+                  ),
                 ),
 
                 CustomTextField(
@@ -74,7 +76,65 @@ class LoginScreen extends GetView<LoginController> {
                   ),
                 ),
 
-                const ForgotPasswordLink(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Obx(
+                      () => Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: Checkbox(
+                              value: controller.rememberMe.value,
+                              onChanged: controller.toggleRememberMe,
+                              activeColor: AppColors.primaryGreen,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              side: BorderSide(
+                                color: colors.onSurfaceVariant,
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          GestureDetector(
+                            onTap: () => controller.toggleRememberMe(
+                              !controller.rememberMe.value,
+                            ),
+                            child: Text(
+                              "Remember me",
+                              style: TextStyle(
+                                color: colors.onSurfaceVariant,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => Get.toNamed('/forgot-password'),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 4,
+                        ),
+                      ),
+                      child: Text(
+                        "Forgot Password?",
+                        style: const TextStyle(
+                          color: AppColors.primaryGreen,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
 
                 const SizedBox(height: 20),
 
@@ -82,7 +142,11 @@ class LoginScreen extends GetView<LoginController> {
                   () => CustomElevatedButton(
                     onPressed: controller.isLoading.value
                         ? null
-                        : _handleLoginSubmit,
+                        : () {
+                            if (controller.formKey.currentState!.validate()) {
+                              controller.handleLogin();
+                            }
+                          },
                     text: "Login",
                     icon: Icons.arrow_forward,
                     isLoading: controller.isLoading.value,
@@ -104,11 +168,5 @@ class LoginScreen extends GetView<LoginController> {
         ),
       ),
     );
-  }
-
-  void _handleLoginSubmit() {
-    if (controller.formKey.currentState!.validate()) {
-      controller.handleLogin();
-    }
   }
 }

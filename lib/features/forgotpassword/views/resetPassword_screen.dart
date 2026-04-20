@@ -1,4 +1,3 @@
-import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/features/forgotpassword/controllers/resetpassword_controller.dart';
 import 'package:dariziflow_app/core/widgets/custom_elevated_button.dart'; // Adjust path
 import 'package:dariziflow_app/core/widgets/custom_text_field.dart'; // Adjust path
@@ -93,7 +92,7 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
 
             const SizedBox(height: 16),
 
-            // Password Requirement Hint
+            // PasswordHint
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -114,7 +113,7 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
 
             const SizedBox(height: 40),
 
-            // Reset Password Button
+            // Reset Button
             Obx(
               () => CustomElevatedButton(
                 onPressed: () => controller.resetPassword(),

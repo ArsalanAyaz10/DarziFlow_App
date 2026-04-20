@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:developer' as dev;
+
 
 class EditProfileController extends GetxController {
   final ProfileRepository profileRepository;
@@ -76,16 +78,17 @@ class EditProfileController extends GetxController {
 
   Future<void> loadUserInfo() async {
     try {
-      final user = await AppStorage.getUser();
-      userName.value = user?['name'] ?? 'User';
-      userEmail.value = user?['email'] ?? 'No email found';
-      userAvatar.value = user?['avatar']?['url'] ?? '';
-      userRole.value = _formatUserRole(user?['role'] ?? '');
+      final user = await AppStorage.getAuthUser();
+      if (user == null) return;
+      userName.value = user.name.isNotEmpty ? user.name : 'User';
+      userEmail.value = user.email.isNotEmpty ? user.email : 'No email found';
+      userAvatar.value = user.avatarUrl;
+      userRole.value = user.formattedRole;
 
       nameController.text = userName.value;
       emailController.text = userEmail.value;
     } catch (e) {
-      if (kDebugMode) print("Error loading user info: $e");
+      if (kDebugMode) dev.log("Error loading user info: $e");
     }
   }
 
@@ -174,14 +177,13 @@ class EditProfileController extends GetxController {
         email: emailController.text,
       );
 
-      final updatedUser = await AppStorage.getUser();
-      final avatarUrl = updatedUser?['avatar']?['url'] ?? userAvatar.value;
-      await AppStorage.saveUser({
-        ...?updatedUser,
-        'name': nameController.text,
-        'email': emailController.text,
-        'avatar': {'url': avatarUrl},
-      });
+      final existingUser = await AppStorage.getAuthUser();
+      if (existingUser != null) {
+        await AppStorage.saveAuthUser(existingUser.copyWith(
+          name: nameController.text,
+          email: emailController.text,
+        ));
+      }
 
       Get.back(
         result: {'name': nameController.text, 'email': emailController.text},
@@ -274,7 +276,7 @@ class EditProfileController extends GetxController {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       );
       if (kDebugMode) {
-        print("Change password error: $e");
+        dev.log("Change password error: $e");
       }
     } finally {
       isLoading.value = false;

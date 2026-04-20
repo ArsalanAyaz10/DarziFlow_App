@@ -1,34 +1,103 @@
+import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/utils/fonts.dart';
-import 'package:dariziflow_app/core/widgets/bgcircles.dart';
+import 'package:dariziflow_app/core/utils/global.dart';
+import 'package:dariziflow_app/core/utils/role_router.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  final PageController pageController = PageController();
+
+  final SvgAssetLoader darkSplash = const SvgAssetLoader(
+    'assets/images/Darksplash.svg',
+  );
+  final SvgAssetLoader lightSplash = const SvgAssetLoader(
+    'assets/images/Lightsplash.svg',
+  );
+  final SvgAssetLoader darkLayer = const SvgAssetLoader(
+    'assets/images/darkLayer.svg',
+  );
+  final SvgAssetLoader lightLayer = const SvgAssetLoader(
+    'assets/images/lightLayer.svg',
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _handleNavigation();
+  }
+
+  void _handleNavigation() {
+    bool isOnboardingDone = box.read('onboarding') ?? false;
+
+    Future.delayed(const Duration(seconds: 3), () async {
+      if (isOnboardingDone) {
+        // Auto-login: check if user chose "Remember Me" and has a valid session
+        final token = await AppStorage.getAccessToken();
+        final rememberMe = box.read('remember_me') ?? false;
+        if (token != null && rememberMe) {
+          // User is already authenticated — check for a pending notification route
+          final pendingRoute = box.read('pending_route');
+          if (pendingRoute != null) {
+            box.remove('pending_route');
+            Get.offAllNamed(pendingRoute);
+          } else {
+            // No pending route — route based on stored role
+            final role = await AppStorage.getUserRole();
+            if (role != null) {
+              RoleRouter.route(role);
+            } else {
+              Get.offAllNamed('/login');
+            }
+          }
+        } else {
+          Get.offAllNamed('/login');
+        }
+      } else {
+        if (pageController.hasClients) {
+          pageController.animateToPage(
+            1,
+            duration: const Duration(milliseconds: 800),
+            curve: Curves.easeInOutCubic,
+          );
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final PageController pageController = PageController();
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
-          BackgroundCircle(top: -0.3, left: -0.2),
-          BackgroundCircle(bottom: -0.3, right: -0.2),
-
           PageView(
             controller: pageController,
             onPageChanged: (index) {
               if (index == 1) {}
             },
             children: [
-              // PAGE 1: The Splash Content
+              // Page 1:  Splash Content
               SafeArea(
                 child: Column(
                   children: [
@@ -36,8 +105,8 @@ class SplashScreen extends StatelessWidget {
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        SvgPicture.asset(
-                          'assets/images/splash.svg',
+                        SvgPicture(
+                          isDark ? darkSplash : lightSplash,
                           width: 150.0,
                           height: 150.0,
                         ),
@@ -69,7 +138,7 @@ class SplashScreen extends StatelessWidget {
                             ),
                             child: FractionallySizedBox(
                               alignment: Alignment.centerLeft,
-                              widthFactor: 0.5, // Represents Page 1 of 2
+                              widthFactor: 0.5,
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: AppColors.primaryGreen,
@@ -94,14 +163,13 @@ class SplashScreen extends StatelessWidget {
                 ),
               ),
 
-              // PAGE 2: Welcome/Onboarding Content
+              // PAGE 2: Welcome Content
               SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: Column(
                     children: [
                       const Spacer(flex: 2),
-                      // Central Icon Container
                       Container(
                         width: 90,
                         height: 90,
@@ -110,13 +178,13 @@ class SplashScreen extends StatelessWidget {
                           color: colors.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: SvgPicture.asset(
-                          'assets/images/Layer.svg',
+                        child: SvgPicture(
+                          isDark ? darkLayer : lightLayer,
                           fit: BoxFit.contain,
                         ),
                       ),
                       const SizedBox(height: 40),
-                      // App Name/Branding
+
                       RichText(
                         text: TextSpan(
                           style: TextStyle(
@@ -126,9 +194,7 @@ class SplashScreen extends StatelessWidget {
                             color: colors.onSurface,
                           ),
                           children: [
-                            TextSpan(
-                              text: "Darzi",
-                            ),
+                            TextSpan(text: "Darzi"),
                             const TextSpan(
                               text: "Flow",
                               style: TextStyle(color: AppColors.primaryGreen),
@@ -151,7 +217,10 @@ class SplashScreen extends StatelessWidget {
                       Column(
                         children: [
                           ElevatedButton(
-                            onPressed: () => Get.toNamed('/signup'),
+                            onPressed: () {
+                              Get.toNamed('/signup');
+                              box.write('onboarding', true);
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primaryGreen,
                               minimumSize: const Size(double.infinity, 56),
@@ -181,9 +250,11 @@ class SplashScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          // Login Button
                           OutlinedButton(
-                            onPressed: () => Get.toNamed('/login'),
+                            onPressed: () {
+                              Get.toNamed('/login');
+                              box.write('onboarding', true);
+                            },
                             style: OutlinedButton.styleFrom(
                               minimumSize: const Size(double.infinity, 56),
                               side: const BorderSide(
@@ -216,7 +287,6 @@ class SplashScreen extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 30),
-                      // Footer Terms
                       RichText(
                         textAlign: TextAlign.center,
                         text: TextSpan(

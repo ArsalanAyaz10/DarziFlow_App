@@ -3,6 +3,7 @@ import 'package:dariziflow_app/features/deptHeadDashboard/repositories/departmen
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'dart:developer' as dev;
 
 class DeptHeadController extends GetxController {
   final DepartmentRepository repository;
@@ -68,25 +69,37 @@ class DeptHeadController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadDashboardData();
+    loadDashboard();
   }
 
-  Future<void> loadDashboardData() async {
+  Future<void> _loadUserInfo() async {
+    try {
+      final user = await AppStorage.getAuthUser();
+      if (user == null) return;
+      userName.value = user.name.isNotEmpty ? user.name : 'User';
+      userRole.value = user.formattedRole;
+      userAvatar.value = user.avatarUrl;
+    } catch (e) {
+      if (kDebugMode) dev.log("Error loading user info: $e");
+    }
+  }
+
+  Future<void> loadDashboard() async {
     isLoading.value = true;
     errorMessage.value = '';
 
     try {
       await _loadUserInfo();
 
-      final user = await AppStorage.getUser();
-      if (user != null && user['department'] != null) {
-        departmentId.value = user['department'];
+      final user = await AppStorage.getAuthUser();
+      if (user != null && user.department != null) {
+        departmentId.value = user.department!;
       }
 
-      await _loadAllDepartmentStats(forceRefresh: true);
+      await _loadAllDepartmentStats();
       await _loadActivities();
     } catch (e) {
-      _handleError('Failed to load dashboard data', e);
+     dev.log('Failed to load dashboard data', error: e);
     } finally {
       isLoading.value = false;
     }
@@ -104,16 +117,16 @@ class DeptHeadController extends GetxController {
         departmentId.value = deptId;
       }
 
-      await _loadAllDepartmentStats(forceRefresh: true);
+      await _loadAllDepartmentStats();
       await _loadActivities();
     } catch (e) {
-      _handleError('Failed to refresh dashboard', e);
+      dev.log('Failed to refresh dashboard', error: e);
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<void> _loadAllDepartmentStats({bool forceRefresh = false}) async {
+  Future<void> _loadAllDepartmentStats() async {
     try {
       final data = await repository.fetchOverview();
 
@@ -155,32 +168,7 @@ class DeptHeadController extends GetxController {
       _calculateEfficiencyScore();
       _calculateTrend();
     } catch (e) {
-      if (kDebugMode) print("Error loading stats: $e");
-    }
-  }
-
-  Future<void> _loadUserInfo() async {
-    try {
-      final user = await AppStorage.getUser();
-      userName.value = user?['name'] ?? 'User';
-      userRole.value = _formatUserRole(user?['role'] ?? '');
-      _loadUserAvatar(user);
-    } catch (e) {
-      if (kDebugMode) print("Error loading user info: $e");
-    }
-  }
-
-  void _loadUserAvatar(Map<String, dynamic>? user) {
-    if (user != null && user['avatar'] != null) {
-      if (user['avatar'] is Map) {
-        userAvatar.value = user['avatar']['url'] ?? '';
-      } else if (user['avatar'] is String) {
-        userAvatar.value = user['avatar'];
-      } else {
-        userAvatar.value = '';
-      }
-    } else {
-      userAvatar.value = '';
+      if (kDebugMode) dev.log("Error loading stats: $e");
     }
   }
 
@@ -239,12 +227,10 @@ class DeptHeadController extends GetxController {
 
   Future<String?> _getUserDepartmentId() async {
     try {
-      final user = await AppStorage.getUser();
-      if (user != null && user['department'] != null) {
-        return user['department'].toString();
-      }
+      final user = await AppStorage.getAuthUser();
+      return user?.department;
     } catch (e) {
-      if (kDebugMode) print("Error getting user department: $e");
+      if (kDebugMode) dev.log("Error getting user department: $e");
     }
     return null;
   }
@@ -290,7 +276,7 @@ class DeptHeadController extends GetxController {
       recentActivity.value = activity;
       _processActivities();
     } catch (e) {
-      if (kDebugMode) print("Activity Error: $e");
+      if (kDebugMode) dev.log("Activity Error: $e");
     }
   }
 
@@ -508,32 +494,23 @@ class DeptHeadController extends GetxController {
   }
 
   void navigateToFullActivityList() {
-    print(
-      "🔄 Navigating to all-activities with ${processedActivities.length} activities",
-    );
-    print("Current route: ${Get.currentRoute}");
+    if (kDebugMode) {
+      dev.log(
+        "Navigating to all-activities with ${processedActivities.length} activities",
+      );
+      dev.log("Current route: ${Get.currentRoute}");
+    }
 
     Get.toNamed(
-          '/all-activities',
-          arguments: {
-            'departmentId': departmentId.value,
-            'activities': processedActivities.toList(),
-          },
-        )
-        ?.then((value) {
-          print("Returned from all-activities with: $value");
-        })
-        .catchError((error) {
-          print("Navigation error: $error");
-        });
+      '/all-activities',
+      arguments: {
+        'departmentId': departmentId.value,
+        'activities': processedActivities.toList(),
+      },
+    );
   }
 
   // ==================== UI HELPERS ====================
-
-  void _handleError(String message, dynamic error) {
-    errorMessage.value = message;
-    if (kDebugMode) print("$message: $error");
-  }
 
   String formatReadableMessage(String action, String checkpoint) {
     switch (action) {
@@ -556,18 +533,5 @@ class DeptHeadController extends GetxController {
     if (diff.inHours < 24) return '${diff.inHours}h ago';
     if (diff.inDays < 7) return '${diff.inDays}d ago';
     return '${date.day}/${date.month}/${date.year}';
-  }
-
-  String _formatUserRole(String role) {
-    switch (role) {
-      case 'CLIENT':
-        return 'Client';
-      case 'DEPARTMENT_HEAD':
-        return 'Department Head';
-      case 'QC_MEMBER':
-        return 'QC Member';
-      default:
-        return 'Unknown Role';
-    }
   }
 }

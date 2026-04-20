@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "176391217396",
+    "project_id": "darziflow-8fa32",
+    "storage_bucket": "darziflow-8fa32.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:176391217396:android:afdd209f462dc8d8f0bea1",
+        "android_client_info": {
+          "package_name": "com.example.dariziflow_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4_xRRUK7eFip63eNnIH0ZAh7C0eQfGhc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

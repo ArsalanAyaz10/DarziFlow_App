@@ -1,12 +1,11 @@
+import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/features/auth/repositories/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/widgets/custom_text_field.dart';
 import 'package:dariziflow_app/core/widgets/custom_dropdown.dart';
-import 'package:dariziflow_app/core/widgets/auth_header.dart';
-import 'package:dariziflow_app/core/widgets/terms_text.dart';
-import 'package:dariziflow_app/core/widgets/auth_bottom_link.dart';
+import 'package:dariziflow_app/features/auth/widgets/auth_header.dart';
+import 'package:dariziflow_app/features/forgotpassword/widgets/auth_bottom_link.dart';
 import 'package:dariziflow_app/core/widgets/custom_elevated_button.dart';
 import '../controllers/signup_controller.dart';
 
@@ -71,7 +70,22 @@ class SignupScreen extends GetView<SignupController> {
                 ),
                 const SizedBox(height: 15),
 
-                _buildRoleDropdown(),
+                Obx(
+                  () => CustomDropdown<UserRole>(
+                    value: controller.selectedRole.value,
+                    hint: "Select your role",
+                    prefixIcon: Icons.badge_outlined,
+                    label: "ROLE",
+                    showLabel: true,
+                    items: [UserRole.qcMember, UserRole.departmenthead]
+                        .map((role) => DropdownMenuItem<UserRole>(
+                              value: role,
+                              child: Text(getRoleString(role)),
+                            ))
+                        .toList(),
+                    onChanged: (value) => controller.selectedRole.value = value,
+                  ),
+                ),
                 const SizedBox(height: 15),
 
                 Obx(
@@ -99,14 +113,60 @@ class SignupScreen extends GetView<SignupController> {
                 ),
 
                 const SizedBox(height: 20),
-                const TermsText(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.grey,
+                        height: 1.5,
+                      ),
+                      children: const [
+                        TextSpan(
+                          text: "By creating an account, you agree to our ",
+                        ),
+                        TextSpan(
+                          text: "Terms of Service",
+                          style: TextStyle(
+                            color: AppColors.primaryGreen,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextSpan(text: " and "),
+                        TextSpan(
+                          text: "Privacy Policy",
+                          style: TextStyle(
+                            color: AppColors.primaryGreen,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 20),
 
                 Obx(
                   () => CustomElevatedButton(
                     onPressed: controller.isLoading.value
                         ? null
-                        : _handleFormSubmit,
+                        : () {
+                            if (_formKey.currentState!.validate()) {
+                              if (controller.selectedRole.value == null) {
+                                Get.snackbar(
+                                  "Role Required",
+                                  "Please select a user role to continue",
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  backgroundColor: Colors.redAccent,
+                                  colorText: Colors.white,
+                                );
+                                return;
+                              }
+                              controller.handleSignUp();
+                            }
+                          },
                     text: "Create Account",
                     icon: Icons.arrow_forward,
                     isLoading: controller.isLoading.value,
@@ -124,43 +184,6 @@ class SignupScreen extends GetView<SignupController> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  void _handleFormSubmit() {
-    if (_formKey.currentState!.validate()) {
-      if (controller.selectedRole.value == null) {
-        Get.snackbar(
-          "Role Required",
-          "Please select a user role to continue",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.redAccent,
-          colorText: Colors.white,
-        );
-        return;
-      }
-      controller.handleSignUp();
-    }
-  }
-
-  Widget _buildRoleDropdown() {
-    final roleOptions = [UserRole.qcMember, UserRole.departmenthead];
-
-    return Obx(
-      () => CustomDropdown<UserRole>(
-        value: controller.selectedRole.value,
-        hint: "Select your role",
-        prefixIcon: Icons.badge_outlined,
-        label: "ROLE",
-        showLabel: true,
-        items: roleOptions.map((role) {
-          return DropdownMenuItem<UserRole>(
-            value: role,
-            child: Text(getRoleString(role)),
-          );
-        }).toList(),
-        onChanged: (value) => controller.selectedRole.value = value,
       ),
     );
   }

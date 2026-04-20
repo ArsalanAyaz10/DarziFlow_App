@@ -25,4 +25,8 @@ class ApiClient {
   Future<Response> upload(String path, FormData formData) {
     return dio.post(path, data: formData);
   }
+
+  Future<Response> patch(String path, {dynamic data}) {
+    return dio.patch(path, data: data);
+  }
 }

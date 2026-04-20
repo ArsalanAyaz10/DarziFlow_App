@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/utils/fonts.dart';
 
 class AuthHeader extends StatelessWidget {
