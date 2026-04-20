@@ -7,34 +7,86 @@ import 'package:get/get.dart';
 class OperationDetails extends StatelessWidget {
   final OperationModel op;
   final String? orderId;
+  final String userRole;
 
-  const OperationDetails({super.key, required this.op, required this.orderId});
+  const OperationDetails({
+    super.key,
+    required this.op,
+    required this.orderId,
+    this.userRole = '',
+  });
+
+  bool get _isQC => userRole.toUpperCase() == 'QC_MEMBER';
 
   @override
   Widget build(BuildContext context) {
     final currentCP = op.checkpoints.isNotEmpty ? op.checkpoints.last : null;
     if (currentCP == null) return const SizedBox.shrink();
 
-    String buttonLabel = "Submit Checkpoint";
-    bool isBtnDisabled = false;
-    Color btnColor = AppColors.primaryGreen;
+    // --- Role-based button configuration ---
+    String buttonLabel;
+    bool isBtnDisabled;
+    Color btnColor;
+    VoidCallback? onPressed;
 
-    if (currentCP.status == 'SUBMITTED' || currentCP.isQcPending) {
-      buttonLabel = "Already Submitted";
-      isBtnDisabled = true;
-      btnColor = Colors.orange;
-    } else if (currentCP.status == 'QC_APPROVED' || currentCP.isApproved) {
-      buttonLabel = "Checkpoint Approved";
-      isBtnDisabled = true;
-      btnColor = Colors.grey.shade400;
-    } else if (currentCP.status == 'QC_REJECTED' || currentCP.isRejected) {
-      buttonLabel = "Re-submit Checkpoint";
-      isBtnDisabled = false;
-      btnColor = Colors.redAccent;
-    } else if (currentCP.status == 'PENDING') {
-      buttonLabel = "Submit Checkpoint";
-      isBtnDisabled = false;
-      btnColor = AppColors.primaryGreen;
+    if (_isQC) {
+      // QC MEMBER: "Review Checkpoint" — only enabled when status is SUBMITTED
+      final isSubmitted = currentCP.status == 'SUBMITTED' || currentCP.isQcPending;
+      final isAlreadyReviewed = currentCP.isApproved || currentCP.isRejected;
+
+      if (isAlreadyReviewed) {
+        buttonLabel = currentCP.isApproved ? "Already Approved" : "Already Rejected";
+        isBtnDisabled = true;
+        btnColor = currentCP.isApproved ? Colors.grey.shade400 : Colors.redAccent;
+        onPressed = null;
+      } else if (isSubmitted) {
+        buttonLabel = "Review Checkpoint";
+        isBtnDisabled = false;
+        btnColor = Colors.orange;
+        onPressed = () => Get.toNamed(
+              '/submit-checkpoint',
+              arguments: {
+                'operation': op,
+                'checkpoint': currentCP,
+                'orderId': orderId,
+              },
+            );
+      } else {
+        buttonLabel = "Awaiting Submission";
+        isBtnDisabled = true;
+        btnColor = Colors.grey.shade400;
+        onPressed = null;
+      }
+    } else {
+      // DEPARTMENT HEAD / DEFAULT: existing submit logic
+      if (currentCP.status == 'SUBMITTED' || currentCP.isQcPending) {
+        buttonLabel = "Already Submitted";
+        isBtnDisabled = true;
+        btnColor = Colors.orange;
+      } else if (currentCP.status == 'QC_APPROVED' || currentCP.isApproved) {
+        buttonLabel = "Checkpoint Approved";
+        isBtnDisabled = true;
+        btnColor = Colors.grey.shade400;
+      } else if (currentCP.status == 'QC_REJECTED' || currentCP.isRejected) {
+        buttonLabel = "Re-submit Checkpoint";
+        isBtnDisabled = false;
+        btnColor = Colors.redAccent;
+      } else {
+        buttonLabel = "Submit Checkpoint";
+        isBtnDisabled = false;
+        btnColor = AppColors.primaryGreen;
+      }
+
+      onPressed = isBtnDisabled
+          ? null
+          : () => Get.toNamed(
+                '/submit-checkpoint',
+                arguments: {
+                  'operation': op,
+                  'checkpoint': currentCP,
+                  'orderId': orderId,
+                },
+              );
     }
 
     return Container(
@@ -57,16 +109,7 @@ class OperationDetails extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: isBtnDisabled
-                    ? null
-                    : () => Get.toNamed(
-                        '/submit-checkpoint',
-                        arguments: {
-                          'operation': op,
-                          'checkpoint': currentCP,
-                          'orderId': orderId,
-                        },
-                      ),
+                onPressed: onPressed,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: btnColor,
                   disabledBackgroundColor: Colors.grey.shade300,

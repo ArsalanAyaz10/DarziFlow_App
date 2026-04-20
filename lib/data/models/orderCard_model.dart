@@ -66,6 +66,10 @@ class OrderModel {
             typeString = cp['submissionType'].toString();
           }
 
+          final List<String> allowedTypesList = (cp['allowedSubmissionTypes'] as List? ?? [])
+              .map((e) => e.toString())
+              .toList();
+
           return CheckpointModel(
             id: cp['_id'] ?? '',
             name: cp['name'] ?? '',
@@ -74,7 +78,10 @@ class OrderModel {
             qcRequired: cp['qcRequired'] ?? false,
             submissionType: _parseSubmissionType(typeString),
             minUploads: num.tryParse(cp['minUploads']?.toString() ?? '0')?.toInt() ?? 0,
-            submissionFiles: [],
+            allowedTypes: allowedTypesList,
+            submissionFiles: (cp['submissionFiles'] as List? ?? [])
+                .map((f) => SubmissionFile.fromJson(f as Map<String, dynamic>))
+                .toList(),
             history: (cp['history'] as List? ?? []).map((h) {
               return HistoryItem(
                 action: h['action'] ?? '',

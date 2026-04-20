@@ -4,6 +4,8 @@ import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:dariziflow_app/data/services/deeplink_service.dart';
 import 'package:dariziflow_app/features/auth/repositories/auth_repository.dart';
 import 'package:dariziflow_app/features/auth/service/auth_service.dart';
+import 'package:dariziflow_app/features/notifications/controllers/notification_controller.dart';
+import 'package:dariziflow_app/features/notifications/repositories/notification_repository.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/bindings_interface.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
@@ -36,5 +38,10 @@ class InitialBinding extends Bindings {
 
     final authRepo = AuthRepository(authService: authService);
     Get.put<AuthRepository>(authRepo, permanent: true);
+
+    // Initialize NotificationRepository & Controller for global badge access
+    final notificationRepo = NotificationRepository(apiClient: apiClient);
+    Get.put<NotificationRepository>(notificationRepo, permanent: true);
+    Get.put<NotificationController>(NotificationController(repository: notificationRepo), permanent: true);
   }
 }

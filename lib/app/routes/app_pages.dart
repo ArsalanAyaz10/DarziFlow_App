@@ -8,18 +8,21 @@ import 'package:dariziflow_app/features/deptHeadDashboard/views/dashboard_screen
 import 'package:dariziflow_app/features/forgotpassword/bindings/password_binding.dart';
 import 'package:dariziflow_app/features/forgotpassword/views/forgotPassword_screen.dart';
 import 'package:dariziflow_app/features/forgotpassword/views/resetPassword_screen.dart';
-import 'package:dariziflow_app/features/orders/bindings/all_orders_binding.dart';
 import 'package:dariziflow_app/features/orders/views/OrderWorkflow_screen.dart';
-import 'package:dariziflow_app/features/orders/views/all_orders_screen.dart';
 import 'package:dariziflow_app/features/orders/views/order_detail_screen.dart';
-import 'package:dariziflow_app/features/orders/views/order_screen.dart';
+import 'package:dariziflow_app/features/orders/views/all_order_screen.dart';
 import 'package:dariziflow_app/features/orders/views/submitCheckpoint_screen.dart';
 import 'package:dariziflow_app/features/profile/bindings/editprofile_binding.dart';
 import 'package:dariziflow_app/features/profile/bindings/viewprofile_binding.dart';
 import 'package:dariziflow_app/features/profile/views/editprofile_screen.dart';
 import 'package:dariziflow_app/features/profile/views/viewprofile_screen.dart';
+import 'package:dariziflow_app/features/notifications/bindings/notification_binding.dart';
+import 'package:dariziflow_app/features/notifications/views/notification_inbox_screen.dart';
 import 'package:dariziflow_app/features/orders/bindings/order_binding.dart';
 import 'package:dariziflow_app/features/splash/views/splash_screen.dart';
+import 'package:dariziflow_app/features/qcDashboard/bindings/qc_dashboard_binding.dart';
+import 'package:dariziflow_app/features/qcDashboard/views/qc_dashboard_screen.dart';
+import 'package:dariziflow_app/features/qcDashboard/views/all_reviews_screen.dart';
 import 'package:get/get.dart';
 part 'app_routes.dart';
 
@@ -50,6 +53,16 @@ class AppPages {
       binding: DeptheadBindings(),
     ),
     GetPage(
+      name: Routes.qcDashboard,
+      page: () => const QCDashboardScreen(),
+      binding: QcDashboardBinding(),
+    ),
+    GetPage(
+      name: Routes.allReviews,
+      page: () => const AllReviewsScreen(),
+      binding: QcDashboardBinding(),
+    ),
+    GetPage(
       name: Routes.resetpassword,
       page: () => const ResetPasswordView(),
       binding: ForgotPasswordBinding(),
@@ -68,31 +81,32 @@ class AppPages {
     ),
 
     GetPage(name: '/all-activities', page: () => const AllActivitiesScreen()),
-    GetPage(
-      name: Routes.allOrders,
-      page: () => const AllOrdersScreen(),
-      binding: AllOrdersBinding(),
-    ),
+
     GetPage(
       name: Routes.orders,
-      page: () => const OrderScreen(),
+      page: () => const AllOrderScreen(),
       binding: OrderBinding(),
     ),
     GetPage(
       name: Routes.orderDetails,
       page: () => OrderDetailScreen(),
-      binding: OrderBinding(),
+      bindings: [OrderBinding(), QcDashboardBinding()],
     ),
     GetPage(
       name: Routes.workflow,
       page: () => OrderWorkflowScreen(),
-      binding: OrderBinding(),
+      bindings: [OrderBinding(), QcDashboardBinding()],
     ),
 
     GetPage(
-      binding: OrderBinding(),
+      bindings: [OrderBinding(), QcDashboardBinding()],
       name: Routes.submitCheckpoint,
       page: () => const SubmitcheckpointScreen(),
+    ),
+    GetPage(
+      name: '/notification-inbox',
+      page: () => const NotificationInboxScreen(),
+      binding: NotificationBinding(),
     ),
   ];
 }

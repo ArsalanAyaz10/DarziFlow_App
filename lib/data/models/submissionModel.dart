@@ -8,6 +8,14 @@ class SubmissionFile {
     required this.publicId,
     required this.resourceType,
   });
+
+  factory SubmissionFile.fromJson(Map<String, dynamic> json) {
+    return SubmissionFile(
+      url: json['url'] ?? '',
+      publicId: json['publicId'] ?? '',
+      resourceType: json['resourceType'] ?? 'image',
+    );
+  }
 }
 
 class HistoryItem {

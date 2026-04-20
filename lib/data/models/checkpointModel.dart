@@ -10,6 +10,7 @@ class CheckpointModel {
   final bool qcRequired;
   final SubmissionType submissionType; //img,video,text,doc
   final int minUploads;
+  final List<String> allowedTypes;
 
   final List<SubmissionFile> submissionFiles;
 
@@ -25,6 +26,7 @@ class CheckpointModel {
     required this.history,
     required this.submissionType,
     required this.minUploads,
+    this.allowedTypes = const [],
   });
 
   bool get isRejected => status == "QC_REJECTED";

@@ -1,5 +1,6 @@
 import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:dariziflow_app/core/utils/colors.dart';
+import 'package:dariziflow_app/core/utils/global.dart';
 import 'package:dariziflow_app/data/services/cookie_service.dart';
 import 'package:dariziflow_app/features/auth/repositories/auth_repository.dart';
 import 'package:flutter/foundation.dart';
@@ -126,6 +127,9 @@ class ViewprofileController extends GetxController {
 
       final cookieJar = await _cookieService.cookieJar;
       await authRepository.logout(cookieJar);
+
+      // Clear remember me so user won't be auto-logged-in next time
+      box.remove('remember_me');
 
       await Future.delayed(const Duration(milliseconds: 500));
       Get.offAllNamed('/splash');

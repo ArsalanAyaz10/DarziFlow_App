@@ -1,4 +1,3 @@
-import 'package:dariziflow_app/features/orders/controllers/all_orders_controller.dart';
 import 'package:dariziflow_app/features/orders/repository/order_repository.dart';
 import 'package:dariziflow_app/features/orders/services/order_service.dart';
 import 'package:get/get.dart';
@@ -8,6 +7,5 @@ class AllOrdersBinding extends Bindings {
   void dependencies() {
     Get.lazyPut(() => OrderService(Get.find()));
     Get.lazyPut(() => OrderRepository(Get.find()));
-    Get.lazyPut(() => AllOrdersController(Get.find()));
   }
 }

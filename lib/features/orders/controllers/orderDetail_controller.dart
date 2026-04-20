@@ -1,6 +1,7 @@
 import 'package:dariziflow_app/data/models/orderCard_model.dart';
 import 'package:dariziflow_app/data/models/submissionModel.dart';
 import 'package:dariziflow_app/features/orders/repository/order_repository.dart';
+import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:get/get.dart';
 import 'dart:developer' as dev;
 
@@ -12,6 +13,7 @@ class OrderDetailController extends GetxController {
   var isLoading = false.obs;
   var progress = 0.obs;
   var currentPhase = 'N/A'.obs;
+  var userRole = ''.obs;
   late String orderId;
 
   @override
@@ -22,13 +24,29 @@ class OrderDetailController extends GetxController {
     if (args is OrderModel) {
       orderId = args.orderId;
       order.value = args;
+      progress.value = args.progress.round();
+      currentPhase.value = _calculateCurrentPhase(args);
     } else if (args is Map && args.containsKey('orderId')) {
       orderId = args['orderId'].toString();
     } else {
       orderId = args.toString();
     }
 
-    _initialize();
+    // Load user role for role-based UI
+    _loadUserRole();
+
+    if (order.value == null) {
+      _initialize();
+    }
+  }
+
+  Future<void> _loadUserRole() async {
+    try {
+      final role = await AppStorage.getUserRole();
+      userRole.value = role?.toUpperCase() ?? '';
+    } catch (e) {
+      dev.log("Error loading user role: $e");
+    }
   }
 
   Future<void> _initialize() async {

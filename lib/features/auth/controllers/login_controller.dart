@@ -1,4 +1,8 @@
+import 'package:dariziflow_app/core/network/api_client.dart';
+import 'package:dariziflow_app/core/utils/global.dart';
 import 'package:dariziflow_app/core/utils/role_router.dart';
+import 'package:dariziflow_app/data/services/notifications_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../repositories/auth_repository.dart';
@@ -13,11 +17,39 @@ class LoginController extends GetxController {
   final formKey = GlobalKey<FormState>();
   var isPasswordVisible = false.obs;
   var isLoading = false.obs;
+  var rememberMe = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    rememberMe.value = box.read('remember_me') ?? false;
+  }
 
   var selectedRole = Rxn<UserRole>();
   final List<UserRole> roles = [UserRole.qcMember, UserRole.departmenthead];
 
   void togglePasswordVisibility() => isPasswordVisible.toggle();
+  void toggleRememberMe(bool? value) => rememberMe.value = value ?? false;
+
+  Future<void> syncFcmToken() async {
+    try {
+      String? token = await Get.find<NotificationService>().getDeviceToken();
+
+      if (token != null) {
+        await Get.find<ApiClient>().post(
+          "/auth/update-fcm-token",
+          data: {"token": token},
+        );
+        if (kDebugMode) {
+          print("FCM Token synced with backend");
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("FCM Sync Error: $e");
+      }
+    }
+  }
 
   Future<void> handleLogin() async {
     if (emailController.text.isEmpty || passwordController.text.isEmpty) {
@@ -38,7 +70,28 @@ class LoginController extends GetxController {
         emailController.text.trim(),
         passwordController.value.text.trim(),
       );
-      RoleRouter.route(authUser.role);
+
+      if (kDebugMode) {
+        print("Authenticated User: ${authUser.name} (${authUser.role})");
+      }
+
+      syncFcmToken();
+
+      // Save remember me preference
+      if (rememberMe.value) {
+        box.write('remember_me', true);
+      } else {
+        box.remove('remember_me');
+      }
+
+      // Check for a pending route saved from a notification tap while logged out
+      final pendingRoute = box.read('pending_route');
+      if (pendingRoute != null) {
+        box.remove('pending_route');
+        Get.offAllNamed(pendingRoute);
+      } else {
+        RoleRouter.route(authUser.role);
+      }
     } catch (e) {
       Get.snackbar(
         "Login Failed",

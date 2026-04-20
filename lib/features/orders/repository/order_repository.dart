@@ -37,6 +37,28 @@ class OrderRepository {
     }
   }
 
+  Future<List<dynamic>> fetchGlobalActiveWorkflows() async {
+    try {
+      final data = await service.getGlobalActiveWorkflows();
+      return data["orders"] ?? [];
+    } catch (e) {
+      if (kDebugMode) dev.log("Error fetching global active workflows: $e");
+      return [];
+    }
+  }
+
+  Future<List<dynamic>> fetchAllOrders() async {
+    try {
+      final data = await service.getAllOrders();
+      // If the response is a direct list, return it. If it's a map with "orders" key, return that.
+      if (data is List) return data;
+      return data["orders"] ?? [];
+    } catch (e) {
+      if (kDebugMode) dev.log("Error fetching all orders: $e");
+      return [];
+    }
+  }
+
   Future<List<dynamic>> fetchAllWorkflows(String id) async {
     try {
       final data = await service.getAllDepartmentOrders(id);

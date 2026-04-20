@@ -76,25 +76,64 @@ class LoginScreen extends GetView<LoginController> {
                   ),
                 ),
 
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () => Get.toNamed('/forgot-password'),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 4,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Obx(
+                      () => Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: Checkbox(
+                              value: controller.rememberMe.value,
+                              onChanged: controller.toggleRememberMe,
+                              activeColor: AppColors.primaryGreen,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              side: BorderSide(
+                                color: colors.onSurfaceVariant,
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          GestureDetector(
+                            onTap: () => controller.toggleRememberMe(
+                              !controller.rememberMe.value,
+                            ),
+                            child: Text(
+                              "Remember me",
+                              style: TextStyle(
+                                color: colors.onSurfaceVariant,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    child: Text(
-                      "Forgot Password?",
-                      style: const TextStyle(
-                        color: AppColors.primaryGreen,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
+                    TextButton(
+                      onPressed: () => Get.toNamed('/forgot-password'),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 4,
+                        ),
+                      ),
+                      child: Text(
+                        "Forgot Password?",
+                        style: const TextStyle(
+                          color: AppColors.primaryGreen,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
 
                 const SizedBox(height: 20),

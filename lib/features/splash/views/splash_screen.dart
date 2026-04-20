@@ -1,6 +1,8 @@
+import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/utils/fonts.dart';
 import 'package:dariziflow_app/core/utils/global.dart';
+import 'package:dariziflow_app/core/utils/role_router.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
@@ -38,9 +40,29 @@ class _SplashScreenState extends State<SplashScreen> {
   void _handleNavigation() {
     bool isOnboardingDone = box.read('onboarding') ?? false;
 
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 3), () async {
       if (isOnboardingDone) {
-        Get.offAllNamed('/login');
+        // Auto-login: check if user chose "Remember Me" and has a valid session
+        final token = await AppStorage.getAccessToken();
+        final rememberMe = box.read('remember_me') ?? false;
+        if (token != null && rememberMe) {
+          // User is already authenticated — check for a pending notification route
+          final pendingRoute = box.read('pending_route');
+          if (pendingRoute != null) {
+            box.remove('pending_route');
+            Get.offAllNamed(pendingRoute);
+          } else {
+            // No pending route — route based on stored role
+            final role = await AppStorage.getUserRole();
+            if (role != null) {
+              RoleRouter.route(role);
+            } else {
+              Get.offAllNamed('/login');
+            }
+          }
+        } else {
+          Get.offAllNamed('/login');
+        }
       } else {
         if (pageController.hasClients) {
           pageController.animateToPage(

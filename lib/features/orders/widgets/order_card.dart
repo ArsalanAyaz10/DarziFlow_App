@@ -20,7 +20,6 @@ class OrderCard extends StatelessWidget {
     if (isCompleted) progressColor = theme.colorScheme.primary;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
@@ -66,7 +65,7 @@ class OrderCard extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -156,6 +155,7 @@ class OrderCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
+        border: Border.all(color: color.withValues(alpha: 1), width: 1),
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),

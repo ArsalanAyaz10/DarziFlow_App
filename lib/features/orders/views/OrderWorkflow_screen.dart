@@ -33,57 +33,63 @@ class OrderWorkflowScreen extends GetView<OrderDetailController> {
         if (controller.isLoading.value || controller.order.value == null) {
           return const OrderWorkflowShimmer();
         }
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: theme.dividerColor.withValues(alpha: 0.9),
+        return RefreshIndicator(
+          onRefresh: () => controller.refreshOrderDetails(),
+          color: AppColors.primaryGreen,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: theme.dividerColor.withValues(alpha: 1),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Production Progress",
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          Text(
+                            "${controller.progress.value}%",
+                            style: const TextStyle(
+                              color: AppColors.primaryGreen,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 15),
+                      LinearProgressIndicator(
+                        value: controller.progress.value / 100,
+                        backgroundColor: AppColors.primaryGreen.withValues(
+                          alpha: 0.1,
+                        ),
+                        color: AppColors.primaryGreen,
+                        borderRadius: BorderRadius.circular(10),
+                        minHeight: 8,
+                      ),
+                    ],
                   ),
                 ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          "Production Progress",
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        Text(
-                          "${controller.progress.value}%",
-                          style: const TextStyle(
-                            color: AppColors.primaryGreen,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 15),
-                    LinearProgressIndicator(
-                      value: controller.progress.value / 100,
-                      backgroundColor: AppColors.primaryGreen.withValues(
-                        alpha: 0.1,
-                      ),
-                      color: AppColors.primaryGreen,
-                      borderRadius: BorderRadius.circular(10),
-                      minHeight: 8,
-                    ),
-                  ],
+                const SizedBox(height: 20),
+                OrderTimeline(
+                  operations: controller.order.value?.operations ?? [],
+                  orderId: controller.order.value?.orderId,
+                  userRole: controller.userRole.value,
                 ),
-              ),
-              const SizedBox(height: 25),
-              OrderTimeline(
-                operations: controller.order.value?.operations ?? [],
-                orderId: controller.order.value?.orderId,
-              ),
-            ],
+              ],
+            ),
           ),
         );
       }),

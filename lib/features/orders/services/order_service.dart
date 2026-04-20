@@ -10,6 +10,11 @@ class OrderService {
     return await apiClient.get('/$route/$orderID');
   }
 
+  Future<dynamic> getAllOrders() async {
+    final response = await apiClient.get('/$route/');
+    return response.data;
+  }
+
   Future<dynamic> getDepartmentOrders(String deptID) async {
     final response = await apiClient.get("/stats/$deptID/active-workflows");
     return response.data;
@@ -17,6 +22,11 @@ class OrderService {
 
   Future<dynamic> getAllDepartmentOrders(String deptID) async {
     final response = await apiClient.get("/stats/$deptID/all-workflows");
+    return response.data;
+  }
+
+  Future<dynamic> getGlobalActiveWorkflows() async {
+    final response = await apiClient.get("/stats/active-workflows");
     return response.data;
   }
 

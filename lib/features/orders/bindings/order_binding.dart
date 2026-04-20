@@ -21,8 +21,8 @@ class OrderBinding extends Bindings {
     Get.lazyPut(
       () => CheckpointController(
         Get.find<OrderRepository>(),
-        Get.find<DepartmentRepository>(),
         Get.find<UploadService>(),
+        Get.find<OrderDetailController>(),
       ),
     );
   }

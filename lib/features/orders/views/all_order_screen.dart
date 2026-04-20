@@ -10,9 +10,10 @@ import 'package:dariziflow_app/features/orders/widgets/order_search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dariziflow_app/app/routes/app_pages.dart';
+import 'package:dariziflow_app/features/notifications/controllers/notification_controller.dart' as darizi_notifications;
 
-class OrderScreen extends GetView<OrderController> {
-  const OrderScreen({super.key});
+class AllOrderScreen extends GetView<OrderController> {
+  const AllOrderScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,18 +21,31 @@ class OrderScreen extends GetView<OrderController> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
+      bottomNavigationBar: const BottomNavBar(currentIndex: 1),
       appBar: CustomAppBar(
-        title: 'Orders',
+        title: 'All Orders',
         isTransparent: false,
+        centerTitle: true,
         showBackButton: false,
         actions: [
           IconButton(
-            icon: Icon(
-              Icons.notifications_outlined,
-              color: theme.iconTheme.color,
-            ),
+            icon: Obx(() {
+              final unreadCount =
+                  Get.find<darizi_notifications.NotificationController>()
+                      .unreadCount
+                      .value;
+              return Badge(
+                isLabelVisible: unreadCount > 0,
+                label: Text(unreadCount > 99 ? '99+' : unreadCount.toString()),
+                backgroundColor: AppColors.error,
+                child: Icon(
+                  Icons.notifications_outlined,
+                  color: theme.iconTheme.color,
+                ),
+              );
+            }),
             onPressed: () {
-              // TODO: Notifications Feature
+              Get.toNamed('/notification-inbox');
             },
           ),
         ],
@@ -48,16 +62,16 @@ class OrderScreen extends GetView<OrderController> {
               children: [
                 Icon(
                   Icons.error_outline,
-                  size: 64,
+                  size: 60,
                   color: theme.colorScheme.error,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 10),
                 Text(
                   controller.errorMessage.value,
                   style: theme.textTheme.bodyMedium,
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: controller.fetchOrders,
                   style: ElevatedButton.styleFrom(
@@ -67,14 +81,21 @@ class OrderScreen extends GetView<OrderController> {
                       vertical: 12,
                     ),
                   ),
-                  child: const Text('Retry'),
+                  child: const Text(
+                    'Retry',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
                 ),
               ],
             ),
           );
         }
 
-        if (controller.orders.isEmpty) {
+        if (controller.filteredOrders.isEmpty) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -86,15 +107,25 @@ class OrderScreen extends GetView<OrderController> {
                     alpha: 0.5,
                   ),
                 ),
-                const SizedBox(height: 16),
-                Text('No Orders Found', style: theme.textTheme.titleLarge),
-                const SizedBox(height: 8),
-                Text(
-                  'There are no active orders in your department',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                const SizedBox(height: 10),
+                Center(
+                  child: Text(
+                    'No Orders Found',
+                    style: theme.textTheme.titleMedium,
                   ),
-                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Center(
+                  child: Text(
+                    controller.userRole.value == "QC_MEMBER" 
+                        ? 'There are no orders currently in production'
+                        : 'There are no active orders in your department',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ],
             ),
@@ -120,6 +151,7 @@ class OrderScreen extends GetView<OrderController> {
                 onRefresh: controller.fetchOrders,
                 child: ListView.builder(
                   padding: const EdgeInsets.all(16),
+                  shrinkWrap: true,
                   itemCount: controller.filteredOrders.length,
                   itemBuilder: (context, index) {
                     final order = controller.filteredOrders[index];
@@ -134,7 +166,6 @@ class OrderScreen extends GetView<OrderController> {
                 ),
               ),
             ),
-            const BottomNavBar(currentIndex: 1),
           ],
         );
       }),

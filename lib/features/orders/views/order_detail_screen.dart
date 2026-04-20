@@ -1,3 +1,4 @@
+import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/features/orders/controllers/orderDetail_controller.dart';
 import 'package:dariziflow_app/features/orders/widgets/order_detail_shimmer.dart';
 import 'package:flutter/material.dart';
@@ -24,12 +25,6 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
         centerTitle: false,
         isTransparent: true,
         showBackButton: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.more_vert, color: brandGreen),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: Obx(() {
         if (controller.isLoading.value && controller.order.value == null) {
@@ -73,7 +68,7 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // --- HEADER ---
+                // header
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -88,8 +83,8 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    ActiveStatusBadge(order.overallStatus, colors),
+                    const SizedBox(width: 12),
+                    activeStatusBadge(order.overallStatus, colors),
                   ],
                 ),
                 const SizedBox(height: 24),
@@ -106,7 +101,7 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
                     ),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: colors.outline.withValues(alpha: 0.05),
+                      color: colors.outline.withValues(alpha: 1),
                     ),
                   ),
                   child: Row(
@@ -114,18 +109,17 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        "TOTAL INVOICE AMOUNT",
+                        "TOTAL ORDER AMOUNT",
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: colors.onSurfaceVariant,
-                          letterSpacing: 1.2,
                         ),
                       ),
                       Text(
                         "${controller.order.value!.currency} ${controller.order.value!.amount}",
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 18,
                           fontWeight: FontWeight.w800,
                           color: colors.onSurface,
                           letterSpacing: -0.5,
@@ -134,30 +128,24 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
 
                 Row(
                   children: [
                     Expanded(
-                      child: DateBox(
-                        "CREATED AT",
-                        createdAtStr,
-                        colors,
-                      ),
+                      child: dateBox("CREATED AT", createdAtStr, colors),
                     ),
                     const SizedBox(width: 16),
-                    Expanded(
-                      child: DateBox("DUE DATE", dueDateStr, colors),
-                    ),
+                    Expanded(child: dateBox("DUE DATE", dueDateStr, colors)),
                   ],
                 ),
                 const SizedBox(height: 32),
 
                 Divider(
-                  color: colors.outline.withValues(alpha: 0.1),
+                  color: colors.outline.withValues(alpha: 0.6),
                   height: 1,
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 20),
 
                 // CLIENT DETAILS
                 Row(
@@ -174,29 +162,27 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
                     Icon(
                       Icons.contact_mail_rounded,
                       color: brandGreen.withValues(alpha: 0.8),
-                      size: 22,
+                      size: 20,
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: colors.surfaceContainerHighest.withValues(
-                      alpha: 0.4,
+                      alpha: 0.5,
                     ),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: colors.outline.withValues(alpha: 0.05),
+                      color: colors.outline.withValues(alpha: 1),
                     ),
                   ),
                   child: Row(
                     children: [
                       CircleAvatar(
-                        radius: 24,
-                        backgroundColor: isDark
-                            ? Colors.black26
-                            : Colors.white60,
+                        radius: 20,
+                        backgroundColor: isDark ? Colors.white24 : Colors.grey,
                         child: const Icon(Icons.person, color: brandGreen),
                       ),
                       const SizedBox(width: 16),
@@ -212,11 +198,11 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
                                 color: colors.onSurface,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: 2),
                             Text(
                               controller.order.value!.clientEmail,
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize: 13,
                                 color: colors.onSurfaceVariant,
                               ),
                             ),
@@ -226,17 +212,35 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
 
                 CustomElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('Notice'),
+                          content: const Text('Chat feature coming soon!'),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text('OK'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
                   text: "Chat",
                   icon: Icons.chat_bubble,
-                  backgroundColor: brandGreen,
-                  height: 56,
+                  backgroundColor: AppColors.primaryGreen,
+                  height: 55,
                   borderRadius: 25,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 CustomElevatedButton(
                   onPressed: () {
                     Get.toNamed(
@@ -245,12 +249,13 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
                     );
                   },
                   text: "Open Workflow",
+
                   icon: Icons.account_tree,
                   backgroundColor: colors.surfaceContainerHighest,
-                  height: 56,
+                  height: 50,
                   borderRadius: 25,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
               ],
             ),
           ),
@@ -260,9 +265,9 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
     );
   }
 
-//mthds
+  //mthds
 
-  Widget ActiveStatusBadge(String status, ColorScheme colors) {
+  Widget activeStatusBadge(String status, ColorScheme colors) {
     if (status == 'null' || status.isEmpty) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -284,7 +289,7 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
 
     Color activeColor = const Color(0xFF96E072);
     if (status == "IN_PROGRESS") {
-      activeColor = Colors.orange;
+      activeColor = Colors.redAccent;
     } else if (status == "COMPLETED") {
       activeColor = colors.primary;
     }
@@ -322,13 +327,13 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
     );
   }
 
-  Widget DateBox(String label, String date, ColorScheme colors) {
+  Widget dateBox(String label, String date, ColorScheme colors) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: colors.surfaceContainerHighest.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colors.outline.withValues(alpha: 0.05)),
+        border: Border.all(color: colors.outline.withValues(alpha: 1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -342,7 +347,7 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
               letterSpacing: 1.2,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 5),
           Text(
             date,
             style: TextStyle(

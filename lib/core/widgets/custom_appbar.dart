@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -34,11 +35,23 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
     return AppBar(
       backgroundColor: isTransparent ? Colors.transparent : colors.surface,
-      elevation: isTransparent ? 0 : 1,
+      elevation: 0,
+      surfaceTintColor: Colors.transparent,
       centerTitle: centerTitle,
       leading: leading ?? _buildLeading(context, colors),
       title: _buildTitle(theme, colors),
       actions: actions,
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1.0),
+        child: Container(
+          color: colors.primary.withValues(alpha: 0.3), // Primary highlight line
+          height: 1.0,
+        ),
+      ),
+      systemOverlayStyle: theme.appBarTheme.systemOverlayStyle ??
+          (theme.brightness == Brightness.dark
+              ? SystemUiOverlayStyle.light
+              : SystemUiOverlayStyle.dark),
     );
   }
 
@@ -56,7 +69,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
     if (showBackButton) {
       return IconButton(
-        icon: Icon(Icons.arrow_back_ios_new, size: 20, color: colors.onSurface),
+        icon: Icon(Icons.arrow_back_ios_new, size: 18, color: colors.onSurface),
         onPressed: onBackPress ?? () => Get.back(),
       );
     }
@@ -71,7 +84,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: colors.onSurface.withValues(alpha: 0.1),
       backgroundImage: hasImage ? NetworkImage(userAvatarUrl!) : null,
       child: !hasImage
-          ? const Icon(Icons.person, size: 20, color: Colors.green)
+          ? Icon(Icons.person, size: 20, color: colors.primary)
           : null,
     );
   }
@@ -86,7 +99,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         Text(
           title ?? "",
           style: TextStyle(
-            color: isDashboard ? Colors.white : colors.onSurface,
+            color: colors.onSurface,
             fontWeight: FontWeight.bold,
             fontSize: isDashboard ? 14 : 16,
           ),

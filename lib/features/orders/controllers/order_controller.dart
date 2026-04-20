@@ -14,6 +14,7 @@ class OrderController extends GetxController {
 
   var isLoading = false.obs;
   var errorMessage = ''.obs;
+  var userRole = ''.obs;
 
   var selectedFilter = 'All'.obs;
   final List<String> filterOptions = ['All', 'Active', 'Completed'];
@@ -33,7 +34,7 @@ class OrderController extends GetxController {
     super.onClose();
   }
 
-  Future<String?> _getDepartmentId() async {
+  Future<String?> getDepartmentId() async {
     try {
       final user = await AppStorage.getAuthUser();
       return user?.department;
@@ -56,16 +57,21 @@ class OrderController extends GetxController {
     errorMessage.value = '';
 
     try {
-      final deptId = await _getDepartmentId();
+      final role = await AppStorage.getUserRole() ?? "";
+      userRole.value = role.toUpperCase();
+      final isQC = userRole.value == "QC_MEMBER";
 
-      if (deptId == null) {
-        errorMessage.value = "Department not found.";
-        return;
+      List data;
+      if (isQC) {
+        data = await repository.fetchAllOrders();
+      } else {
+        final deptId = await getDepartmentId();
+        if (deptId == null) {
+          errorMessage.value = "Department not found.";
+          return;
+        }
+        data = await repository.fetchActiveWorkflows(deptId);
       }
-
-      final response = await repository.fetchActiveWorkflows(deptId);
-
-      final List data = response;
 
       orders.value = data.map((json) => OrderModel.fromJson(json)).toList();
     } catch (e) {
@@ -88,6 +94,14 @@ class OrderController extends GetxController {
           })
           .toList()
           .obs;
+    }
+
+    final role = userRole.value;
+    final isQC = role == "QC_MEMBER";
+
+    // Base filter for QC: Hide orders that haven't started (0% progress)
+    if (isQC) {
+      list = list.where((o) => o.progress > 0).toList().obs;
     }
 
     switch (selectedFilter.value) {

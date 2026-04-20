@@ -1,8 +1,10 @@
 import 'package:dariziflow_app/core/widgets/bottom_nav_bar.dart';
 import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
 import 'package:dariziflow_app/features/deptHeadDashboard/controllers/deptHeadController.dart';
-import 'package:dariziflow_app/features/deptHeadDashboard/controllers/department_details_controller.dart';
 import 'package:dariziflow_app/features/deptHeadDashboard/widgets/dashboard_widgets.dart';
+import 'package:dariziflow_app/features/notifications/controllers/notification_controller.dart'
+    as darizi_notifications;
+import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -28,17 +30,25 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
             actions: [
               IconButton(
                 onPressed: () {
-                  Get.put(DepartmentDetailsController(
-                    repository: Get.find(),
-                    departmentId: controller.departmentId.value,
-                  ));
-                  Get.to(() => const DepartmentDetailsScreen());
+                  Get.toNamed('/notification-inbox');
                 },
-                icon: Icon(Icons.corporate_fare, color: colors.onSurface),
-              ),
-              IconButton(
-                onPressed: () {},
-                icon: Icon(Icons.notifications_none, color: colors.onSurface),
+                icon: Obx(() {
+                  final unreadCount =
+                      Get.find<darizi_notifications.NotificationController>()
+                          .unreadCount
+                          .value;
+                  return Badge(
+                    isLabelVisible: unreadCount > 0,
+                    label: Text(
+                      unreadCount > 99 ? '99+' : unreadCount.toString(),
+                    ),
+                    backgroundColor: AppColors.error,
+                    child: Icon(
+                      Icons.notifications_none,
+                      color: colors.onSurface,
+                    ),
+                  );
+                }),
               ),
             ],
           ),
@@ -69,7 +79,7 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
                       ),
                       const SizedBox(height: 20),
                       PerformanceSummaryPanel(controller: controller),
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 20),
                       RecentActivityPanel(controller: controller),
                       const SizedBox(height: 20),
                     ],

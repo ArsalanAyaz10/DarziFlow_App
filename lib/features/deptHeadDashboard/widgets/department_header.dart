@@ -31,6 +31,7 @@ class DepartmentHeader extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.primaryGreen.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.black, width: 1),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
