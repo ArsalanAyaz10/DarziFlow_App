@@ -32,7 +32,7 @@ class ActivityTile extends StatelessWidget {
       }
     }
 
-    // Determine icon
+    // get icon
     IconData iconData;
     switch (type) {
       case 'movement':

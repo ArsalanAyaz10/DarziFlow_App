@@ -23,14 +23,15 @@ class OperationDetails extends StatelessWidget {
     final currentCP = op.checkpoints.isNotEmpty ? op.checkpoints.last : null;
     if (currentCP == null) return const SizedBox.shrink();
 
-    // --- Role-based button configuration ---
+    // Role-based config
+
     String buttonLabel;
     bool isBtnDisabled;
     Color btnColor;
     VoidCallback? onPressed;
 
     if (_isQC) {
-      // QC MEMBER: "Review Checkpoint" — only enabled when status is SUBMITTED
+      // QC MEMBER: "Review Checkpoint"
       final isSubmitted = currentCP.status == 'SUBMITTED' || currentCP.isQcPending;
       final isAlreadyReviewed = currentCP.isApproved || currentCP.isRejected;
 

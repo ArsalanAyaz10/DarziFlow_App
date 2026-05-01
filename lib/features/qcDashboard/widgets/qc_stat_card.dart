@@ -21,13 +21,13 @@ class QCStatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    final backgroundColor = isDark 
-        ? AppColors.atelierSurfaceDark 
+
+    final backgroundColor = isDark
+        ? AppColors.atelierSurfaceDark
         : AppColors.atelierSurfaceLight;
-        
-    final labelColor = isDark 
-        ? AppColors.atelierTonalGrey 
+
+    final labelColor = isDark
+        ? AppColors.atelierTonalGrey
         : Colors.grey.shade600;
 
     return Expanded(
@@ -36,6 +36,7 @@ class QCStatCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Theme.of(context).dividerColor),
           boxShadow: [
             if (!isDark)
               BoxShadow(
@@ -57,11 +58,7 @@ class QCStatCard extends StatelessWidget {
                     color: accentColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(
-                    icon,
-                    color: accentColor,
-                    size: 16,
-                  ),
+                  child: Icon(icon, color: accentColor, size: 16),
                 ),
                 if (subText.isNotEmpty)
                   Expanded(

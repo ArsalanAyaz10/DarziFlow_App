@@ -27,7 +27,7 @@ class PerformanceSummaryPanel extends StatelessWidget {
               color: AppColors.primaryGreen,
               icon: Icons.shopping_bag_outlined,
               showTrend: true,
-              onTap: () => Get.toNamed(Routes.allOrders),
+              onTap: () => Get.toNamed(Routes.orders),
             ),
             const SizedBox(width: 15),
             StatTile(

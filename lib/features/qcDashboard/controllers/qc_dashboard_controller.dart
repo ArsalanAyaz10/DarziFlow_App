@@ -1,4 +1,6 @@
 import 'package:dariziflow_app/core/storage/storage.dart';
+import 'package:dariziflow_app/data/models/orderCard_model.dart';
+import 'package:dariziflow_app/features/orders/repository/order_repository.dart';
 import 'package:dariziflow_app/features/qcDashboard/repositories/qc_repository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -7,34 +9,40 @@ import 'dart:developer' as dev;
 
 class QcDashboardController extends GetxController {
   final QcRepository repository;
-  QcDashboardController({required this.repository});
+  final OrderRepository orderRepository; // <-- Added OrderRepository
+
+  QcDashboardController({
+    required this.repository,
+    required this.orderRepository, // <-- Required in constructor
+  });
 
   // USER INFO
   var userName = ''.obs;
   var userRole = ''.obs;
   var userAvatar = ''.obs;
 
-  // QC GLOBAL STATS (From /qc/getStats)
+  // QC GLOBAL
   var pendingReviewsCount = 0.obs;
   var approvedTodayCount = 0.obs;
   var rejectedTodayCount = 0.obs;
 
-  // PENDING SUBMISSIONS (From /qc/submissions/pending)
+  // PENDING SUBMISSIONS
   var pendingSubmissions = <Map<String, dynamic>>[].obs;
 
-  // REJECTION REASONS (From /qc/rejection-reasons)
+  // ACTIVE ORDERS PIPELINE (NEW)
+  var activeOrders = <OrderModel>[].obs; // <-- Holds the real pipeline data
+
+  // REJECTION
   var rejectionReasons = <String>[].obs;
 
-  // UI STATE
+  // UI
   var isLoading = false.obs;
   var isActionLoading = false.obs;
 
   @override
   void onInit() {
     super.onInit();
-    // 1. Initial Load for UI display
     _loadUserInfo();
-    // 2. Strict Requirement: Initial data fetch calls exclusively the 3 global endpoints via refreshDashboard()
     refreshDashboard();
   }
 
@@ -53,9 +61,11 @@ class QcDashboardController extends GetxController {
   Future<void> refreshDashboard() async {
     isLoading.value = true;
     try {
+      // Run all three fetches in parallel for maximum speed
       await Future.wait([
         _loadStats(),
         _loadPendingSubmissions(),
+        _loadActiveOrders(), // <-- Added to the refresh cycle
       ]);
     } catch (e) {
       dev.log("Error refreshing Global QC dashboard: $e");
@@ -65,20 +75,50 @@ class QcDashboardController extends GetxController {
   }
 
   Future<void> _loadStats() async {
-    final stats = await repository.fetchStats();
-    // Binding to /{pending_reviews, approved_today, rejected_today}
-    pendingReviewsCount.value = stats['pending_reviews'] ?? 0;
-    approvedTodayCount.value = stats['approved_today'] ?? 0;
-    rejectedTodayCount.value = stats['rejected_today'] ?? 0;
+    try {
+      final stats = await repository.fetchStats();
+      pendingReviewsCount.value = stats['pending_reviews'] ?? 0;
+      approvedTodayCount.value = stats['approved_today'] ?? 0;
+      rejectedTodayCount.value = stats['rejected_today'] ?? 0;
+    } catch (e) {
+      if (kDebugMode) dev.log("Error loading QC stats: $e");
+    }
   }
 
   Future<void> _loadPendingSubmissions() async {
-    final submissions = await repository.fetchPendingSubmissions();
-    pendingSubmissions.value = submissions.cast<Map<String, dynamic>>();
+    try {
+      final submissions = await repository.fetchPendingSubmissions();
+      pendingSubmissions.value = submissions.cast<Map<String, dynamic>>();
+    } catch (e) {
+      if (kDebugMode) dev.log("Error loading pending submissions: $e");
+    }
   }
 
-  // ACTIONS (Standard QC workflow)
-  Future<void> approveSubmission(String orderId, String opId, String chkId) async {
+  // --- NEW: Load Active Pipeline ---
+  Future<void> _loadActiveOrders() async {
+    try {
+      // Fetch all orders assigned to this QC (from the /api/orders endpoint)
+      final rawData = await orderRepository.fetchAllOrders();
+
+      // Parse them using your OrderModel
+      final parsedOrders = rawData
+          .map((json) => OrderModel.fromJson(json))
+          .toList();
+
+      // Filter out completed ones so the pipeline only shows active work
+      activeOrders.value = parsedOrders
+          .where((o) => o.overallStatus != 'COMPLETED')
+          .toList();
+    } catch (e) {
+      if (kDebugMode) dev.log("Error loading active orders for pipeline: $e");
+    }
+  }
+
+  Future<void> approveSubmission(
+    String orderId,
+    String opId,
+    String chkId,
+  ) async {
     isActionLoading.value = true;
     try {
       final success = await repository.approveSubmission(
@@ -138,6 +178,23 @@ class QcDashboardController extends GetxController {
       }
     } finally {
       isActionLoading.value = false;
+    }
+  }
+
+  String formatTimeAgo(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return 'Just now';
+    try {
+      final date = DateTime.parse(dateStr).toLocal();
+      final now = DateTime.now();
+      final diff = now.difference(date);
+
+      if (diff.inMinutes < 1) return 'Just now';
+      if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+      if (diff.inHours < 24) return '${diff.inHours}h ago';
+      if (diff.inDays == 1) return 'Yesterday';
+      return '${date.day}/${date.month}/${date.year}';
+    } catch (e) {
+      return '';
     }
   }
 }

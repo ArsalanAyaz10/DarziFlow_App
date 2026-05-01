@@ -15,7 +15,6 @@ class CheckpointHistorySheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Sort history to show latest at top
     final sortedHistory = history.reversed.toList();
 
     return Container(

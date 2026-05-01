@@ -9,11 +9,11 @@ class OrderDetailController extends GetxController {
   final OrderRepository repository;
   OrderDetailController(this.repository);
 
-  var order = Rxn<OrderModel>();
-  var isLoading = false.obs;
-  var progress = 0.obs;
-  var currentPhase = 'N/A'.obs;
-  var userRole = ''.obs;
+  final order = Rxn<OrderModel>();
+  final isLoading = false.obs;
+  final progress = 0.obs;
+  final currentPhase = 'N/A'.obs;
+  final userRole = ''.obs;
   late String orderId;
 
   @override
@@ -25,63 +25,61 @@ class OrderDetailController extends GetxController {
       orderId = args.orderId;
       order.value = args;
       progress.value = args.progress.round();
-      currentPhase.value = _calculateCurrentPhase(args);
-    } else if (args is Map && args.containsKey('orderId')) {
-      orderId = args['orderId'].toString();
+      
+      // Calculate current phase
+      String phase = "COMPLETED";
+      for (var op in args.operations) {
+        for (var cp in op.checkpoints) {
+          if (cp.isRejected) {
+            phase = "REWORK REQUIRED";
+            break;
+          }
+          if (cp.isQcPending) {
+            phase = op.name.toUpperCase();
+            break;
+          }
+        }
+        if (phase != "COMPLETED") break;
+      }
+      currentPhase.value = phase;
     } else {
-      orderId = args.toString();
+      orderId = (args is Map) ? args['orderId'].toString() : args.toString();
     }
 
-    // Load user role for role-based UI
-    _loadUserRole();
-
-    if (order.value == null) {
-      _initialize();
-    }
-  }
-
-  Future<void> _loadUserRole() async {
-    try {
-      final role = await AppStorage.getUserRole();
-      userRole.value = role?.toUpperCase() ?? '';
-    } catch (e) {
-      dev.log("Error loading user role: $e");
-    }
-  }
-
-  Future<void> _initialize() async {
-    await refreshOrderDetails();
+    AppStorage.getUserRole().then((role) => userRole.value = role?.toUpperCase() ?? '');
+    refreshOrderDetails();
   }
 
   Future<void> refreshOrderDetails() async {
     try {
       isLoading.value = true;
+      if (orderId.isEmpty) return;
 
-      if (orderId.isEmpty) {
-        dev.log("Error: orderId is empty");
-        return;
-      }
+      final response = await repository.fetchOrderById(orderId);
+      if (response != null) {
+        final data = (response as Map<String, dynamic>).containsKey('order') 
+            ? response['order'] as Map<String, dynamic> 
+            : response;
 
-      final dynamic specificOrderJson = await repository.fetchOrderById(
-        orderId,
-      );
+        final newOrder = OrderModel.fromJson(data);
+        order.value = newOrder;
+        progress.value = newOrder.progress.round();
 
-      if (specificOrderJson != null) {
-        final Map<String, dynamic> responseMap =
-            specificOrderJson as Map<String, dynamic>;
-
-        final Map<String, dynamic> orderData = responseMap.containsKey('order')
-            ? responseMap['order'] as Map<String, dynamic>
-            : responseMap;
-
-        dev.log("Unwrapped Order Data: ${orderData.toString()}");
-
-        order.value = OrderModel.fromJson(orderData);
-
-        progress.value = order.value!.progress.round();
-        currentPhase.value = _calculateCurrentPhase(order.value!);
-      } else {
-        dev.log("No data returned for Order ID: $orderId");
+        String phase = "COMPLETED";
+        for (var op in newOrder.operations) {
+          for (var cp in op.checkpoints) {
+            if (cp.isRejected) {
+              phase = "REWORK REQUIRED";
+              break;
+            }
+            if (cp.isQcPending) {
+              phase = op.name.toUpperCase();
+              break;
+            }
+          }
+          if (phase != "COMPLETED") break;
+        }
+        currentPhase.value = phase;
       }
     } catch (e) {
       dev.log("Error refreshing order details: $e");
@@ -92,28 +90,14 @@ class OrderDetailController extends GetxController {
 
   HistoryItem? get latestRejection {
     if (order.value == null) return null;
+    
     for (var op in order.value!.operations) {
       for (var cp in op.checkpoints) {
         if (cp.isRejected) {
-          return cp.history.reversed.firstWhere(
-            (h) => h.action == "REJECT",
-            orElse: () => cp.history.last,
-          );
+          return cp.history.reversed.where((h) => h.action == "REJECT").firstOrNull ?? cp.history.lastOrNull;
         }
       }
     }
     return null;
-  }
-
-
-
-  String _calculateCurrentPhase(OrderModel data) {
-    for (var op in data.operations) {
-      for (var cp in op.checkpoints) {
-        if (cp.isRejected) return "REWORK REQUIRED";
-        if (cp.isQcPending) return op.name.toUpperCase();
-      }
-    }
-    return "COMPLETED";
   }
 }

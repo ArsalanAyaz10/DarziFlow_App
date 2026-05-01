@@ -17,4 +17,8 @@ abstract class Routes {
   static const orderDetails = "/order-details";
   static const submitCheckpoint = "/submit-checkpoint";
   static const allReviews = '/all-reviews';
+  static const qcHistory = '/qc-history';
+  static const qcHistoryDetail = '/qc-history-detail';
+  static const termsOfService = '/terms-of-service';
+  static const privacyPolicy = '/privacy-policy';
 }

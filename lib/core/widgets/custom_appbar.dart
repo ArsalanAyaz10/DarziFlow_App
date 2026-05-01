@@ -44,11 +44,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1.0),
         child: Container(
-          color: colors.primary.withValues(alpha: 0.3), // Primary highlight line
+          color: colors.primary.withValues(
+            alpha: 0.3,
+          ), // Primary highlight line
           height: 1.0,
         ),
       ),
-      systemOverlayStyle: theme.appBarTheme.systemOverlayStyle ??
+      systemOverlayStyle:
+          theme.appBarTheme.systemOverlayStyle ??
           (theme.brightness == Brightness.dark
               ? SystemUiOverlayStyle.light
               : SystemUiOverlayStyle.dark),
@@ -96,21 +99,27 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           : CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          title ?? "",
-          style: TextStyle(
-            color: colors.onSurface,
-            fontWeight: FontWeight.bold,
-            fontSize: isDashboard ? 14 : 16,
+        Transform.translate(
+          offset: const Offset(-5, 0),
+          child: Text(
+            title ?? "",
+            style: TextStyle(
+              color: colors.onSurface,
+              fontWeight: FontWeight.bold,
+              fontSize: isDashboard ? 14 : 16,
+            ),
           ),
         ),
         if (subtitle != null && subtitle!.isNotEmpty)
-          Text(
-            subtitle!,
-            style: TextStyle(
-              color: colors.onSurface.withValues(alpha: 0.7),
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
+          Transform.translate(
+            offset: const Offset(-5, 0),
+            child: Text(
+              subtitle!,
+              style: TextStyle(
+                color: colors.onSurface.withValues(alpha: 0.7),
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
       ],

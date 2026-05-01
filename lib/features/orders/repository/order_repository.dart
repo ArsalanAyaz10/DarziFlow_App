@@ -50,7 +50,6 @@ class OrderRepository {
   Future<List<dynamic>> fetchAllOrders() async {
     try {
       final data = await service.getAllOrders();
-      // If the response is a direct list, return it. If it's a map with "orders" key, return that.
       if (data is List) return data;
       return data["orders"] ?? [];
     } catch (e) {

@@ -36,7 +36,7 @@ class OrderService {
     required String chkId,
     required Map<String, dynamic> data,
   }) async {
-    // route = /orders/:orderId/workflow/:opId/checkpoints/:chkId/submit
+
     final response = await apiClient.post(
       '/$route/$orderId/workflow/$opId/checkpoints/$chkId/submit',
       data: data,

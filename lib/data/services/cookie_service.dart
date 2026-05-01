@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:developer' as dev;
 
-
 class CookieService {
   static final CookieService _instance = CookieService._internal();
   factory CookieService() => _instance;

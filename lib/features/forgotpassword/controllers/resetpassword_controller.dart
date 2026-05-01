@@ -18,7 +18,7 @@ class ResetPasswordController extends GetxController {
   var isNewPasswordObscured = true.obs;
   var isConfirmPasswordObscured = true.obs;
 
-  // Password Visibility Toggles
+  // Password Visibility chagens
   void toggleNewPasswordVisibility() => isNewPasswordObscured.toggle();
   void toggleConfirmPasswordVisibility() => isConfirmPasswordObscured.toggle();
 
@@ -121,8 +121,9 @@ class ResetPasswordController extends GetxController {
 
   @override
   void onClose() {
-    newPasswordController.dispose();
-    confirmPasswordController.dispose();
+    // Manual disposal can sometimes cause crashes if the view is still active for a frame
+    // newPasswordController.dispose();
+    // confirmPasswordController.dispose();
     super.onClose();
   }
 }

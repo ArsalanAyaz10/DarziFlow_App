@@ -3,8 +3,7 @@ import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ReviewQueueItem extends StatelessWidget {
-  final String orderId;
-  final String workerName;
+  final String orderName;
   final String department;
   final String checkpointName;
   final String time;
@@ -13,8 +12,7 @@ class ReviewQueueItem extends StatelessWidget {
 
   const ReviewQueueItem({
     super.key,
-    required this.orderId,
-    required this.workerName,
+    required this.orderName,
     required this.department,
     required this.checkpointName,
     required this.time,
@@ -25,9 +23,9 @@ class ReviewQueueItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    final backgroundColor = isDark 
-        ? AppColors.atelierSurfaceDark 
+
+    final backgroundColor = isDark
+        ? AppColors.atelierSurfaceDark
         : AppColors.atelierSurfaceLight;
 
     return Container(
@@ -35,6 +33,7 @@ class ReviewQueueItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Theme.of(context).dividerColor),
         boxShadow: [
           if (!isDark)
             BoxShadow(
@@ -51,112 +50,90 @@ class ReviewQueueItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Worker Initial / Avatar Placeholder
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: AppColors.atelierSilkGreen.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      workerName.isNotEmpty ? workerName[0].toUpperCase() : '?',
-                      style: GoogleFonts.plusJakartaSans(
-                        color: AppColors.atelierSilkGreen,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        checkpointName,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: isDark
+                              ? Colors.white
+                              : AppColors.black.withValues(alpha: 0.8),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                  ),
+                    const SizedBox(width: 5),
+                    Text(
+                      time,
+                      style: GoogleFonts.manrope(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: isDark
+                            ? AppColors.atelierTonalGrey
+                            : Colors.grey.shade500,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                // Details
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              checkpointName,
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: isDark ? Colors.white : AppColors.black,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            time,
-                            style: GoogleFonts.manrope(
-                              fontSize: 10,
-                              color: isDark ? AppColors.atelierTonalGrey : Colors.grey.shade500,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Text(
-                            workerName,
-                            style: GoogleFonts.manrope(
-                              fontSize: 11,
-                              color: isDark ? AppColors.atelierTonalGrey : Colors.grey.shade600,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          _buildDot(isDark),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: (isDark ? Colors.white : AppColors.black).withValues(alpha: 0.05),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              department.toUpperCase(),
-                              style: GoogleFonts.manrope(
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
-                                color: isDark ? Colors.white70 : Colors.black87,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      // Evidence Icons
-                      Row(
-                        children: evidenceTypes.map((type) => _buildEvidenceIcon(type, isDark)).toList(),
-                      ),
-                    ],
+
+                const SizedBox(height: 5),
+
+                Text(
+                  orderName,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w400,
+                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+
+                const SizedBox(height: 10),
+
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: (isDark ? Colors.white : AppColors.black)
+                            .withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        department.toUpperCase(),
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                          color: isDark
+                              ? AppColors.atelierTonalGrey
+                              : Colors.grey.shade600,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    ...evidenceTypes.map(
+                      (type) => _buildEvidenceIcon(type, isDark),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildDot(bool isDark) {
-    return Container(
-      width: 3,
-      height: 3,
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.atelierTonalGrey : Colors.grey.shade400,
-        shape: BoxShape.circle,
       ),
     );
   }
@@ -174,6 +151,10 @@ class ReviewQueueItem extends StatelessWidget {
         iconData = Icons.videocam_outlined;
         label = 'Video';
         break;
+      case 'text':
+        iconData = Icons.notes;
+        label = 'Text';
+        break;
       case 'document':
         iconData = Icons.description_outlined;
         label = 'Doc';
@@ -183,20 +164,16 @@ class ReviewQueueItem extends StatelessWidget {
         label = 'File';
     }
 
-    return Container(
-      margin: const EdgeInsets.only(right: 12),
+    return Padding(
+      padding: const EdgeInsets.only(left: 10),
       child: Row(
         children: [
-          Icon(
-            iconData,
-            size: 14,
-            color: AppColors.atelierSilkGreen,
-          ),
+          Icon(iconData, size: 14, color: AppColors.atelierSilkGreen),
           const SizedBox(width: 4),
           Text(
             label,
             style: GoogleFonts.manrope(
-              fontSize: 10,
+              fontSize: 11,
               fontWeight: FontWeight.w600,
               color: isDark ? AppColors.atelierTonalGrey : Colors.grey.shade600,
             ),

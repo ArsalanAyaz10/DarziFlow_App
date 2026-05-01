@@ -1,9 +1,11 @@
+import 'package:dariziflow_app/core/network/api_client.dart';
 import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:dariziflow_app/core/utils/global.dart';
 import 'package:dariziflow_app/features/notifications/controllers/notification_controller.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
+import 'dart:developer' as dev;
 
 class NotificationService extends GetxService {
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
@@ -41,7 +43,6 @@ class NotificationService extends GetxService {
 
     final initialMessage = await _fcm.getInitialMessage();
     if (initialMessage != null) {
-      // Delay to let the app's navigation stack settle before routing
       Future.delayed(const Duration(milliseconds: 800), () {
         _handleBackgroundClick(initialMessage);
       });
@@ -51,6 +52,22 @@ class NotificationService extends GetxService {
   }
 
   Future<String?> getDeviceToken() async => await _fcm.getToken();
+
+  Future<void> syncTokenWithBackend() async {
+    try {
+      final token = await getDeviceToken();
+      if (token != null) {
+        final apiClient = Get.find<ApiClient>();
+        await apiClient.post(
+          "/auth/update-fcm-token",
+          data: {"token": token},
+        );
+        dev.log("FCM Token synced with backend: $token");
+      }
+    } catch (e) {
+      dev.log("FCM Sync Error: $e");
+    }
+  }
 
   void _showForegroundNotification(RemoteMessage message) {
     RemoteNotification? notification = message.notification;
@@ -67,18 +84,16 @@ class NotificationService extends GetxService {
         ),
         payload: message.data['screen'],
       );
-      
-      // Refresh notifications to update badges instantly in foreground
       try {
         Get.find<NotificationController>().fetchNotifications();
       } catch (e) {
-        // controller might not be initialized yet
+        dev.log('NotificationController not found, skipping badge refresh: $e');
       }
     }
   }
 
-  /// Routes the user to the screen specified in the notification payload,
-  /// or saves it as a pending route if the user is not authenticated.
+  // Routes user to the screen in the notification data payload only if auth is true,
+  // else saves it as a pending route if the user is not authenticated.
   Future<void> _navigateOrSavePendingRoute(String screen) async {
     final token = await AppStorage.getAccessToken();
     if (token != null) {

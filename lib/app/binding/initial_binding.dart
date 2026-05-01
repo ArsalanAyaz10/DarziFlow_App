@@ -14,32 +14,27 @@ class InitialBinding extends Bindings {
   @override
   Future<void> dependencies() async {
     
-    // DeeplinkService can remain lazy
-    Get.lazyPut<DeeplinkService>(() {
-      final service = DeeplinkService();
-      service.init();
-      return service;
-    });
+    // DeeplinkService 
+    final deeplinkService = DeeplinkService();
+    await deeplinkService.init();
+    Get.put<DeeplinkService>(deeplinkService, permanent: true);
 
-    // Make ApiService synchronous
+    // ApiService 
     final apiService = ApiService();
     await apiService.init(() async {
       await AppStorage.clearTokens();
     });
     Get.put<ApiService>(apiService, permanent: true);
 
-    // API client depends on ApiService
     final apiClient = ApiClient(apiService.dio);
     Get.put<ApiClient>(apiClient, permanent: true);
 
-    // AuthService & AuthRepository are permanent global services
     final authService = AuthService(apiClient: apiClient);
     Get.put<AuthService>(authService, permanent: true);
 
     final authRepo = AuthRepository(authService: authService);
     Get.put<AuthRepository>(authRepo, permanent: true);
 
-    // Initialize NotificationRepository & Controller for global badge access
     final notificationRepo = NotificationRepository(apiClient: apiClient);
     Get.put<NotificationRepository>(notificationRepo, permanent: true);
     Get.put<NotificationController>(NotificationController(repository: notificationRepo), permanent: true);

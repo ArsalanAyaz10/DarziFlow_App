@@ -23,6 +23,11 @@ import 'package:dariziflow_app/features/splash/views/splash_screen.dart';
 import 'package:dariziflow_app/features/qcDashboard/bindings/qc_dashboard_binding.dart';
 import 'package:dariziflow_app/features/qcDashboard/views/qc_dashboard_screen.dart';
 import 'package:dariziflow_app/features/qcDashboard/views/all_reviews_screen.dart';
+import 'package:dariziflow_app/features/legal/views/terms_of_service_screen.dart';
+import 'package:dariziflow_app/features/legal/views/privacy_policy_screen.dart';
+import 'package:dariziflow_app/features/qcDashboard/bindings/qc_history_binding.dart';
+import 'package:dariziflow_app/features/qcDashboard/views/qc_history_screen.dart';
+import 'package:dariziflow_app/features/qcDashboard/views/qc_history_detail_screen.dart';
 import 'package:get/get.dart';
 part 'app_routes.dart';
 
@@ -61,6 +66,15 @@ class AppPages {
       name: Routes.allReviews,
       page: () => const AllReviewsScreen(),
       binding: QcDashboardBinding(),
+    ),
+    GetPage(
+      name: Routes.qcHistory,
+      page: () => const QcHistoryScreen(),
+      binding: QcHistoryBinding(),
+    ),
+    GetPage(
+      name: Routes.qcHistoryDetail,
+      page: () => const QcHistoryDetailScreen(),
     ),
     GetPage(
       name: Routes.resetpassword,
@@ -107,6 +121,14 @@ class AppPages {
       name: '/notification-inbox',
       page: () => const NotificationInboxScreen(),
       binding: NotificationBinding(),
+    ),
+    GetPage(
+      name: Routes.termsOfService,
+      page: () => const TermsOfServiceScreen(),
+    ),
+    GetPage(
+      name: Routes.privacyPolicy,
+      page: () => const PrivacyPolicyScreen(),
     ),
   ];
 }

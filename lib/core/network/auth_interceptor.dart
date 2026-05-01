@@ -24,29 +24,8 @@ class AuthInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     if (err.response?.statusCode == 401) {
-      try {
-        // Call refresh endpoint (refresh cookie automatically sent)
-        final response = await dio.post("/auth/refresh");
-
-        final newToken = response.headers["x-access-token"]?.first;
-
-        if (newToken != null) {
-          await AppStorage.saveAccessToken(newToken);
-
-          // Retry original request
-          final requestOptions = err.requestOptions;
-
-          requestOptions.headers["Authorization"] = "Bearer $newToken";
-
-          final clone = await dio.fetch(requestOptions);
-
-          return handler.resolve(clone);
-        }
-      } catch (_) {
-        await onLogout();
-      }
+      await onLogout();
     }
-
     handler.next(err);
   }
 }

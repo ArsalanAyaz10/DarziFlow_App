@@ -16,11 +16,6 @@ class QcService {
     return response.data;
   }
 
-  Future<dynamic> getRejectionReasons() async {
-    final response = await apiClient.get("$route/rejection-reasons");
-    return response.data;
-  }
-
   Future<dynamic> approve({
     required String orderId,
     required String opId,
@@ -42,6 +37,11 @@ class QcService {
       "/orders/$orderId/workflow/$opId/checkpoints/$chkId/reject",
       data: {"comment": comment},
     );
+    return response.data;
+  }
+
+  Future<dynamic> getHistory() async {
+    final response = await apiClient.get("/orders/qc/history");
     return response.data;
   }
 }

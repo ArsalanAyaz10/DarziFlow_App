@@ -366,11 +366,11 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
             const SizedBox(height: 16),
             Divider(color: colors.outline.withValues(alpha: 0.1)),
             const SizedBox(height: 16),
-            _buildDetailRow(context, "Title", activity['title'] ?? ''),
-            _buildDetailRow(context, "Description", activity['subtitle'] ?? ''),
-            _buildDetailRow(context, "Time", activity['timeAgo'] ?? ''),
+            _detailRow(context, "Title", activity['title'] ?? ''),
+            _detailRow(context, "Description", activity['subtitle'] ?? ''),
+            _detailRow(context, "Time", activity['timeAgo'] ?? ''),
             if (activity['orderId'] != null)
-              _buildDetailRow(context, "Order ID", activity['orderId']),
+              _detailRow(context, "Order ID", activity['orderId']),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
@@ -406,7 +406,7 @@ class AllActivitiesScreen extends GetView<DeptHeadController> {
     );
   }
 
-  Widget _buildDetailRow(BuildContext context, String label, String value) {
+  Widget _detailRow(BuildContext context, String label, String value) {
     final colors = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),

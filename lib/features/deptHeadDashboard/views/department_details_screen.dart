@@ -1,6 +1,8 @@
+import 'package:dariziflow_app/app/routes/app_pages.dart';
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
 import 'package:dariziflow_app/features/deptHeadDashboard/controllers/department_details_controller.dart';
+import 'package:dariziflow_app/features/deptHeadDashboard/widgets/stat_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -97,165 +99,29 @@ class DepartmentDetailsScreen extends GetView<DepartmentDetailsController> {
               ],
               const SizedBox(height: 24),
 
-              // Stats Overview
+              // Department Overview Stats
               Row(
                 children: [
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: colors.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: colors.outline.withValues(alpha: 0.1),
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(
-                            Icons.people_outline,
-                            color: AppColors.primaryGreen,
-                            size: 24,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            "24",
-                            style: TextStyle(
-                              color: colors.onSurface,
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            "Total Employees",
-                            style: TextStyle(
-                              color: colors.onSurfaceVariant,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  StatTile(
+                    label: "Total Orders",
+                    value: controller.totalOrders.value.toString(),
+                    subText: "Orders Assigned",
+                    color: AppColors.primaryGreen,
+                    icon: Icons.shopping_bag_outlined,
+                    showTrend: true,
+                    onTap: () => Get.toNamed(Routes.orders),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: colors.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: colors.outline.withValues(alpha: 0.1),
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(
-                            Icons.trending_up,
-                            color: AppColors.primaryGreen,
-                            size: 24,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            "85%",
-                            style: TextStyle(
-                              color: colors.onSurface,
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            "Current Load",
-                            style: TextStyle(
-                              color: colors.onSurfaceVariant,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  const SizedBox(width: 15),
+                  StatTile(
+                    label: "Active Orders",
+                    value: controller.activeOrders.value.toString(),
+                    subText: "In progress now",
+                    color: Colors.orange,
+                    icon: Icons.pending_actions,
+                    showTrend: false,
+                    onTap: () => Get.toNamed(Routes.orders),
                   ),
                 ],
-              ),
-              const SizedBox(height: 20),
-
-              // Performance
-              Text(
-                "Performance",
-                style: TextStyle(
-                  color: colors.onSurface,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: colors.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: colors.outline.withValues(alpha: 0.1),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Efficiency Score",
-                          style: TextStyle(
-                            color: colors.onSurfaceVariant,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "94%",
-                          style: TextStyle(
-                            color: colors.onSurface,
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryGreen.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: const [
-                          Icon(
-                            Icons.arrow_upward,
-                            color: AppColors.primaryGreen,
-                            size: 14,
-                          ),
-                          SizedBox(width: 4),
-                          Text(
-                            "+2.4%",
-                            style: TextStyle(
-                              color: AppColors.primaryGreen,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
               ),
               const SizedBox(height: 12),
               // Operations

@@ -1,4 +1,3 @@
-
 import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:dariziflow_app/data/models/checkpointModel.dart';
 import 'package:dariziflow_app/data/models/operationModel.dart';
@@ -16,50 +15,41 @@ import "dart:io";
 import 'package:image_picker/image_picker.dart';
 
 class CheckpointController extends GetxController {
-  TextEditingController remarksController = TextEditingController();
-
+  final TextEditingController remarksController = TextEditingController();
   final OrderRepository orderRepository;
   final UploadService uploadService;
 
   CheckpointController(
     this.orderRepository,
-    this.uploadService, OrderDetailController find,
+    this.uploadService,
+    OrderDetailController find,
   );
 
-  var operation = Rxn<OperationModel>();
-  var isLoading = false.obs;
   late final OperationModel op;
   late final CheckpointModel ck;
   String orderId = '';
-  var checkpointDescription = ''.obs;
-  var minUploads = 0.obs;
-  var submissionTypes = [];
 
-  // Image variables
-  var pickedImages = <File>[].obs;
+  final checkpointDescription = ''.obs;
+  final minUploads = 0.obs;
+  final pickedImages = <File>[].obs;
+  final userRole = ''.obs;
+
+  final isSubmitting = false.obs;
+  final isActionLoading = false.obs;
   final int maxFiles = 10;
-
-  // loading
-  var isSubmitting = false.obs;
-  var isActionLoading = false.obs;
-
-  // Role
-  var userRole = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
     op = Get.arguments['operation'];
     ck = Get.arguments['checkpoint'];
-    orderId = Get.arguments['orderId'];
-    if (orderId.isEmpty) {
-      dev.log("LOG: orderId passed to SubmitCheckpoint is empty or null");
-    }
-    
-    minUploads.value = ck.minUploads;
-    checkpointDescription.value = ck.submissionText.isNotEmpty ? ck.submissionText : "No Description Provided";
-    submissionTypes = [ck.submissionType];
+    orderId = Get.arguments['orderId'] ?? '';
 
+    minUploads.value = ck.minUploads;
+    checkpointDescription.value = ck.submissionText.isNotEmpty
+        ? ck.submissionText
+        : "No Description Provided";
+    dev.log("Submission Text: ${ck.submissionText}");
     _loadUserRole();
   }
 
@@ -72,29 +62,21 @@ class CheckpointController extends GetxController {
 
   Future<void> pickImage() async {
     if (pickedImages.length >= maxFiles) {
-      Get.snackbar(
-        "Limit Reached",
-        "You can only upload up to $maxFiles files.",
-      );
+      Get.snackbar("Limit Reached", "Max $maxFiles files allowed.");
       return;
     }
 
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(
+    final image = await ImagePicker().pickImage(
       source: ImageSource.gallery,
       maxWidth: 800,
       maxHeight: 800,
       imageQuality: 80,
     );
 
-    if (image != null) {
-      pickedImages.add(File(image.path));
-    }
+    if (image != null) pickedImages.add(File(image.path));
   }
 
-  void removeImage(int index) {
-    pickedImages.removeAt(index);
-  }
+  void removeImage(int index) => pickedImages.removeAt(index);
 
   Future<File?> _compressImage(File file) async {
     final tempDir = await path_provider.getTemporaryDirectory();
@@ -104,10 +86,9 @@ class CheckpointController extends GetxController {
     final result = await FlutterImageCompress.compressAndGetFile(
       file.absolute.path,
       targetPath,
-      quality: 70, //% compression
+      quality: 70,
       format: CompressFormat.jpeg,
     );
-
     return result != null ? File(result.path) : null;
   }
 
@@ -117,25 +98,23 @@ class CheckpointController extends GetxController {
       return;
     }
 
+    if (orderId.isEmpty) {
+      Get.snackbar("Error", "Order Context Missing");
+      return;
+    }
+
     try {
       isSubmitting.value = true;
-      dev.log("SUBMITTING FOR ORDER ID: '$orderId'");
-
-      if (orderId.isEmpty) {
-        Get.snackbar("Error", "Order Context Missing");
-        return;
-      }
-      List<Map<String, dynamic>> evidenceList = [];
-
+      final List<Map<String, dynamic>> evidenceList = [];
       final sigData = await uploadService.getCheckpointUploadSignature(
         orderId: orderId,
       );
 
       for (var image in pickedImages) {
-        File? compressed = await _compressImage(image);
+        final compressed = await _compressImage(image);
         if (compressed == null) continue;
 
-        final uploadResult = await uploadService.uploadToCloudinary(
+        final upload = await uploadService.uploadToCloudinary(
           file: compressed,
           cloudName: sigData['cloudName'],
           apiKey: sigData['apiKey'],
@@ -145,13 +124,13 @@ class CheckpointController extends GetxController {
         );
 
         evidenceList.add({
-          "url": uploadResult['secure_url'],
-          "publicId": uploadResult['public_id'],
-          "resourceType": uploadResult['resource_type'],
+          "url": upload['secure_url'],
+          "publicId": upload['public_id'],
+          "resourceType": upload['resource_type'],
         });
       }
 
-      bool success = await orderRepository.submitCheckpointData(
+      final success = await orderRepository.submitCheckpointData(
         orderId: orderId,
         opId: op.id,
         chkId: ck.id,
@@ -163,26 +142,23 @@ class CheckpointController extends GetxController {
         Get.back();
         Get.snackbar(
           "Success",
-          "Checkpoint submitted successfully",
+          "Submitted successfully",
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
       }
     } catch (e) {
-      dev.log("Final Submission Error: $e");
-      Get.snackbar("Submission Failed", e.toString());
+      dev.log("Submission Error", error: e);
+      Get.snackbar("Error", e.toString());
     } finally {
       isSubmitting.value = false;
     }
   }
 
-  // --- QC Actions ---
-
   Future<void> approveCheckpoint() async {
     isActionLoading.value = true;
     try {
-      final qcRepo = Get.find<QcRepository>();
-      final success = await qcRepo.approveSubmission(
+      final success = await Get.find<QcRepository>().approveSubmission(
         orderId: orderId,
         opId: op.id,
         chkId: ck.id,
@@ -190,9 +166,12 @@ class CheckpointController extends GetxController {
 
       if (success) {
         Get.back();
-        Get.snackbar("Success", "Checkpoint Approved", backgroundColor: Colors.green, colorText: Colors.white);
-      } else {
-        Get.snackbar("Error", "Fast approve failed");
+        Get.snackbar(
+          "Success",
+          "Approved",
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
       }
     } catch (e) {
       Get.snackbar("Error", e.toString());
@@ -203,14 +182,17 @@ class CheckpointController extends GetxController {
 
   Future<void> rejectCheckpoint() async {
     if (remarksController.text.isEmpty) {
-      Get.snackbar("Required", "Please provide a rejection comment in the remarks field.", backgroundColor: Colors.orange);
+      Get.snackbar(
+        "Required",
+        "Please provide a rejection comment.",
+        backgroundColor: Colors.orange,
+      );
       return;
     }
 
     isActionLoading.value = true;
     try {
-      final qcRepo = Get.find<QcRepository>();
-      final success = await qcRepo.rejectSubmission(
+      final success = await Get.find<QcRepository>().rejectSubmission(
         orderId: orderId,
         opId: op.id,
         chkId: ck.id,
@@ -219,10 +201,12 @@ class CheckpointController extends GetxController {
 
       if (success) {
         Get.back();
-        Get.snackbar("Status Changed", "Checkpoint rejected for rework", backgroundColor: Colors.orange, colorText: Colors.white);
-      } else {
-        Get.snackbar("Error", "Rejection failed");
-        print("rejection failed : ${success}");
+        Get.snackbar(
+          "Rejected",
+          "Sent for rework",
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+        );
       }
     } catch (e) {
       Get.snackbar("Error", e.toString());

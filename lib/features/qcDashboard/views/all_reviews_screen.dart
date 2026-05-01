@@ -15,7 +15,9 @@ class AllReviewsScreen extends GetView<QcDashboardController> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final backgroundColor = isDark ? AppColors.atelierBackgroundDark : AppColors.atelierBackgroundLight;
+    final backgroundColor = isDark
+        ? AppColors.atelierBackgroundDark
+        : AppColors.atelierBackgroundLight;
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -27,11 +29,10 @@ class AllReviewsScreen extends GetView<QcDashboardController> {
         onBackPress: () => Get.back(),
       ),
       body: Obx(() {
-        if (controller.isLoading.value && controller.pendingSubmissions.isEmpty) {
+        if (controller.isLoading.value &&
+            controller.pendingSubmissions.isEmpty) {
           return const Center(
-            child: CircularProgressIndicator(
-              color: AppColors.atelierSilkGreen,
-            ),
+            child: CircularProgressIndicator(color: AppColors.atelierSilkGreen),
           );
         }
 
@@ -43,7 +44,9 @@ class AllReviewsScreen extends GetView<QcDashboardController> {
                 Icon(
                   Icons.reviews_outlined,
                   size: 64,
-                  color: isDark ? AppColors.atelierTonalGrey : Colors.grey.shade400,
+                  color: isDark
+                      ? AppColors.atelierTonalGrey
+                      : Colors.grey.shade400,
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -59,7 +62,9 @@ class AllReviewsScreen extends GetView<QcDashboardController> {
                   "You're all caught up with your quality checks!",
                   style: GoogleFonts.manrope(
                     fontSize: 14,
-                    color: isDark ? AppColors.atelierTonalGrey : Colors.grey.shade600,
+                    color: isDark
+                        ? AppColors.atelierTonalGrey
+                        : Colors.grey.shade600,
                   ),
                 ),
               ],
@@ -72,14 +77,15 @@ class AllReviewsScreen extends GetView<QcDashboardController> {
           onRefresh: controller.refreshDashboard,
           child: Column(
             children: [
-              // Header Summary
+              // Header
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: isDark ? AppColors.atelierSurfaceDark : Colors.white,
                   border: Border(
                     bottom: BorderSide(
-                      color: (isDark ? Colors.white : AppColors.black).withValues(alpha: 0.05),
+                      color: (isDark ? Colors.white : AppColors.black)
+                          .withValues(alpha: 0.05),
                     ),
                   ),
                 ),
@@ -89,21 +95,9 @@ class AllReviewsScreen extends GetView<QcDashboardController> {
                       "${controller.pendingSubmissions.length} Submissions",
                       style: GoogleFonts.manrope(
                         fontWeight: FontWeight.w600,
-                        color: isDark ? AppColors.atelierTonalGrey : Colors.grey.shade700,
-                      ),
-                    ),
-                    const Spacer(),
-                    Icon(
-                      Icons.filter_list,
-                      size: 18,
-                      color: isDark ? AppColors.atelierTonalGrey : Colors.grey.shade600,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      "Latest first",
-                      style: GoogleFonts.manrope(
-                        fontSize: 12,
-                        color: isDark ? AppColors.atelierTonalGrey : Colors.grey.shade600,
+                        color: isDark
+                            ? AppColors.atelierTonalGrey
+                            : Colors.grey.shade700,
                       ),
                     ),
                   ],
@@ -116,10 +110,11 @@ class AllReviewsScreen extends GetView<QcDashboardController> {
                   itemBuilder: (context, index) {
                     final item = controller.pendingSubmissions[index];
                     return ReviewQueueItem(
-                      orderId: item['orderName'] ?? 'N/A',
-                      workerName: "Submitted Task",
+                      orderName: item['orderName'] ?? 'N/A',
+
                       department: item['departmentName'] ?? 'Production',
-                      checkpointName: item['checkpointName'] ?? 'General Review',
+                      checkpointName:
+                          item['checkpointName'] ?? 'General Review',
                       time: item['submittedAt'] ?? '',
                       evidenceTypes: const ['photo'],
                       onTap: () {

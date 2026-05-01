@@ -41,12 +41,9 @@ class DeptHeadController extends GetxController {
   var completedWorkflowCheckpoints = 0.obs;
   var pendingWorkflowCheckpoints = 0.obs;
 
-  // LEGACY CHECKPOINT STATS (for backward compatibility)
   var totalCheckpoints = 0.obs;
   var completedCheckpoints = 0.obs;
   var pendingCheckpoints = 0.obs;
-  var overdueCheckpoints = 0.obs;
-  var checkpointCompletionRate = 0.0.obs;
 
   // QUALITY STATS
   var qualityScore = 100.obs;
@@ -55,16 +52,14 @@ class DeptHeadController extends GetxController {
 
   // EFFICIENCY & TRENDS
   var efficiencyScore = 0.obs;
-  var ordersTrend = '+0%'.obs;
-  var avgCompletionTime = 0.0.obs;
 
   // ACTIVITIES
-  var recentActivity = <dynamic>[].obs;
+  final _recentActivity = <dynamic>[].obs;
+  List<dynamic> get rawOrderData => _recentActivity;
   var processedActivities = <Map<String, dynamic>>[].obs;
 
   // UI
   var isLoading = false.obs;
-  var errorMessage = ''.obs;
 
   @override
   void onInit() {
@@ -86,7 +81,6 @@ class DeptHeadController extends GetxController {
 
   Future<void> loadDashboard() async {
     isLoading.value = true;
-    errorMessage.value = '';
 
     try {
       await _loadUserInfo();
@@ -99,7 +93,7 @@ class DeptHeadController extends GetxController {
       await _loadAllDepartmentStats();
       await _loadActivities();
     } catch (e) {
-     dev.log('Failed to load dashboard data', error: e);
+      dev.log('Failed to load dashboard data', error: e);
     } finally {
       isLoading.value = false;
     }
@@ -107,7 +101,6 @@ class DeptHeadController extends GetxController {
 
   Future<void> refreshDashboard() async {
     isLoading.value = true;
-    errorMessage.value = '';
 
     try {
       await _loadUserInfo();
@@ -164,9 +157,7 @@ class DeptHeadController extends GetxController {
       rejectedCount.value = qualityStats['rejected'] ?? 0;
 
       _updateLegacyCheckpointStats();
-      _calculateCheckpointCompletionRate();
       _calculateEfficiencyScore();
-      _calculateTrend();
     } catch (e) {
       if (kDebugMode) dev.log("Error loading stats: $e");
     }
@@ -180,17 +171,6 @@ class DeptHeadController extends GetxController {
     pendingCheckpoints.value = pendingWorkflowCheckpoints.value;
   }
 
-  void _calculateCheckpointCompletionRate() {
-    if (totalCheckpointsInWorkflow.value > 0) {
-      checkpointCompletionRate.value =
-          (completedWorkflowCheckpoints.value /
-                  totalCheckpointsInWorkflow.value *
-                  100)
-              .roundToDouble();
-    } else {
-      checkpointCompletionRate.value = 0;
-    }
-  }
 
   void _calculateEfficiencyScore() {
     if (totalOperationsHandled.value == 0 &&
@@ -235,45 +215,15 @@ class DeptHeadController extends GetxController {
     return null;
   }
 
-  void _calculateTrend() {
-    if (totalOrders.value > 0) {
-      if (inProgressOrders.value > 5) {
-        ordersTrend.value = '+15%';
-      } else if (inProgressOrders.value > 2) {
-        ordersTrend.value = '+8%';
-      } else if (inProgressOrders.value > 0) {
-        ordersTrend.value = '+3%';
-      } else {
-        ordersTrend.value = '0%';
-      }
-    }
-  }
 
-  double getOrderCompletionRate() {
-    if (totalOrders.value == 0) return 0;
-    return (completedOrders.value / totalOrders.value * 100);
-  }
-
-  double getOperationCompletionRate() {
-    if (totalOperationsHandled.value == 0) return 0;
-    return (completedOps.value / totalOperationsHandled.value * 100);
-  }
-
-  double getCheckpointCompletionRate() {
-    if (totalCheckpointsInWorkflow.value == 0) return 0;
-    return (completedWorkflowCheckpoints.value /
-        totalCheckpointsInWorkflow.value *
-        100);
-  }
-
-  // ==================== ACTIVITY PROCESSING ====================
+  // ==================== Acitivty process ====================
 
   Future<void> _loadActivities() async {
     try {
       final activity = await repository.fetchActiveWorkflows(
         departmentId.value,
       );
-      recentActivity.value = activity;
+      _recentActivity.value = activity;
       _processActivities();
     } catch (e) {
       if (kDebugMode) dev.log("Activity Error: $e");
@@ -283,7 +233,7 @@ class DeptHeadController extends GetxController {
   void _processActivities() {
     final List<Map<String, dynamic>> processed = [];
 
-    for (var order in recentActivity) {
+    for (var order in _recentActivity) {
       final orderName = order['orderName'] ?? 'Unknown Order';
       final orderUniqueId = order['orderUniqueId'] ?? '';
       final orderId = order['_id'] ?? '';
@@ -294,7 +244,6 @@ class DeptHeadController extends GetxController {
           ? orderUniqueId.substring(0, 6)
           : orderUniqueId;
 
-      // 1. Add movement activity (when order enters department)
       processed.add({
         "id": "${orderId}_movement",
         "type": "movement",
@@ -307,37 +256,6 @@ class DeptHeadController extends GetxController {
         "color": Colors.blue,
       });
 
-      // 2. Check for material alerts (can be extended based on actual data)
-      if (_hasLowMaterialAlert(order)) {
-        processed.add({
-          "id": "${orderId}_alert",
-          "type": "alert",
-          "title": "Low Material Alert",
-          "subtitle": _getMaterialAlertMessage(order),
-          "timeAgo": _calculateTimeAgo(updatedAt),
-          "action": "ALERT",
-          "orderId": orderId,
-          "iconData": Icons.warning_amber_rounded,
-          "color": Colors.orange,
-        });
-      }
-
-      // 3. Check for operator assignments
-      if (_hasNewAssignment(order)) {
-        processed.add({
-          "id": "${orderId}_assignment",
-          "type": "assignment",
-          "title": "New Operator Assigned",
-          "subtitle": _getAssignmentMessage(order),
-          "timeAgo": _calculateTimeAgo(updatedAt),
-          "action": "ASSIGN",
-          "orderId": orderId,
-          "iconData": Icons.person_add_alt,
-          "color": Colors.purple,
-        });
-      }
-
-      // 4. Process operations and checkpoints for detailed activities
       for (var op in operations) {
         final opName = op['name'] ?? 'Unknown Operation';
         final checkpoints = op['checkpoints'] as List? ?? [];
@@ -372,7 +290,7 @@ class DeptHeadController extends GetxController {
       }
     }
 
-    // Sort by time (newest first)
+    // Sort by time
     processed.sort((a, b) {
       final aTime = _parseTimeAgo(a['timeAgo']);
       final bTime = _parseTimeAgo(b['timeAgo']);
@@ -459,7 +377,6 @@ class DeptHeadController extends GetxController {
   }
 
   DateTime _parseTimeAgo(String timeAgo) {
-    // This is a simplified parser - for sorting purposes
     if (timeAgo.contains('m')) {
       final minutes = int.tryParse(timeAgo.replaceAll('m ago', '')) ?? 0;
       return DateTime.now().subtract(Duration(minutes: minutes));
@@ -471,26 +388,6 @@ class DeptHeadController extends GetxController {
       return DateTime.now().subtract(Duration(days: days));
     }
     return DateTime.now();
-  }
-
-  bool _hasLowMaterialAlert(Map<String, dynamic> order) {
-    // This should be implemented based on actual data
-    // For now, return false as placeholder
-    return false;
-  }
-
-  bool _hasNewAssignment(Map<String, dynamic> order) {
-    // This should be implemented based on actual data
-    // For now, return false as placeholder
-    return false;
-  }
-
-  String _getMaterialAlertMessage(Map<String, dynamic> order) {
-    return "Thread count low for Batch B-12";
-  }
-
-  String _getAssignmentMessage(Map<String, dynamic> order) {
-    return "Maria G. assigned to Table 4";
   }
 
   void navigateToFullActivityList() {
@@ -510,28 +407,4 @@ class DeptHeadController extends GetxController {
     );
   }
 
-  // ==================== UI HELPERS ====================
-
-  String formatReadableMessage(String action, String checkpoint) {
-    switch (action) {
-      case 'SUBMIT':
-        return "$checkpoint submitted";
-      case 'APPROVE':
-        return "$checkpoint approved";
-      case 'REJECT':
-        return "$checkpoint rejected";
-      default:
-        return "$checkpoint updated";
-    }
-  }
-
-  String formatTimeAgo(DateTime? date) {
-    if (date == null) return '';
-    final diff = DateTime.now().difference(date);
-    if (diff.inMinutes < 1) return 'Just now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    if (diff.inDays < 7) return '${diff.inDays}d ago';
-    return '${date.day}/${date.month}/${date.year}';
-  }
 }

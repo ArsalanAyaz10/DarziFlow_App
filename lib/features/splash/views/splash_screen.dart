@@ -3,10 +3,15 @@ import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/utils/fonts.dart';
 import 'package:dariziflow_app/core/utils/global.dart';
 import 'package:dariziflow_app/core/utils/role_router.dart';
+import 'package:dariziflow_app/app/routes/app_pages.dart';
+import 'package:dariziflow_app/data/services/notifications_service.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:dariziflow_app/features/notifications/controllers/notification_controller.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -41,11 +46,28 @@ class _SplashScreenState extends State<SplashScreen> {
     bool isOnboardingDone = box.read('onboarding') ?? false;
 
     Future.delayed(const Duration(seconds: 3), () async {
+      // If the widget is no longer mounted or the app has navigated away, stop.
+      if (!mounted || Get.currentRoute != Routes.splash) return;
+
+      // 1. Check for Deep Link Reset Token first (highest priority)
+      final resetToken = box.read('reset_token');
+      if (resetToken != null) {
+        box.remove('reset_token');
+        Get.offAllNamed('/resetpassword', arguments: resetToken);
+        return;
+      }
+
       if (isOnboardingDone) {
         // Auto-login: check if user chose "Remember Me" and has a valid session
         final token = await AppStorage.getAccessToken();
         final rememberMe = box.read('remember_me') ?? false;
         if (token != null && rememberMe) {
+          // Sync FCM token during auto-login
+          Get.find<NotificationService>().syncTokenWithBackend();
+          
+          // Fetch notifications after auto-login
+          Get.find<NotificationController>().fetchNotifications();
+
           // User is already authenticated — check for a pending notification route
           final pendingRoute = box.read('pending_route');
           if (pendingRoute != null) {
@@ -295,14 +317,19 @@ class _SplashScreenState extends State<SplashScreen> {
                             color: colors.onSurfaceVariant,
                             fontFamily: AppFonts.outfit,
                           ),
-                          children: const [
-                            TextSpan(text: "By continuing, you agree to our "),
+                          children: [
+                            const TextSpan(
+                              text: "By continuing, you agree to our ",
+                            ),
                             TextSpan(
                               text: "Terms of Service",
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: AppColors.primaryGreen,
                                 fontWeight: FontWeight.w400,
                               ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () =>
+                                    Get.toNamed(Routes.termsOfService),
                             ),
                           ],
                         ),

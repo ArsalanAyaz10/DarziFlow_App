@@ -27,16 +27,6 @@ class QcRepository {
     }
   }
 
-  Future<List<String>> fetchRejectionReasons() async {
-    try {
-      final data = await service.getRejectionReasons();
-      return List<String>.from(data["data"] ?? []);
-    } catch (e) {
-      if (kDebugMode) dev.log("Error fetching rejection reasons: $e");
-      return [];
-    }
-  }
-
   Future<bool> approveSubmission({
     required String orderId,
     required String opId,
@@ -63,6 +53,19 @@ class QcRepository {
     } catch (e) {
       if (kDebugMode) dev.log("Error rejecting submission: $e");
       return false;
+    }
+  }
+
+  Future<List<dynamic>> fetchQcHistory() async {
+    try {
+      final data = await service.getHistory();
+      if (data != null && data['success'] == true) {
+        return data['data'] ?? [];
+      }
+      return [];
+    } catch (e) {
+      if (kDebugMode) dev.log("Error fetching QC history: $e");
+      return [];
     }
   }
 }

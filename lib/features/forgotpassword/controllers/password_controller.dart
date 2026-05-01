@@ -61,7 +61,7 @@ class PasswordController extends GetxController {
 
   @override
   void onClose() {
-    emailController.dispose();
+    // emailController.dispose();
     super.onClose();
   }
 }
