@@ -11,21 +11,15 @@ class NotificationRepository {
     try {
       final response = await apiClient.get('/notifications');
       final data = response.data;
-      
-      if (data is List) {
-        return data; // API returned an array directly
-      }
-      
-      if (data is Map) {
-        return data['notifications'] ?? data['data'] ?? [];
-      }
-      
+
+      if (data is List) return data;
+      if (data is Map) return data['notifications'] ?? data['data'] ?? [];
       return [];
     } catch (e) {
       if (kDebugMode) {
-        dev.log("Error fetching notifications: $e");
+        dev.log("API Error fetching notifications: $e");
       }
-      return [];
+      rethrow; // Let the Controller handle the UI error state
     }
   }
 

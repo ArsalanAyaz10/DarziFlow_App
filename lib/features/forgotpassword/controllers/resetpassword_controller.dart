@@ -1,6 +1,7 @@
-import 'package:dariziflow_app/features/forgotpassword/repositories/password_repository.dart';
+import 'package:dariziflow_app/features/ForgotPassword/repositories/password_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:dariziflow_app/core/utils/global.dart';
 
 class ResetPasswordController extends GetxController {
   final ForgotPasswordRepository repository;
@@ -18,7 +19,7 @@ class ResetPasswordController extends GetxController {
   var isNewPasswordObscured = true.obs;
   var isConfirmPasswordObscured = true.obs;
 
-  // Password Visibility Toggles
+  // Password Visibility chagens
   void toggleNewPasswordVisibility() => isNewPasswordObscured.toggle();
   void toggleConfirmPasswordVisibility() => isConfirmPasswordObscured.toggle();
 
@@ -86,6 +87,8 @@ class ResetPasswordController extends GetxController {
       final response = await repository.resetPassword(token, password);
 
       if (response['success'] == true) {
+        box.remove('reset_token');
+        
         Get.snackbar(
           "Success",
           "Password reset successfully!",
@@ -121,8 +124,9 @@ class ResetPasswordController extends GetxController {
 
   @override
   void onClose() {
-    newPasswordController.dispose();
-    confirmPasswordController.dispose();
+    // Manual disposal can sometimes cause crashes if the view is still active for a frame
+    // newPasswordController.dispose();
+    // confirmPasswordController.dispose();
     super.onClose();
   }
 }

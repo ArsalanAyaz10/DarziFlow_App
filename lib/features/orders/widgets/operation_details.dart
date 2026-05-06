@@ -1,6 +1,6 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/data/models/operationModel.dart';
-import 'package:dariziflow_app/features/orders/widgets/checkpoint_item.dart';
+import 'package:dariziflow_app/features/Orders/widgets/checkpoint_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -23,14 +23,15 @@ class OperationDetails extends StatelessWidget {
     final currentCP = op.checkpoints.isNotEmpty ? op.checkpoints.last : null;
     if (currentCP == null) return const SizedBox.shrink();
 
-    // --- Role-based button configuration ---
+    // Role-based config
+
     String buttonLabel;
     bool isBtnDisabled;
     Color btnColor;
     VoidCallback? onPressed;
 
     if (_isQC) {
-      // QC MEMBER: "Review Checkpoint" — only enabled when status is SUBMITTED
+      // QC MEMBER: "Review Checkpoint"
       final isSubmitted = currentCP.status == 'SUBMITTED' || currentCP.isQcPending;
       final isAlreadyReviewed = currentCP.isApproved || currentCP.isRejected;
 

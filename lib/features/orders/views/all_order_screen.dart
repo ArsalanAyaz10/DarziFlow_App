@@ -2,15 +2,15 @@ import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/widgets/bottom_nav_bar.dart';
 import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
 import 'package:dariziflow_app/data/models/orderCard_model.dart';
-import 'package:dariziflow_app/features/orders/controllers/order_controller.dart';
-import 'package:dariziflow_app/features/orders/widgets/order_card.dart';
-import 'package:dariziflow_app/features/orders/widgets/order_filter_chips.dart';
-import 'package:dariziflow_app/features/orders/widgets/order_list_shimmer.dart';
-import 'package:dariziflow_app/features/orders/widgets/order_search_bar.dart';
+import 'package:dariziflow_app/features/Orders/controllers/order_controller.dart';
+import 'package:dariziflow_app/features/Orders/widgets/order_card.dart';
+import 'package:dariziflow_app/features/Orders/widgets/order_filter_chips.dart';
+import 'package:dariziflow_app/features/Orders/widgets/order_list_shimmer.dart';
+import 'package:dariziflow_app/features/Orders/widgets/order_search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dariziflow_app/app/routes/app_pages.dart';
-import 'package:dariziflow_app/features/notifications/controllers/notification_controller.dart' as darizi_notifications;
+import 'package:dariziflow_app/features/Notifications/controllers/notification_controller.dart' as darizi_notifications;
 
 class AllOrderScreen extends GetView<OrderController> {
   const AllOrderScreen({super.key});

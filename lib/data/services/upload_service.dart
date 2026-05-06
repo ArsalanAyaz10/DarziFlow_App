@@ -100,7 +100,6 @@ class UploadService {
     }
   }
 
-  // Helper method to update local storage with new avatar
   Future<void> _updateLocalStorageWithAvatar(
     String url,
     String publicId,
@@ -123,7 +122,6 @@ class UploadService {
     required String orderId,
   }) async {
     try {
-      // Explicitly creating the map to ensure keys are present
       final Map<String, dynamic> body = {
         "contextType": "checkpoint",
         "orderId": orderId,

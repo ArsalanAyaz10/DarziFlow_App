@@ -3,7 +3,7 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/data/services/upload_service.dart';
-import 'package:dariziflow_app/features/profile/repositories/profile_repository.dart';
+import 'package:dariziflow_app/features/Profile/repositories/profile_repository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

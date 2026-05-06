@@ -1,6 +1,6 @@
 import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:dariziflow_app/data/models/auth_model.dart';
-import 'package:dariziflow_app/features/profile/services/profile_service.dart';
+import 'package:dariziflow_app/features/Profile/services/profile_service.dart';
 
 class ProfileRepository {
   final ProfileService service;

@@ -1,8 +1,8 @@
 import 'package:dariziflow_app/core/utils/fonts.dart';
-import 'package:dariziflow_app/features/profile/controllers/viewProfile_controller.dart';
-import 'package:dariziflow_app/features/profile/widgets/profile_header.dart';
-import 'package:dariziflow_app/features/profile/widgets/profile_shimmer.dart';
-import 'package:dariziflow_app/features/profile/widgets/profile_tile.dart';
+import 'package:dariziflow_app/features/Profile/controllers/viewProfile_controller.dart';
+import 'package:dariziflow_app/features/Profile/widgets/profile_header.dart';
+import 'package:dariziflow_app/features/Profile/widgets/profile_shimmer.dart';
+import 'package:dariziflow_app/features/Profile/widgets/profile_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

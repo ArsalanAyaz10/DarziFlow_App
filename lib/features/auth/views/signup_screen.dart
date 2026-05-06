@@ -5,8 +5,10 @@ import 'package:get/get.dart';
 import 'package:dariziflow_app/core/widgets/custom_text_field.dart';
 import 'package:dariziflow_app/core/widgets/custom_dropdown.dart';
 import 'package:dariziflow_app/features/auth/widgets/auth_header.dart';
-import 'package:dariziflow_app/features/forgotpassword/widgets/auth_bottom_link.dart';
+import 'package:dariziflow_app/features/ForgotPassword/widgets/auth_bottom_link.dart';
 import 'package:dariziflow_app/core/widgets/custom_elevated_button.dart';
+import 'package:dariziflow_app/app/routes/app_pages.dart';
+import 'package:flutter/gestures.dart';
 import '../controllers/signup_controller.dart';
 
 class SignupScreen extends GetView<SignupController> {
@@ -123,24 +125,32 @@ class SignupScreen extends GetView<SignupController> {
                         color: AppColors.grey,
                         height: 1.5,
                       ),
-                      children: const [
-                        TextSpan(
+                      children: [
+                        const TextSpan(
                           text: "By creating an account, you agree to our ",
                         ),
                         TextSpan(
                           text: "Terms of Service",
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: AppColors.primaryGreen,
                             fontWeight: FontWeight.bold,
                           ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              Get.toNamed(Routes.termsOfService);
+                            },
                         ),
-                        TextSpan(text: " and "),
+                        const TextSpan(text: " and "),
                         TextSpan(
                           text: "Privacy Policy",
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: AppColors.primaryGreen,
                             fontWeight: FontWeight.bold,
                           ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              Get.toNamed(Routes.privacyPolicy);
+                            },
                         ),
                       ],
                     ),

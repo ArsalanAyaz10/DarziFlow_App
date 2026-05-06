@@ -14,7 +14,13 @@ class AppStorage {
     return await _storage.read(key: "accessToken");
   }
 
-  // ─── Raw Map methods (kept for backward compatibility) ───
+  static Future<void> saveRefreshToken(String token) async {
+    await _storage.write(key: "refreshToken", value: token);
+  }
+
+  static Future<String?> getRefreshToken() async {
+    return await _storage.read(key: "refreshToken");
+  }
 
   static Future<void> saveUser(Map<dynamic, dynamic> user) async {
     final userJson = jsonEncode(user);
@@ -27,16 +33,11 @@ class AppStorage {
     return jsonDecode(userString);
   }
 
-  // ─── Typed AuthModel methods ───
-
-  /// Save an [AuthModel] to secure storage.
   static Future<void> saveAuthUser(AuthModel user) async {
     final userJson = jsonEncode(user.toJson());
     await _storage.write(key: "user", value: userJson);
   }
 
-  /// Retrieve the stored user as a typed [AuthModel].
-  /// Returns null if no user is stored or parsing fails.
   static Future<AuthModel?> getAuthUser() async {
     final userString = await _storage.read(key: "user");
     if (userString == null) return null;

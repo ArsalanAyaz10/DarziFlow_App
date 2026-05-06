@@ -1,5 +1,5 @@
 import 'package:dariziflow_app/data/models/notification_model.dart';
-import 'package:dariziflow_app/features/notifications/repositories/notification_repository.dart';
+import 'package:dariziflow_app/features/Notifications/repositories/notification_repository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
@@ -12,34 +12,27 @@ class NotificationController extends GetxController {
   var unreadCount = 0.obs;
   var isLoading = false.obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    fetchNotifications();
-  }
 
   Future<void> fetchNotifications() async {
     isLoading.value = true;
     try {
       final rawData = await repository.fetchNotifications();
       
-      List<NotificationModel> parsed = [];
-      for (var e in rawData) {
-        try {
-          parsed.add(NotificationModel.fromJson(e as Map<String, dynamic>));
-        } catch (err) {
-          if (kDebugMode) {
-            print("Error parsing single notification: $err | Data: $e");
-          }
-        }
-      }
-      
-      notifications.value = parsed;
-      _updateUnreadCount();
+      notifications.value = rawData
+          .map((e) {
+            try {
+              return NotificationModel.fromJson(e as Map<String, dynamic>);
+            } catch (err) {
+              if (kDebugMode) print("Error parsing notification: $err");
+              return null;
+            }
+          })
+          .whereType<NotificationModel>()
+          .toList();
+
+      unreadCount.value = notifications.where((n) => !n.isRead).length;
     } catch (e) {
-      if (kDebugMode) {
-        print("Error in fetchNotifications controller: $e");
-      }
+      if (kDebugMode) print("Error in fetchNotifications controller: $e");
       Get.snackbar("Error", "Failed to load notifications: $e");
     } finally {
       isLoading.value = false;
@@ -53,7 +46,7 @@ class NotificationController extends GetxController {
       if (index != -1) {
         notifications[index].isRead = true;
         notifications.refresh(); 
-        _updateUnreadCount();
+        unreadCount.value = notifications.where((n) => !n.isRead).length;
       }
     }
   }
@@ -65,11 +58,7 @@ class NotificationController extends GetxController {
         n.isRead = true;
       }
       notifications.refresh();
-      _updateUnreadCount();
+      unreadCount.value = notifications.where((n) => !n.isRead).length;
     }
-  }
-
-  void _updateUnreadCount() {
-    unreadCount.value = notifications.where((n) => !n.isRead).length;
   }
 }

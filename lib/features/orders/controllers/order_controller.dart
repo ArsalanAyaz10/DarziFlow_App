@@ -1,7 +1,9 @@
 import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:dariziflow_app/data/models/orderCard_model.dart';
-import 'package:dariziflow_app/features/orders/repository/order_repository.dart';
+import 'package:dariziflow_app/features/Orders/repository/order_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 
@@ -25,7 +27,22 @@ class OrderController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchOrders();
+    if (Get.arguments != null && Get.arguments is List) {
+      loadArguments(Get.arguments as List);
+    } else {
+      fetchOrders();
+    }
+  }
+
+  void loadArguments(List rawData) async {
+    try {
+      final role = await AppStorage.getUserRole() ?? "";
+      userRole.value = role.toUpperCase();
+
+      orders.value = rawData.map((json) => OrderModel.fromJson(json)).toList();
+    } catch (e) {
+      fetchOrders();
+    }
   }
 
   @override
@@ -94,14 +111,6 @@ class OrderController extends GetxController {
           })
           .toList()
           .obs;
-    }
-
-    final role = userRole.value;
-    final isQC = role == "QC_MEMBER";
-
-    // Base filter for QC: Hide orders that haven't started (0% progress)
-    if (isQC) {
-      list = list.where((o) => o.progress > 0).toList().obs;
     }
 
     switch (selectedFilter.value) {

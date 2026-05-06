@@ -1,65 +1,64 @@
-
 import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:dariziflow_app/data/models/checkpointModel.dart';
 import 'package:dariziflow_app/data/models/operationModel.dart';
 import 'package:dariziflow_app/data/services/upload_service.dart';
-import 'package:dariziflow_app/features/orders/controllers/orderDetail_controller.dart';
-import 'package:dariziflow_app/features/orders/repository/order_repository.dart';
-import 'package:dariziflow_app/features/qcDashboard/repositories/qc_repository.dart';
+import 'package:dariziflow_app/features/Orders/controllers/orderDetail_controller.dart';
+import 'package:dariziflow_app/features/Orders/repository/order_repository.dart';
+import 'package:dariziflow_app/features/QualityControl/repositories/qc_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:get/get.dart';
 import 'dart:developer' as dev;
 import 'package:path_provider/path_provider.dart' as path_provider;
-import "dart:io";
+import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 
 class CheckpointController extends GetxController {
-  TextEditingController remarksController = TextEditingController();
-
+  final TextEditingController remarksController = TextEditingController();
   final OrderRepository orderRepository;
   final UploadService uploadService;
+  final ImagePicker _picker = ImagePicker();
 
   CheckpointController(
     this.orderRepository,
-    this.uploadService, OrderDetailController find,
+    this.uploadService,
+    OrderDetailController find,
   );
 
-  var operation = Rxn<OperationModel>();
-  var isLoading = false.obs;
   late final OperationModel op;
   late final CheckpointModel ck;
   String orderId = '';
-  var checkpointDescription = ''.obs;
-  var minUploads = 0.obs;
-  var submissionTypes = [];
 
-  // Image variables
-  var pickedImages = <File>[].obs;
-  final int maxFiles = 10;
+  final checkpointDescription = ''.obs;
+  final minUploads = 0.obs;
+  final pickedImages = <File>[].obs;
+  SubmissionType allowedSubmissions = SubmissionType.text;
+  final userRole = ''.obs;
 
-  // loading
-  var isSubmitting = false.obs;
-  var isActionLoading = false.obs;
-
-  // Role
-  var userRole = ''.obs;
+  final isSubmitting = false.obs;
+  final isActionLoading = false.obs;
+  final maxFiles = 10.obs;
 
   @override
   void onInit() {
     super.onInit();
     op = Get.arguments['operation'];
     ck = Get.arguments['checkpoint'];
-    orderId = Get.arguments['orderId'];
-    if (orderId.isEmpty) {
-      dev.log("LOG: orderId passed to SubmitCheckpoint is empty or null");
-    }
-    
-    minUploads.value = ck.minUploads;
-    checkpointDescription.value = ck.submissionText.isNotEmpty ? ck.submissionText : "No Description Provided";
-    submissionTypes = [ck.submissionType];
+    orderId = Get.arguments['orderId'] ?? '';
 
+    minUploads.value = ck.minUploads;
+    if (minUploads.value > 0) {
+      maxFiles.value = minUploads.value;
+    } else {
+      maxFiles.value = 10;
+    }
+    allowedSubmissions = ck.submissionType;
+    checkpointDescription.value = ck.description.isNotEmpty
+        ? ck.description
+        : "No Description Provided";
+    dev.log("Description: ${ck.description}");
     _loadUserRole();
   }
 
@@ -70,33 +69,85 @@ class CheckpointController extends GetxController {
 
   bool get isQC => userRole.value == 'QC_MEMBER';
 
-  Future<void> pickImage() async {
-    if (pickedImages.length >= maxFiles) {
-      Get.snackbar(
-        "Limit Reached",
-        "You can only upload up to $maxFiles files.",
-      );
+  Future<void> pickMedia({bool fromCamera = false, bool isVideo = false, bool isFile = false}) async {
+    final allowed = ck.allowedTypes.map((e) => e.toUpperCase()).toList();
+    final isMediaAllowed = allowed.isEmpty ||
+        allowed.contains('IMAGE') ||
+        allowed.contains('VIDEO') ||
+        allowed.contains('DOCUMENT') ||
+        allowed.contains('DOC') ||
+        ck.submissionType != SubmissionType.text;
+
+    if (!isMediaAllowed) {
+      Get.snackbar("Not Allowed", "This checkpoint only accepts text submissions.");
       return;
     }
 
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 800,
-      maxHeight: 800,
-      imageQuality: 80,
-    );
+    if (pickedImages.length >= maxFiles.value) {
+      Get.snackbar("Limit Reached", "Max ${maxFiles.value} files allowed.");
+      return;
+    }
 
-    if (image != null) {
-      pickedImages.add(File(image.path));
+    try {
+      if (isFile) {
+        List<String> allowedExtensions = [];
+        final allowed = ck.allowedTypes.map((e) => e.toUpperCase()).toList();
+        if (allowed.isEmpty || allowed.contains('IMAGE')) {
+          allowedExtensions.addAll(['jpg', 'jpeg', 'png']);
+        }
+        if (allowed.isEmpty || allowed.contains('VIDEO')) {
+          allowedExtensions.addAll(['mp4', 'mov', 'avi']);
+        }
+        if (allowed.isEmpty || allowed.contains('DOCUMENT') || allowed.contains('DOC')) {
+          allowedExtensions.addAll(['pdf', 'doc', 'docx']);
+        }
+
+        final result = await FilePicker.pickFiles(
+          type: allowedExtensions.isNotEmpty ? FileType.custom : FileType.any,
+          allowedExtensions: allowedExtensions.isNotEmpty ? allowedExtensions : null,
+          allowMultiple: true,
+        );
+
+        if (result != null) {
+          for (var path in result.paths) {
+            if (path != null && pickedImages.length < maxFiles.value) {
+              pickedImages.add(File(path));
+            } else if (path != null && pickedImages.length >= maxFiles.value) {
+              Get.snackbar("Limit Reached", "Some files were not added because the limit of ${maxFiles.value} was reached.");
+              break;
+            }
+          }
+        }
+      } else if (isVideo) {
+        final XFile? video = await _picker.pickVideo(
+          source: fromCamera ? ImageSource.camera : ImageSource.gallery,
+        );
+        if (video != null) {
+          pickedImages.add(File(video.path));
+        }
+      } else {
+        final XFile? image = await _picker.pickImage(
+          source: fromCamera ? ImageSource.camera : ImageSource.gallery,
+          imageQuality: 70,
+        );
+        if (image != null) {
+          pickedImages.add(File(image.path));
+        }
+      }
+    } catch (e) {
+      dev.log("Pick Media Error: $e");
+      Get.snackbar("Error", "Failed to pick media: $e");
     }
   }
 
-  void removeImage(int index) {
-    pickedImages.removeAt(index);
-  }
+  void removeImage(int index) => pickedImages.removeAt(index);
 
-  Future<File?> _compressImage(File file) async {
+  Future<File?> _processFile(File file) async {
+    final ext = file.path.split('.').last.toLowerCase();
+    if (!['jpg', 'jpeg', 'png'].contains(ext)) {
+      return file; 
+    }
+
     final tempDir = await path_provider.getTemporaryDirectory();
     final targetPath =
         "${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg";
@@ -104,39 +155,85 @@ class CheckpointController extends GetxController {
     final result = await FlutterImageCompress.compressAndGetFile(
       file.absolute.path,
       targetPath,
-      quality: 70, //% compression
+      quality: 70,
       format: CompressFormat.jpeg,
     );
-
     return result != null ? File(result.path) : null;
   }
 
   Future<void> submitCheckpoint() async {
+    if (pickedImages.length < minUploads.value) {
+      Get.snackbar(
+        "Missing Evidence",
+        "This checkpoint requires at least ${minUploads.value} evidence file(s).",
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
     if (pickedImages.isEmpty && remarksController.text.isEmpty) {
       Get.snackbar("Error", "Please provide remarks or evidence.");
       return;
     }
 
-    try {
-      isSubmitting.value = true;
-      dev.log("SUBMITTING FOR ORDER ID: '$orderId'");
+    if (pickedImages.isNotEmpty) {
+      final allowed = ck.allowedTypes.map((e) => e.toUpperCase()).toList();
+      final isMediaAllowed = allowed.contains('IMAGE') ||
+          allowed.contains('VIDEO') ||
+          allowed.contains('DOCUMENT') ||
+          allowed.contains('DOC') ||
+          ck.submissionType != SubmissionType.text;
 
-      if (orderId.isEmpty) {
-        Get.snackbar("Error", "Order Context Missing");
+      if (!isMediaAllowed) {
+        Get.snackbar("Error", "Media upload is not allowed for this checkpoint.");
         return;
       }
-      List<Map<String, dynamic>> evidenceList = [];
 
+      if (allowed.isNotEmpty) {
+        bool isImageAllowed = allowed.contains('IMAGE');
+        bool isVideoAllowed = allowed.contains('VIDEO');
+        bool isDocAllowed =
+            allowed.contains('DOCUMENT') || allowed.contains('DOC');
+
+        List<String> validExts = [];
+        if (isImageAllowed) validExts.addAll(['jpg', 'jpeg', 'png']);
+        if (isVideoAllowed) validExts.addAll(['mp4', 'mov', 'avi']);
+        if (isDocAllowed) validExts.addAll(['pdf', 'doc', 'docx']);
+
+        for (var file in pickedImages) {
+          final ext = file.path.split('.').last.toLowerCase();
+          if (validExts.isNotEmpty && !validExts.contains(ext)) {
+            Get.snackbar(
+              "Invalid Submission",
+              "File type .$ext is not allowed. Accepted formats: ${ck.allowedTypes.join(', ')}",
+              backgroundColor: Colors.orange,
+              colorText: Colors.white,
+            );
+            return;
+          }
+        }
+      }
+    }
+
+    if (orderId.isEmpty) {
+      Get.snackbar("Error", "Order Context Missing");
+      return;
+    }
+
+    try {
+      isSubmitting.value = true;
+      final List<Map<String, dynamic>> evidenceList = [];
       final sigData = await uploadService.getCheckpointUploadSignature(
         orderId: orderId,
       );
 
       for (var image in pickedImages) {
-        File? compressed = await _compressImage(image);
-        if (compressed == null) continue;
+        final processed = await _processFile(image);
+        if (processed == null) continue;
 
-        final uploadResult = await uploadService.uploadToCloudinary(
-          file: compressed,
+        final upload = await uploadService.uploadToCloudinary(
+          file: processed,
           cloudName: sigData['cloudName'],
           apiKey: sigData['apiKey'],
           timestamp: sigData['timestamp'].toString(),
@@ -145,13 +242,13 @@ class CheckpointController extends GetxController {
         );
 
         evidenceList.add({
-          "url": uploadResult['secure_url'],
-          "publicId": uploadResult['public_id'],
-          "resourceType": uploadResult['resource_type'],
+          "url": upload['secure_url'],
+          "publicId": upload['public_id'],
+          "resourceType": upload['resource_type'],
         });
       }
 
-      bool success = await orderRepository.submitCheckpointData(
+      final success = await orderRepository.submitCheckpointData(
         orderId: orderId,
         opId: op.id,
         chkId: ck.id,
@@ -163,26 +260,23 @@ class CheckpointController extends GetxController {
         Get.back();
         Get.snackbar(
           "Success",
-          "Checkpoint submitted successfully",
+          "Submitted successfully",
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
       }
     } catch (e) {
-      dev.log("Final Submission Error: $e");
-      Get.snackbar("Submission Failed", e.toString());
+      dev.log("Submission Error", error: e);
+      Get.snackbar("Error", e.toString());
     } finally {
       isSubmitting.value = false;
     }
   }
 
-  // --- QC Actions ---
-
   Future<void> approveCheckpoint() async {
     isActionLoading.value = true;
     try {
-      final qcRepo = Get.find<QcRepository>();
-      final success = await qcRepo.approveSubmission(
+      final success = await Get.find<QcRepository>().approveSubmission(
         orderId: orderId,
         opId: op.id,
         chkId: ck.id,
@@ -190,9 +284,12 @@ class CheckpointController extends GetxController {
 
       if (success) {
         Get.back();
-        Get.snackbar("Success", "Checkpoint Approved", backgroundColor: Colors.green, colorText: Colors.white);
-      } else {
-        Get.snackbar("Error", "Fast approve failed");
+        Get.snackbar(
+          "Success",
+          "Approved",
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
       }
     } catch (e) {
       Get.snackbar("Error", e.toString());
@@ -203,14 +300,17 @@ class CheckpointController extends GetxController {
 
   Future<void> rejectCheckpoint() async {
     if (remarksController.text.isEmpty) {
-      Get.snackbar("Required", "Please provide a rejection comment in the remarks field.", backgroundColor: Colors.orange);
+      Get.snackbar(
+        "Required",
+        "Please provide a rejection comment.",
+        backgroundColor: Colors.orange,
+      );
       return;
     }
 
     isActionLoading.value = true;
     try {
-      final qcRepo = Get.find<QcRepository>();
-      final success = await qcRepo.rejectSubmission(
+      final success = await Get.find<QcRepository>().rejectSubmission(
         orderId: orderId,
         opId: op.id,
         chkId: ck.id,
@@ -219,10 +319,12 @@ class CheckpointController extends GetxController {
 
       if (success) {
         Get.back();
-        Get.snackbar("Status Changed", "Checkpoint rejected for rework", backgroundColor: Colors.orange, colorText: Colors.white);
-      } else {
-        Get.snackbar("Error", "Rejection failed");
-        print("rejection failed : ${success}");
+        Get.snackbar(
+          "Rejected",
+          "Sent for rework",
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+        );
       }
     } catch (e) {
       Get.snackbar("Error", e.toString());

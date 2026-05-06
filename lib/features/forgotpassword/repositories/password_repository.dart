@@ -1,4 +1,4 @@
-import 'package:dariziflow_app/features/forgotpassword/services/password_service.dart';
+import 'package:dariziflow_app/features/ForgotPassword/services/password_service.dart';
 
 class ForgotPasswordRepository {
 

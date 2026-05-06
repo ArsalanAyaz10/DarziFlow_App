@@ -1,6 +1,6 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/utils/fonts.dart';
-import 'package:dariziflow_app/features/profile/controllers/viewProfile_controller.dart';
+import 'package:dariziflow_app/features/Profile/controllers/viewProfile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:get/get_state_manager/src/simple/get_view.dart';

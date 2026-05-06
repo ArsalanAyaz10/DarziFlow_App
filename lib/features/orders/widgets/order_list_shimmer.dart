@@ -17,7 +17,6 @@ class OrderListShimmer extends StatelessWidget {
 
     return Column(
       children: [
-        // ─── Search bar skeleton ───
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
           child: Shimmer(
@@ -59,7 +58,6 @@ class OrderListShimmer extends StatelessWidget {
           ),
         ),
 
-        // ─── Filter chips skeleton ───
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Shimmer(

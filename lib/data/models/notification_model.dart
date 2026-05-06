@@ -23,9 +23,13 @@ class NotificationModel {
       title: json['title']?.toString() ?? '',
       message: json['body']?.toString() ?? json['message']?.toString() ?? '',
       isRead: json['read'] == true || json['isRead'] == true,
-      data: (json['metadata'] as Map<String, dynamic>?) ?? (json['data'] as Map<String, dynamic>?) ?? {},
+      data:
+          (json['metadata'] as Map<String, dynamic>?) ??
+          (json['data'] as Map<String, dynamic>?) ??
+          {},
       createdAt: json['createdAt'] != null
-          ? DateTime.tryParse(json['createdAt'].toString())?.toLocal() ?? DateTime.now()
+          ? DateTime.tryParse(json['createdAt'].toString())?.toLocal() ??
+                DateTime.now()
           : DateTime.now(),
     );
   }

@@ -5,6 +5,7 @@ import 'package:dariziflow_app/data/services/notifications_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:dariziflow_app/features/Notifications/controllers/notification_controller.dart';
 import '../repositories/auth_repository.dart';
 
 class LoginController extends GetxController {
@@ -75,16 +76,19 @@ class LoginController extends GetxController {
         print("Authenticated User: ${authUser.name} (${authUser.role})");
       }
 
+
+      // Fetch notifications after login
+      Get.find<NotificationController>().fetchNotifications();
+
       syncFcmToken();
 
-      // Save remember me preference
+      // Save remember me 
       if (rememberMe.value) {
         box.write('remember_me', true);
       } else {
         box.remove('remember_me');
       }
 
-      // Check for a pending route saved from a notification tap while logged out
       final pendingRoute = box.read('pending_route');
       if (pendingRoute != null) {
         box.remove('pending_route');
@@ -108,8 +112,8 @@ class LoginController extends GetxController {
 
   @override
   void onClose() {
-    emailController.dispose();
-    passwordController.dispose();
+    // emailController.dispose();
+    // passwordController.dispose();
     super.onClose();
   }
 }

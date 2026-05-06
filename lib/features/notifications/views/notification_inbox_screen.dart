@@ -1,6 +1,6 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
-import 'package:dariziflow_app/features/notifications/controllers/notification_controller.dart';
+import 'package:dariziflow_app/features/Notifications/controllers/notification_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

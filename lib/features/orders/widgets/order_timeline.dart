@@ -1,6 +1,6 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/data/models/operationModel.dart';
-import 'package:dariziflow_app/features/orders/widgets/operation_details.dart';
+import 'package:dariziflow_app/features/Orders/widgets/operation_details.dart';
 import 'package:flutter/material.dart';
 
 class OrderTimeline extends StatelessWidget {
