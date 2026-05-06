@@ -1,9 +1,9 @@
 import 'package:dariziflow_app/app/routes/app_pages.dart';
 import 'package:dariziflow_app/core/storage/storage.dart';
-import 'package:dariziflow_app/features/deptHeadDashboard/controllers/deptHeadController.dart';
-import 'package:dariziflow_app/features/deptHeadDashboard/controllers/department_details_controller.dart';
-import 'package:dariziflow_app/features/deptHeadDashboard/views/department_details_screen.dart';
-import 'package:dariziflow_app/features/messages/views/messages_screen.dart';
+import 'package:dariziflow_app/features/DepartmentHead/controllers/deptHeadController.dart';
+import 'package:dariziflow_app/features/DepartmentHead/controllers/department_details_controller.dart';
+import 'package:dariziflow_app/features/DepartmentHead/views/department_details_screen.dart';
+import 'package:dariziflow_app/features/Messages/views/messages_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -46,6 +46,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
     }
 
     final isQC = _userRole == 'QC_MEMBER';
+    final isClient = _userRole == 'CLIENT';
 
     return Container(
       decoration: BoxDecoration(
@@ -85,6 +86,12 @@ class _BottomNavBarState extends State<BottomNavBar> {
               activeIcon: Icon(Icons.history),
               label: 'History',
             )
+          else if (isClient)
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.description_outlined),
+              activeIcon: Icon(Icons.description),
+              label: 'Docs',
+            )
           else
             const BottomNavigationBarItem(
               icon: Icon(Icons.corporate_fare_outlined),
@@ -114,6 +121,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
           Get.offAllNamed(Routes.qcDashboard);
         } else if (role == "DEPARTMENT_HEAD") {
           Get.offAllNamed(Routes.deptartmentHead);
+        } else if (role == "CLIENT") {
+          Get.offAllNamed(Routes.clientDashboard);
         } else {
           Get.offAllNamed(Routes.login);
         }
@@ -132,6 +141,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
       case 2: // Dynamic Tab
         if (isQC) {
           Get.offNamed(Routes.qcHistory);
+        } else if (role == "CLIENT") {
+          Get.offNamed(Routes.clientDocs);
         } else {
           // --- DEPARTMENT HEAD NAVIGATION ---
           try {

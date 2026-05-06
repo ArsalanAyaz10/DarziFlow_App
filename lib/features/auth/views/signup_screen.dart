@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:dariziflow_app/core/widgets/custom_text_field.dart';
 import 'package:dariziflow_app/core/widgets/custom_dropdown.dart';
 import 'package:dariziflow_app/features/auth/widgets/auth_header.dart';
-import 'package:dariziflow_app/features/forgotpassword/widgets/auth_bottom_link.dart';
+import 'package:dariziflow_app/features/ForgotPassword/widgets/auth_bottom_link.dart';
 import 'package:dariziflow_app/core/widgets/custom_elevated_button.dart';
 import 'package:dariziflow_app/app/routes/app_pages.dart';
 import 'package:flutter/gestures.dart';

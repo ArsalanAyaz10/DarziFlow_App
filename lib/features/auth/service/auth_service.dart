@@ -43,8 +43,8 @@ class AuthService {
     return apiClient.get("/auth/verify/$token");
   }
 
-  Future<dynamic> logout() async {
-    return apiClient.post("/auth/logout");
+  Future<dynamic> logout({String? fcmToken}) async {
+    return apiClient.post("/auth/logout", data: {"fcmToken": fcmToken});
   }
 
   Future<dynamic> me() async {

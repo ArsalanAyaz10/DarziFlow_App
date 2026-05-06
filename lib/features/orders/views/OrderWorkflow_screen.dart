@@ -1,7 +1,7 @@
 import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
-import 'package:dariziflow_app/features/orders/controllers/orderDetail_controller.dart';
-import 'package:dariziflow_app/features/orders/widgets/order_timeline.dart';
-import 'package:dariziflow_app/features/orders/widgets/order_workflow_shimmer.dart';
+import 'package:dariziflow_app/features/Orders/controllers/orderDetail_controller.dart';
+import 'package:dariziflow_app/features/Orders/widgets/order_timeline.dart';
+import 'package:dariziflow_app/features/Orders/widgets/order_workflow_shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dariziflow_app/core/utils/colors.dart';

@@ -1,9 +1,9 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
-import 'package:dariziflow_app/features/profile/controllers/editProfile_controller.dart';
-import 'package:dariziflow_app/features/profile/widgets/profile_input_field.dart';
-import 'package:dariziflow_app/features/profile/widgets/profile_password_field.dart';
-import 'package:dariziflow_app/features/profile/widgets/profile_photo_picker.dart';
-import 'package:dariziflow_app/features/profile/widgets/profile_section_header.dart';
+import 'package:dariziflow_app/features/Profile/controllers/editProfile_controller.dart';
+import 'package:dariziflow_app/features/Profile/widgets/profile_input_field.dart';
+import 'package:dariziflow_app/features/Profile/widgets/profile_password_field.dart';
+import 'package:dariziflow_app/features/Profile/widgets/profile_photo_picker.dart';
+import 'package:dariziflow_app/features/Profile/widgets/profile_section_header.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';

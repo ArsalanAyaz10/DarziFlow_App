@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import '../../../core/storage/storage.dart';
 import 'dart:developer' as dev;
+import 'package:dariziflow_app/data/services/notifications_service.dart';
+import 'package:get/get.dart' hide Response;
 
 enum UserRole { qcMember, client, departmenthead }
 
@@ -51,10 +53,14 @@ class AuthRepository {
       }
 
       final accessToken = data["accessToken"];
+      final refreshToken = data["refreshToken"];
       final authUser =
           AuthModel.fromJson(Map<String, dynamic>.from(data["user"]));
 
       await AppStorage.saveAccessToken(accessToken);
+      if (refreshToken != null) {
+        await AppStorage.saveRefreshToken(refreshToken);
+      }
       await AppStorage.saveAuthUser(authUser);
       await AppStorage.saveUserRole(authUser.role);
 
@@ -73,9 +79,17 @@ class AuthRepository {
     }
   }
 
+
+
   Future<void> logout(PersistCookieJar cookieJar) async {
     try {
-      await authService.logout();
+      String? fcmToken;
+      try {
+        fcmToken = await Get.find<NotificationService>().getDeviceToken();
+      } catch (e) {
+        dev.log("Error getting FCM token for logout: $e");
+      }
+      await authService.logout(fcmToken: fcmToken);
     } catch (e) {
       dev.log("Logout API error: $e");
     } finally {

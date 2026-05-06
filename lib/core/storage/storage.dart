@@ -14,6 +14,14 @@ class AppStorage {
     return await _storage.read(key: "accessToken");
   }
 
+  static Future<void> saveRefreshToken(String token) async {
+    await _storage.write(key: "refreshToken", value: token);
+  }
+
+  static Future<String?> getRefreshToken() async {
+    return await _storage.read(key: "refreshToken");
+  }
+
   static Future<void> saveUser(Map<dynamic, dynamic> user) async {
     final userJson = jsonEncode(user);
     await _storage.write(key: "user", value: userJson);

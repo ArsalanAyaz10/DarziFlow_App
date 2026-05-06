@@ -1,5 +1,5 @@
 import 'package:dariziflow_app/data/models/notification_model.dart';
-import 'package:dariziflow_app/features/notifications/repositories/notification_repository.dart';
+import 'package:dariziflow_app/features/Notifications/repositories/notification_repository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
@@ -12,10 +12,6 @@ class NotificationController extends GetxController {
   var unreadCount = 0.obs;
   var isLoading = false.obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-  }
 
   Future<void> fetchNotifications() async {
     isLoading.value = true;

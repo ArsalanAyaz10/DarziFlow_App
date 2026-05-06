@@ -1,7 +1,7 @@
-import 'package:dariziflow_app/features/forgotpassword/controllers/password_controller.dart';
-import 'package:dariziflow_app/features/forgotpassword/controllers/resetpassword_controller.dart';
-import 'package:dariziflow_app/features/forgotpassword/repositories/password_repository.dart';
-import 'package:dariziflow_app/features/forgotpassword/services/password_service.dart';
+import 'package:dariziflow_app/features/ForgotPassword/controllers/password_controller.dart';
+import 'package:dariziflow_app/features/ForgotPassword/controllers/resetpassword_controller.dart';
+import 'package:dariziflow_app/features/ForgotPassword/repositories/password_repository.dart';
+import 'package:dariziflow_app/features/ForgotPassword/services/password_service.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/bindings_interface.dart';
 import 'package:get/get_instance/src/extension_instance.dart';

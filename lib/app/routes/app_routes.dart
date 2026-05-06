@@ -21,4 +21,6 @@ abstract class Routes {
   static const qcHistoryDetail = '/qc-history-detail';
   static const termsOfService = '/terms-of-service';
   static const privacyPolicy = '/privacy-policy';
+  static const clientDashboard = '/client-dashboard';
+  static const clientDocs = '/client-docs';
 }

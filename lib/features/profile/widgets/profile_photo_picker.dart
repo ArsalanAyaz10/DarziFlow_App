@@ -1,5 +1,5 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
-import 'package:dariziflow_app/features/profile/controllers/editProfile_controller.dart';
+import 'package:dariziflow_app/features/Profile/controllers/editProfile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

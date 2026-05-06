@@ -74,10 +74,11 @@ class OrderModel {
             id: cp['_id'] ?? '',
             name: cp['name'] ?? '',
             status: cp['status'] ?? 'PENDING',
+            description: cp['description'] ?? '',
             submissionText: cp['submissionText'] ?? '',
             qcRequired: cp['qcRequired'] ?? false,
             submissionType: _parseSubmissionType(typeString),
-            minUploads: num.tryParse(cp['minUploads']?.toString() ?? '0')?.toInt() ?? 0,
+            minUploads: num.tryParse(cp['minRequiredUploads']?.toString() ?? '0')?.toInt() ?? 0,
             allowedTypes: allowedTypesList,
             submissionFiles: (cp['submissionFiles'] as List? ?? [])
                 .map((f) => SubmissionFile.fromJson(f as Map<String, dynamic>))

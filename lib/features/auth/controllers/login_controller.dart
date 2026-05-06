@@ -5,7 +5,7 @@ import 'package:dariziflow_app/data/services/notifications_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:dariziflow_app/features/notifications/controllers/notification_controller.dart';
+import 'package:dariziflow_app/features/Notifications/controllers/notification_controller.dart';
 import '../repositories/auth_repository.dart';
 
 class LoginController extends GetxController {

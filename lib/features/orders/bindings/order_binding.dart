@@ -1,11 +1,11 @@
 import 'package:dariziflow_app/data/services/upload_service.dart';
-import 'package:dariziflow_app/features/deptHeadDashboard/repositories/department_repository.dart';
-import 'package:dariziflow_app/features/deptHeadDashboard/service/department_service.dart';
-import 'package:dariziflow_app/features/orders/controllers/checkpoint_controller.dart';
-import 'package:dariziflow_app/features/orders/controllers/orderDetail_controller.dart';
-import 'package:dariziflow_app/features/orders/controllers/order_controller.dart';
-import 'package:dariziflow_app/features/orders/repository/order_repository.dart';
-import 'package:dariziflow_app/features/orders/services/order_service.dart';
+import 'package:dariziflow_app/features/DepartmentHead/repositories/department_repository.dart';
+import 'package:dariziflow_app/features/DepartmentHead/service/department_service.dart';
+import 'package:dariziflow_app/features/Orders/controllers/checkpoint_controller.dart';
+import 'package:dariziflow_app/features/Orders/controllers/orderDetail_controller.dart';
+import 'package:dariziflow_app/features/Orders/controllers/order_controller.dart';
+import 'package:dariziflow_app/features/Orders/repository/order_repository.dart';
+import 'package:dariziflow_app/features/Orders/services/order_service.dart';
 import 'package:get/get.dart';
 
 class OrderBinding extends Bindings {

@@ -1,4 +1,4 @@
-import 'package:dariziflow_app/features/forgotpassword/repositories/password_repository.dart';
+import 'package:dariziflow_app/features/ForgotPassword/repositories/password_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

@@ -6,6 +6,7 @@ class CheckpointModel {
   final String id;
   final String name;
   final String status;
+  final String description;
   final String submissionText;
   final bool qcRequired;
   final SubmissionType submissionType; //img,video,text,doc
@@ -18,6 +19,7 @@ class CheckpointModel {
 
   CheckpointModel({
     required this.id,
+    required this.description,
     required this.submissionText,
     required this.name,
     required this.status,

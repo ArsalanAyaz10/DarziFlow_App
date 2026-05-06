@@ -2,32 +2,35 @@ import 'package:dariziflow_app/features/auth/bindings/login_binding.dart';
 import 'package:dariziflow_app/features/auth/bindings/signup_binding.dart';
 import 'package:dariziflow_app/features/auth/views/login_screen.dart';
 import 'package:dariziflow_app/features/auth/views/signup_screen.dart';
-import 'package:dariziflow_app/features/deptHeadDashboard/bindings/DeptHeadBindings.dart';
-import 'package:dariziflow_app/features/deptHeadDashboard/views/all_activities_screen.dart';
-import 'package:dariziflow_app/features/deptHeadDashboard/views/dashboard_screen.dart';
-import 'package:dariziflow_app/features/forgotpassword/bindings/password_binding.dart';
-import 'package:dariziflow_app/features/forgotpassword/views/forgotPassword_screen.dart';
-import 'package:dariziflow_app/features/forgotpassword/views/resetPassword_screen.dart';
-import 'package:dariziflow_app/features/orders/views/OrderWorkflow_screen.dart';
-import 'package:dariziflow_app/features/orders/views/order_detail_screen.dart';
-import 'package:dariziflow_app/features/orders/views/all_order_screen.dart';
-import 'package:dariziflow_app/features/orders/views/submitCheckpoint_screen.dart';
-import 'package:dariziflow_app/features/profile/bindings/editprofile_binding.dart';
-import 'package:dariziflow_app/features/profile/bindings/viewprofile_binding.dart';
-import 'package:dariziflow_app/features/profile/views/editprofile_screen.dart';
-import 'package:dariziflow_app/features/profile/views/viewprofile_screen.dart';
-import 'package:dariziflow_app/features/notifications/bindings/notification_binding.dart';
-import 'package:dariziflow_app/features/notifications/views/notification_inbox_screen.dart';
-import 'package:dariziflow_app/features/orders/bindings/order_binding.dart';
-import 'package:dariziflow_app/features/splash/views/splash_screen.dart';
-import 'package:dariziflow_app/features/qcDashboard/bindings/qc_dashboard_binding.dart';
-import 'package:dariziflow_app/features/qcDashboard/views/qc_dashboard_screen.dart';
-import 'package:dariziflow_app/features/qcDashboard/views/all_reviews_screen.dart';
-import 'package:dariziflow_app/features/legal/views/terms_of_service_screen.dart';
-import 'package:dariziflow_app/features/legal/views/privacy_policy_screen.dart';
-import 'package:dariziflow_app/features/qcDashboard/bindings/qc_history_binding.dart';
-import 'package:dariziflow_app/features/qcDashboard/views/qc_history_screen.dart';
-import 'package:dariziflow_app/features/qcDashboard/views/qc_history_detail_screen.dart';
+import 'package:dariziflow_app/features/DepartmentHead/bindings/DeptHeadBindings.dart';
+import 'package:dariziflow_app/features/DepartmentHead/views/all_activities_screen.dart';
+import 'package:dariziflow_app/features/DepartmentHead/views/dashboard_screen.dart';
+import 'package:dariziflow_app/features/ForgotPassword/bindings/password_binding.dart';
+import 'package:dariziflow_app/features/ForgotPassword/views/forgotPassword_screen.dart';
+import 'package:dariziflow_app/features/ForgotPassword/views/resetPassword_screen.dart';
+import 'package:dariziflow_app/features/Orders/views/OrderWorkflow_screen.dart';
+import 'package:dariziflow_app/features/Orders/views/order_detail_screen.dart';
+import 'package:dariziflow_app/features/Orders/views/all_order_screen.dart';
+import 'package:dariziflow_app/features/Orders/views/submitCheckpoint_screen.dart';
+import 'package:dariziflow_app/features/Profile/bindings/editprofile_binding.dart';
+import 'package:dariziflow_app/features/Profile/bindings/viewprofile_binding.dart';
+import 'package:dariziflow_app/features/Profile/views/editprofile_screen.dart';
+import 'package:dariziflow_app/features/Profile/views/viewprofile_screen.dart';
+import 'package:dariziflow_app/features/Notifications/bindings/notification_binding.dart';
+import 'package:dariziflow_app/features/Notifications/views/notification_inbox_screen.dart';
+import 'package:dariziflow_app/features/Orders/bindings/order_binding.dart';
+import 'package:dariziflow_app/features/Splash/views/splash_screen.dart';
+import 'package:dariziflow_app/features/QualityControl/bindings/qc_dashboard_binding.dart';
+import 'package:dariziflow_app/features/QualityControl/views/qc_dashboard_screen.dart';
+import 'package:dariziflow_app/features/QualityControl/views/all_reviews_screen.dart';
+import 'package:dariziflow_app/features/Splash/views/terms_of_service_screen.dart';
+import 'package:dariziflow_app/features/Splash/views/privacy_policy_screen.dart';
+import 'package:dariziflow_app/features/QualityControl/bindings/qc_history_binding.dart';
+import 'package:dariziflow_app/features/QualityControl/views/qc_history_screen.dart';
+import 'package:dariziflow_app/features/QualityControl/views/qc_history_detail_screen.dart';
+import 'package:dariziflow_app/features/Cilent/bindings/client_dashboard_binding.dart';
+import 'package:dariziflow_app/features/Cilent/views/client_dashboard_screen.dart';
+import 'package:dariziflow_app/features/Cilent/views/client_docs_screen.dart';
 import 'package:get/get.dart';
 part 'app_routes.dart';
 
@@ -129,6 +132,15 @@ class AppPages {
     GetPage(
       name: Routes.privacyPolicy,
       page: () => const PrivacyPolicyScreen(),
+    ),
+    GetPage(
+      name: Routes.clientDashboard,
+      page: () => const ClientDashboardScreen(),
+      binding: ClientDashboardBinding(),
+    ),
+    GetPage(
+      name: Routes.clientDocs,
+      page: () => const ClientDocsScreen(),
     ),
   ];
 }

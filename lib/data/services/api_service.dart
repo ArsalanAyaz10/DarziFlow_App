@@ -4,6 +4,7 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter/foundation.dart';
 
 class ApiService {
   late Dio dio;
@@ -45,7 +46,7 @@ class ApiService {
               err.requestOptions.baseUrl == primaryUrl) {
             _azureLastFailTime = DateTime.now();
 
-            print("Azure failed. Retrying with Backup: $backupUrl");
+            debugPrint("Azure failed. Retrying with Backup: $backupUrl");
             final retryOptions = err.requestOptions.copyWith(
               baseUrl: backupUrl,
             );

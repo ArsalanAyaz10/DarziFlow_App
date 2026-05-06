@@ -11,7 +11,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:dariziflow_app/features/notifications/controllers/notification_controller.dart';
+import 'package:dariziflow_app/features/Notifications/controllers/notification_controller.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -46,10 +46,8 @@ class _SplashScreenState extends State<SplashScreen> {
     bool isOnboardingDone = box.read('onboarding') ?? false;
 
     Future.delayed(const Duration(seconds: 3), () async {
-      // If the widget is no longer mounted or the app has navigated away, stop.
       if (!mounted || Get.currentRoute != Routes.splash) return;
 
-      // 1. Check for Deep Link Reset Token first (highest priority)
       final resetToken = box.read('reset_token');
       if (resetToken != null) {
         box.remove('reset_token');
@@ -58,17 +56,12 @@ class _SplashScreenState extends State<SplashScreen> {
       }
 
       if (isOnboardingDone) {
-        // Auto-login: check if user chose "Remember Me" and has a valid session
         final token = await AppStorage.getAccessToken();
         final rememberMe = box.read('remember_me') ?? false;
         if (token != null && rememberMe) {
-          // Sync FCM token during auto-login
           Get.find<NotificationService>().syncTokenWithBackend();
           
-          // Fetch notifications after auto-login
           Get.find<NotificationController>().fetchNotifications();
-
-          // User is already authenticated — check for a pending notification route
           final pendingRoute = box.read('pending_route');
           if (pendingRoute != null) {
             box.remove('pending_route');

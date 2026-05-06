@@ -1,4 +1,4 @@
-import 'package:dariziflow_app/features/forgotpassword/controllers/resetpassword_controller.dart';
+import 'package:dariziflow_app/features/ForgotPassword/controllers/resetpassword_controller.dart';
 import 'package:dariziflow_app/core/widgets/custom_elevated_button.dart'; // Adjust path
 import 'package:dariziflow_app/core/widgets/custom_text_field.dart'; // Adjust path
 import 'package:flutter/material.dart';

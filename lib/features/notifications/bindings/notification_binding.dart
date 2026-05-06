@@ -1,6 +1,6 @@
 import 'package:dariziflow_app/core/network/api_client.dart';
-import 'package:dariziflow_app/features/notifications/controllers/notification_controller.dart';
-import 'package:dariziflow_app/features/notifications/repositories/notification_repository.dart';
+import 'package:dariziflow_app/features/Notifications/controllers/notification_controller.dart';
+import 'package:dariziflow_app/features/Notifications/repositories/notification_repository.dart';
 import 'package:get/get.dart';
 
 class NotificationBinding extends Bindings {

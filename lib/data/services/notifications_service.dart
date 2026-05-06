@@ -1,7 +1,7 @@
 import 'package:dariziflow_app/core/network/api_client.dart';
 import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:dariziflow_app/core/utils/global.dart';
-import 'package:dariziflow_app/features/notifications/controllers/notification_controller.dart';
+import 'package:dariziflow_app/features/Notifications/controllers/notification_controller.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
