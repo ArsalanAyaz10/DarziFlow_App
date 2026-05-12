@@ -1,6 +1,6 @@
 import 'package:dariziflow_app/app/routes/app_pages.dart';
 import 'package:dariziflow_app/core/storage/storage.dart';
-import 'package:dariziflow_app/features/DepartmentHead/controllers/deptHeadController.dart';
+import 'package:dariziflow_app/features/DepartmentHead/controllers/deptHead_controller.dart';
 import 'package:dariziflow_app/features/DepartmentHead/controllers/department_details_controller.dart';
 import 'package:dariziflow_app/features/DepartmentHead/views/department_details_screen.dart';
 import 'package:dariziflow_app/features/Messages/views/messages_screen.dart';
@@ -27,7 +27,6 @@ class _BottomNavBarState extends State<BottomNavBar> {
     _loadRole();
   }
 
-  // Load the role once when the nav bar initializes to prevent UI flickering
   Future<void> _loadRole() async {
     final role = await AppStorage.getUserRole();
     if (mounted) {
@@ -41,7 +40,6 @@ class _BottomNavBarState extends State<BottomNavBar> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      // Show an empty container of roughly the same height while loading
       return const SizedBox(height: 60);
     }
 
@@ -79,7 +77,6 @@ class _BottomNavBarState extends State<BottomNavBar> {
             activeIcon: Icon(Icons.shopping_bag),
             label: 'Orders',
           ),
-          // --- DYNAMIC 3RD TAB ---
           if (isQC)
             const BottomNavigationBarItem(
               icon: Icon(Icons.history_outlined),
@@ -88,9 +85,9 @@ class _BottomNavBarState extends State<BottomNavBar> {
             )
           else if (isClient)
             const BottomNavigationBarItem(
-              icon: Icon(Icons.description_outlined),
-              activeIcon: Icon(Icons.description),
-              label: 'Docs',
+              icon: Icon(Icons.assignment_outlined),
+              activeIcon: Icon(Icons.assignment),
+              label: 'Requests',
             )
           else
             const BottomNavigationBarItem(
@@ -111,7 +108,6 @@ class _BottomNavBarState extends State<BottomNavBar> {
   Future<void> _handleNavigation(int index) async {
     if (index == widget.currentIndex) return;
 
-    // Fallback to fetching if state isn't loaded for some reason
     final role = _userRole ?? (await AppStorage.getUserRole())?.toUpperCase();
     final isQC = role == "QC_MEMBER";
 
@@ -142,25 +138,21 @@ class _BottomNavBarState extends State<BottomNavBar> {
         if (isQC) {
           Get.offNamed(Routes.qcHistory);
         } else if (role == "CLIENT") {
-          Get.offNamed(Routes.clientDocs);
+          Get.offNamed(Routes.orderRequests);
         } else {
-          // --- DEPARTMENT HEAD NAVIGATION ---
           try {
             String? deptId;
 
-            // 1. Try to get from active DeptHeadController
             if (Get.isRegistered<DeptHeadController>()) {
               deptId = Get.find<DeptHeadController>().departmentId.value;
             }
 
-            // 2. If not found, fallback to local storage
             if (deptId == null || deptId.isEmpty) {
               final user = await AppStorage.getAuthUser();
               deptId = user?.department;
             }
 
             if (deptId != null && deptId.isNotEmpty) {
-              // Ensure any existing controller with a different ID is replaced
               if (Get.isRegistered<DepartmentDetailsController>()) {
                 Get.delete<DepartmentDetailsController>();
               }

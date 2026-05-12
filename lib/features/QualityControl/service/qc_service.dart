@@ -22,7 +22,7 @@ class QcService {
     required String chkId,
   }) async {
     final response = await apiClient.patch(
-      "/orders/$orderId/workflow/$opId/checkpoints/$chkId/approve",
+      "/checkpoints/$orderId/workflow/$opId/checkpoints/$chkId/approve",
     );
     return response.data;
   }
@@ -34,14 +34,14 @@ class QcService {
     required String comment,
   }) async {
     final response = await apiClient.patch(
-      "/orders/$orderId/workflow/$opId/checkpoints/$chkId/reject",
+      "/checkpoints/$orderId/workflow/$opId/checkpoints/$chkId/reject",
       data: {"comment": comment},
     );
     return response.data;
   }
 
   Future<dynamic> getHistory() async {
-    final response = await apiClient.get("/orders/qc/history");
+    final response = await apiClient.get("/checkpoints/history");
     return response.data;
   }
 }

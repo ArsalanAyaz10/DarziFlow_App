@@ -2,31 +2,31 @@ import 'package:dariziflow_app/core/network/api_client.dart';
 
 class OrderService {
   final ApiClient apiClient;
-  static final route = "orders";
+  static final route = "order";
 
   OrderService(this.apiClient);
 
   Future<dynamic> getOrderbyID(String orderID) async {
-    return await apiClient.get('/$route/$orderID');
+    return await apiClient.get('$route/$orderID');
   }
 
   Future<dynamic> getAllOrders() async {
-    final response = await apiClient.get('/$route/');
+    final response = await apiClient.get('$route/');
     return response.data;
   }
 
   Future<dynamic> getDepartmentOrders(String deptID) async {
-    final response = await apiClient.get("/stats/$deptID/active-workflows");
+    final response = await apiClient.get("stats/$deptID/active-workflows");
     return response.data;
   }
 
   Future<dynamic> getAllDepartmentOrders(String deptID) async {
-    final response = await apiClient.get("/stats/$deptID/all-workflows");
+    final response = await apiClient.get("stats/$deptID/all-workflows");
     return response.data;
   }
 
   Future<dynamic> getGlobalActiveWorkflows() async {
-    final response = await apiClient.get("/stats/active-workflows");
+    final response = await apiClient.get("stats/active-workflows");
     return response.data;
   }
 
@@ -38,7 +38,7 @@ class OrderService {
   }) async {
 
     final response = await apiClient.post(
-      '/$route/$orderId/workflow/$opId/checkpoints/$chkId/submit',
+      'checkpoints/$orderId/workflow/$opId/checkpoints/$chkId/submit',
       data: data,
     );
     return response.data;

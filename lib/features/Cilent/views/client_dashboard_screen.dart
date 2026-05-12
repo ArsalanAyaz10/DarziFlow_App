@@ -2,11 +2,14 @@ import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/widgets/bottom_nav_bar.dart';
 import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
 import 'package:dariziflow_app/features/Cilent/controllers/client_dashboard_controller.dart';
+import 'package:dariziflow_app/app/routes/app_pages.dart';
 import 'package:dariziflow_app/features/Notifications/controllers/notification_controller.dart';
 import 'package:dariziflow_app/features/DepartmentHead/widgets/stat_tile.dart';
 import 'package:dariziflow_app/features/DepartmentHead/widgets/recent_activity_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:dariziflow_app/features/Cilent/widgets/client_dashboard_shimmer.dart';
 import 'dart:math' as math;
 
 class ClientDashboardScreen extends GetView<ClientDashboardController> {
@@ -18,8 +21,12 @@ class ClientDashboardScreen extends GetView<ClientDashboardController> {
     final colors = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
 
-    final backgroundColor = isDark ? AppColors.atelierBackgroundDark : AppColors.atelierBackgroundLight;
-    final cardColor = isDark ? AppColors.atelierSurfaceDark : AppColors.atelierSurfaceLight;
+    final backgroundColor = isDark
+        ? AppColors.atelierBackgroundDark
+        : AppColors.atelierBackgroundLight;
+    final cardColor = isDark
+        ? AppColors.atelierSurfaceDark
+        : AppColors.atelierSurfaceLight;
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -37,10 +44,13 @@ class ClientDashboardScreen extends GetView<ClientDashboardController> {
               IconButton(
                 onPressed: () => Get.toNamed('/notification-inbox'),
                 icon: Obx(() {
-                  final unreadCount = Get.find<NotificationController>().unreadCount.value;
+                  final unreadCount =
+                      Get.find<NotificationController>().unreadCount.value;
                   return Badge(
                     isLabelVisible: unreadCount > 0,
-                    label: Text(unreadCount > 99 ? '99+' : unreadCount.toString()),
+                    label: Text(
+                      unreadCount > 99 ? '99+' : unreadCount.toString(),
+                    ),
                     backgroundColor: AppColors.error,
                     child: Icon(
                       Icons.notifications_none,
@@ -53,131 +63,154 @@ class ClientDashboardScreen extends GetView<ClientDashboardController> {
           ),
         ),
       ),
-      body: Obx(() => SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 20),
-            // Greeting Section
-            Column(
+      body: Obx(() {
+        if (controller.isLoading.value &&
+            controller.orders.isEmpty &&
+            controller.carouselItems.isEmpty) {
+          return const ClientDashboardShimmer();
+        }
+
+        return RefreshIndicator(
+          onRefresh: () => controller.fetchDashboardData(),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                const SizedBox(height: 20),
+
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Welcome back, ",
-                      style: TextStyle(
-                        color: colors.onSurface.withValues(alpha: 1),
-                        fontSize: 15,
-                        letterSpacing: 0.5,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          "Welcome back, ",
+                          style: TextStyle(
+                            color: colors.onSurface.withValues(alpha: 1),
+                            fontSize: 15,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        Text(
+                          controller.userName.value,
+                          style: TextStyle(
+                            color: colors.onSurface,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 5),
                     Text(
-                      controller.userName.value,
+                      "Your style, our craft. Tracking your masterpieces.",
                       style: TextStyle(
-                        color: colors.onSurface,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: -0.5,
+                        color: AppColors.atelierSilkGreen.withValues(
+                          alpha: 0.8,
+                        ),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  "Your style, our craft. Tracking your masterpieces.",
-                  style: TextStyle(
-                    color: AppColors.atelierSilkGreen.withValues(alpha: 0.8),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
+
+                const SizedBox(height: 10),
+                Divider(color: colors.outlineVariant, height: 1),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    StatTile(
+                      label: "Total Orders",
+                      value: controller.totalOrdersCount.value.toString(),
+                      subText: "Orders Placed",
+                      color: colors.primary,
+                      icon: Icons.shopping_bag_outlined,
+                      showTrend: false,
+                    ),
+                    const SizedBox(width: 10),
+                    StatTile(
+                      label: "Active Orders",
+                      value: controller.activeOrdersCount.value.toString(),
+                      subText: "In progress now",
+                      color: AppColors.atelierSilkGreen,
+                      icon: Icons.pending_actions,
+                      showTrend: false,
+                    ),
+                  ],
                 ),
+
+                const SizedBox(height: 10),
+                Divider(color: colors.outlineVariant, height: 1),
+                const SizedBox(height: 10),
+
+                if (controller.orders.isNotEmpty) ...[
+                  Text(
+                    "ORDER PROGRESS",
+                    style: TextStyle(
+                      color: colors.onSurface.withValues(alpha: 0.6),
+                      fontSize: 12,
+                      letterSpacing: 1.2,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  _buildLatestOrderCard(cardColor, colors, isDark),
+
+                  const SizedBox(height: 10),
+                  Divider(color: colors.outlineVariant, height: 1),
+                  const SizedBox(height: 10),
+                ],
+
+                if (controller.carouselItems.isNotEmpty) ...[
+                  Text(
+                    "EXPLORE COLLECTIONS",
+                    style: TextStyle(
+                      color: colors.onSurface.withValues(alpha: 0.6),
+                      fontSize: 12,
+                      letterSpacing: 1.2,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  _buildCarousel(colors),
+                  const SizedBox(height: 10),
+                  Divider(color: colors.outlineVariant, height: 1),
+                  const SizedBox(height: 10),
+                ],
+
+                RecentActivityPanel(
+                  activities: controller.mappedActivities,
+                  onViewAll: controller.navigateToFullActivityList,
+                ),
+                const SizedBox(height: 10),
               ],
             ),
-            
-            const SizedBox(height: 10),
-            Divider(color: colors.outlineVariant, height: 1),
-            const SizedBox(height: 10),
-
-            _buildSummaryCards(cardColor, colors),
-            
-            const SizedBox(height: 10),
-            Divider(color: colors.outlineVariant, height: 1),
-            const SizedBox(height: 10),
-
-            Text(
-              "ORDER PROGRESS",
-              style: TextStyle(
-                color: colors.onSurface.withValues(alpha: 0.6),
-                fontSize: 12,
-                letterSpacing: 1.2,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            
-            _buildLatestOrderCard(cardColor, colors, isDark),
-            
-            const SizedBox(height: 10),
-            Divider(color: colors.outlineVariant, height: 1),
-            const SizedBox(height: 10),
-
-            Text(
-              "PREVIOUS ORDERS",
-              style: TextStyle(
-                color: colors.onSurface.withValues(alpha: 0.6),
-                fontSize: 12,
-                letterSpacing: 1.2,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            
-            _buildPreviousOrdersList(cardColor, colors),
-            
-            const SizedBox(height: 10),
-            Divider(color: colors.outlineVariant, height: 1),
-            const SizedBox(height: 10),
-
-            RecentActivityPanel(
-              activities: controller.processedActivities,
-              onViewAll: controller.navigateToFullActivityList,
-            ),
-            const SizedBox(height: 10),
-          ],
-        ),
-      )),
+          ),
+        );
+      }),
       bottomNavigationBar: const BottomNavBar(currentIndex: 0),
+      floatingActionButton: FloatingActionButton(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+        onPressed: () => Get.toNamed(Routes.createOrderRequest),
+        backgroundColor: AppColors.atelierSilkGreen,
+        child: const Icon(Icons.add, color: Colors.black),
+      ),
     );
   }
 
-  Widget _buildSummaryCards(Color cardColor, ColorScheme colors) {
-    return Row(
-      children: [
-        Obx(() => StatTile(
-          label: "Total Orders",
-          value: controller.completedOrdersCount.value.toString(),
-          subText: "Orders Completed",
-          color: colors.primary,
-          icon: Icons.shopping_bag_outlined,
-          showTrend: false,
-        )),
-        const SizedBox(width: 10),
-        Obx(() => StatTile(
-          label: "Active Orders",
-          value: controller.activeOrdersCount.value.toString(),
-          subText: "In progress now",
-          color: AppColors.atelierSilkGreen,
-          icon: Icons.pending_actions,
-          showTrend: false,
-        )),
-      ],
-    );
-  }
+  Widget _buildLatestOrderCard(
+    Color cardColor,
+    ColorScheme colors,
+    bool isDark,
+  ) {
+    final order = controller.orders.first;
+    final mappedOrder = controller.mappedRecentOrders.first;
 
-
-  Widget _buildLatestOrderCard(Color cardColor, ColorScheme colors, bool isDark) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -198,7 +231,10 @@ class ClientDashboardScreen extends GetView<ClientDashboardController> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.atelierSilkGreen.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
@@ -217,7 +253,7 @@ class ClientDashboardScreen extends GetView<ClientDashboardController> {
                     const SizedBox(width: 6),
                     Text(
                       "LATEST ORDER",
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppColors.atelierSilkGreen,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
@@ -234,7 +270,7 @@ class ClientDashboardScreen extends GetView<ClientDashboardController> {
             height: 90,
             width: 160,
             child: TweenAnimationBuilder<double>(
-              tween: Tween<double>(begin: 0.0, end: 0.85),
+              tween: Tween<double>(begin: 0.0, end: order.progress / 100),
               duration: const Duration(milliseconds: 1500),
               curve: Curves.easeOutCubic,
               builder: (context, value, child) {
@@ -246,7 +282,9 @@ class ClientDashboardScreen extends GetView<ClientDashboardController> {
                       painter: SemiCircleProgressPainter(
                         progress: value,
                         color: AppColors.atelierSilkGreen,
-                        backgroundColor: colors.onSurface.withValues(alpha: 0.05),
+                        backgroundColor: colors.onSurface.withValues(
+                          alpha: 0.05,
+                        ),
                       ),
                     ),
                     Positioned(
@@ -262,7 +300,7 @@ class ClientDashboardScreen extends GetView<ClientDashboardController> {
                             ),
                           ),
                           Text(
-                            "Hand-Stitching",
+                            mappedOrder['milestone'],
                             style: TextStyle(
                               color: colors.onSurface.withValues(alpha: 0.5),
                               fontSize: 10,
@@ -278,7 +316,7 @@ class ClientDashboardScreen extends GetView<ClientDashboardController> {
           ),
           const SizedBox(height: 12),
           Text(
-            "Navy Silk Tuxedo",
+            order.orderName,
             style: TextStyle(
               color: colors.onSurface,
               fontSize: 16,
@@ -287,7 +325,7 @@ class ClientDashboardScreen extends GetView<ClientDashboardController> {
           ),
           const SizedBox(height: 2),
           Text(
-            "DF-2024-0912",
+            order.displayOrderId,
             style: TextStyle(
               color: colors.onSurface.withValues(alpha: 0.4),
               fontSize: 10,
@@ -310,7 +348,7 @@ class ClientDashboardScreen extends GetView<ClientDashboardController> {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  "4/5 Checkpoints Completed",
+                  order.overallStatus,
                   style: TextStyle(
                     color: colors.onSurface.withValues(alpha: 0.7),
                     fontSize: 12,
@@ -325,84 +363,87 @@ class ClientDashboardScreen extends GetView<ClientDashboardController> {
     );
   }
 
-  Widget _buildPreviousOrdersList(Color cardColor, ColorScheme colors) {
-    final orders = [
-      {'name': 'Wool Overcoat', 'status': 'Completed', 'image': 'assets/images/navy_suit_1777995278931.png'},
-      {'name': 'Linen Overcoat', 'status': 'Delivered', 'image': 'assets/images/grey_suit_1777995295110.png'},
-      {'name': 'Lazy Flat Suit', 'status': 'Completed', 'image': 'assets/images/silk_gown_1777995259644.png'},
-    ];
-
-    return SizedBox(
-      height: 180,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: orders.length,
-        itemBuilder: (context, index) {
-          final order = orders[index];
-          return Container(
-            width: 140,
-            margin: const EdgeInsets.only(right: 15),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: cardColor,
-              borderRadius: BorderRadius.circular(15),
-              boxShadow: [
-                BoxShadow(
-                  color: colors.shadow.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      image: DecorationImage(
-                        image: AssetImage(order['image']!),
+  Widget _buildCarousel(ColorScheme colors) {
+    return CarouselSlider(
+      options: CarouselOptions(
+        height: 160.0,
+        autoPlay: true,
+        enlargeCenterPage: true,
+        viewportFraction: 0.9,
+        aspectRatio: 2.0,
+        initialPage: 0,
+        autoPlayInterval: const Duration(seconds: 5),
+        autoPlayAnimationDuration: const Duration(milliseconds: 800),
+        autoPlayCurve: Curves.fastOutSlowIn,
+      ),
+      items: controller.carouselItems.map((item) {
+        return Builder(
+          builder: (BuildContext context) {
+            return Container(
+              width: MediaQuery.of(context).size.width,
+              margin: const EdgeInsets.symmetric(horizontal: 5.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                image: item.imageUrl.isNotEmpty
+                    ? DecorationImage(
+                        image: NetworkImage(item.imageUrl),
                         fit: BoxFit.cover,
+                      )
+                    : null,
+                color: colors.primaryContainer.withValues(alpha: 0.1),
+              ),
+              child: item.imageUrl.isEmpty
+                  ? Center(
+                      child: Icon(
+                        Icons.image_outlined,
+                        color: colors.primary.withValues(alpha: 0.3),
+                        size: 40,
+                      ),
+                    )
+                  : Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        gradient: LinearGradient(
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                          colors: [
+                            Colors.black.withValues(alpha: 0.6),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.title,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (item.description != null)
+                            Text(
+                              item.description!,
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 12,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                        ],
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  order['name']!,
-                  style: TextStyle(
-                    color: colors.onSurface,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: (order['status'] == 'Delivered' ? Colors.blue : AppColors.atelierSilkGreen).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    order['status']!,
-                    style: TextStyle(
-                      color: order['status'] == 'Delivered' ? Colors.blue : AppColors.atelierSilkGreen,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
+            );
+          },
+        );
+      }).toList(),
     );
   }
-
 }
 
 class SemiCircleProgressPainter extends CustomPainter {

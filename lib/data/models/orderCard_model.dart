@@ -5,7 +5,7 @@ import 'package:dariziflow_app/data/models/submissionModel.dart';
 class OrderModel {
   final String orderId;
   final String orderName;
-  final String uniqueId;
+
 
   final DateTime? dueDate;
   final double progress;
@@ -24,7 +24,7 @@ class OrderModel {
   OrderModel({
     required this.orderId,
     required this.orderName,
-    required this.uniqueId,
+
     required this.progress,
     required this.operations,
     this.dueDate,
@@ -39,7 +39,7 @@ class OrderModel {
   });
 
   String get displayOrderId =>
-      '#ORD-${uniqueId.length > 6 ? uniqueId.substring(0, 6) : uniqueId}';
+      '#ORD-${orderId.length > 6 ? orderId.substring(orderId.length - 6) : orderId}';
 
   bool get isOverdue => dueDate != null && DateTime.now().isAfter(dueDate!);
 
@@ -104,7 +104,7 @@ class OrderModel {
     return OrderModel(
       orderId: json['_id'] ?? json['id'] ?? '',
       orderName: json['orderName'] ?? json['name'] ?? 'Unknown Order',
-      uniqueId: json['orderUniqueId'] ?? json['uniqueId'] ?? '',
+
       overallStatus: json['overallStatus'] ?? 'PENDING',
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString())

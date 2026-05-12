@@ -2,7 +2,7 @@ import 'package:dariziflow_app/core/network/api_client.dart';
 
 class AuthService {
   final ApiClient apiClient;
-  static const route = "/auth";
+  static const route = "auth";
   static const platform = "MOBILE";
 
   AuthService({required this.apiClient});
@@ -36,15 +36,15 @@ class AuthService {
   }
 
   Future<dynamic> getProfile() async {
-    return apiClient.get("/profile");
+    return apiClient.get("profile");
   }
 
   Future<dynamic> verifyEmail(String token) async {
-    return apiClient.get("/auth/verify/$token");
+    return apiClient.get("auth/verify/$token");
   }
 
   Future<dynamic> logout({String? fcmToken}) async {
-    return apiClient.post("/auth/logout", data: {"fcmToken": fcmToken});
+    return apiClient.post("auth/logout", data: {"fcmToken": fcmToken});
   }
 
   Future<dynamic> me() async {

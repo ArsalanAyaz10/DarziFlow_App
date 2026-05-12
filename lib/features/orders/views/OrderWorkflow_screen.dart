@@ -1,5 +1,5 @@
 import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
-import 'package:dariziflow_app/features/Orders/controllers/orderDetail_controller.dart';
+import 'package:dariziflow_app/features/Orders/controllers/order_workflow_controller.dart';
 import 'package:dariziflow_app/features/Orders/widgets/order_timeline.dart';
 import 'package:dariziflow_app/features/Orders/widgets/order_workflow_shimmer.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/widgets/bottom_nav_bar.dart';
 
-class OrderWorkflowScreen extends GetView<OrderDetailController> {
+class OrderWorkflowScreen extends GetView<OrderWorkflowController> {
   const OrderWorkflowScreen({super.key});
 
   @override

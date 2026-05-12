@@ -12,8 +12,11 @@ class ApiService {
   DateTime? _azureLastFailTime;
 
   Future<void> init(Future<void> Function() onLogout) async {
-    final primaryUrl = dotenv.env['AZURE_BASE_URL'] ?? '';
-    final backupUrl = dotenv.env['LOCAL_BASE_URL'] ?? primaryUrl;
+    final String rawPrimary = dotenv.env['AZURE_BASE_URL'] ?? '';
+    final String rawBackup = dotenv.env['LOCAL_BASE_URL'] ?? rawPrimary;
+
+    final primaryUrl = rawPrimary.endsWith('/') ? rawPrimary : '$rawPrimary/';
+    final backupUrl = rawBackup.endsWith('/') ? rawBackup : '$rawBackup/';
 
     dio = Dio(
       BaseOptions(

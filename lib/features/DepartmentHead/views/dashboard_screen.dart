@@ -1,6 +1,6 @@
 import 'package:dariziflow_app/core/widgets/bottom_nav_bar.dart';
 import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
-import 'package:dariziflow_app/features/DepartmentHead/controllers/deptHeadController.dart';
+import 'package:dariziflow_app/features/DepartmentHead/controllers/deptHead_controller.dart';
 import 'package:dariziflow_app/features/DepartmentHead/widgets/dashboard_widgets.dart';
 import 'package:dariziflow_app/features/Notifications/controllers/notification_controller.dart'
     as darizi_notifications;
