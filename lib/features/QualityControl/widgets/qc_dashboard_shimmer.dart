@@ -1,4 +1,3 @@
-import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 

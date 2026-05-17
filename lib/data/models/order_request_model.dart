@@ -1,4 +1,3 @@
-import 'package:dariziflow_app/data/models/submissionModel.dart';
 
 class AttachedFileModel {
   final String fileName;

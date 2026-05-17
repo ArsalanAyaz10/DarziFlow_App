@@ -1,7 +1,7 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/widgets/bottom_nav_bar.dart';
 import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
-import 'package:dariziflow_app/features/Cilent/controllers/client_dashboard_controller.dart';
+import 'package:dariziflow_app/features/Client/controllers/client_dashboard_controller.dart';
 import 'package:dariziflow_app/app/routes/app_pages.dart';
 import 'package:dariziflow_app/features/Notifications/controllers/notification_controller.dart';
 import 'package:dariziflow_app/features/DepartmentHead/widgets/stat_tile.dart';
@@ -9,7 +9,7 @@ import 'package:dariziflow_app/features/DepartmentHead/widgets/recent_activity_p
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:dariziflow_app/features/Cilent/widgets/client_dashboard_shimmer.dart';
+import 'package:dariziflow_app/features/Client/widgets/client_dashboard_shimmer.dart';
 import 'dart:math' as math;
 
 class ClientDashboardScreen extends GetView<ClientDashboardController> {

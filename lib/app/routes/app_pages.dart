@@ -28,14 +28,14 @@ import 'package:dariziflow_app/features/Splash/views/privacy_policy_screen.dart'
 import 'package:dariziflow_app/features/QualityControl/bindings/qc_history_binding.dart';
 import 'package:dariziflow_app/features/QualityControl/views/qc_history_screen.dart';
 import 'package:dariziflow_app/features/QualityControl/views/qc_history_detail_screen.dart';
-import 'package:dariziflow_app/features/Cilent/bindings/client_dashboard_binding.dart';
-import 'package:dariziflow_app/features/Cilent/views/client_dashboard_screen.dart';
-import 'package:dariziflow_app/features/Cilent/views/client_docs_screen.dart';
+import 'package:dariziflow_app/features/Client/bindings/client_dashboard_binding.dart';
+import 'package:dariziflow_app/features/Client/views/client_dashboard_screen.dart';
 import 'package:dariziflow_app/features/OrderRequest/bindings/order_request_binding.dart';
 import 'package:dariziflow_app/features/OrderRequest/views/order_request_list_screen.dart';
 import 'package:dariziflow_app/features/OrderRequest/views/create_order_request_screen.dart';
-import 'package:dariziflow_app/features/Cilent/views/client_all_activities_screen.dart';
-import 'package:flutter/material.dart';
+import 'package:dariziflow_app/features/Client/views/client_all_activities_screen.dart';
+import 'package:dariziflow_app/features/Client/views/client_tracking_screen.dart';
+import 'package:dariziflow_app/features/Client/bindings/client_tracking_binding.dart';
 import 'package:get/get.dart';
 part 'app_routes.dart';
 
@@ -157,6 +157,11 @@ class AppPages {
       name: Routes.clientActivities,
       page: () => const ClientAllActivitiesScreen(),
       binding: ClientDashboardBinding(),
+    ),
+    GetPage(
+      name: Routes.clientTracking,
+      page: () => const ClientTrackingScreen(),
+      binding: ClientTrackingBinding(),
     ),
   ];
 }

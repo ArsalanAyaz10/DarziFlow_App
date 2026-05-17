@@ -31,7 +31,7 @@ class OrderRequestController extends GetxController {
         'Error',
         'Failed to fetch order requests',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.1),
+        backgroundColor: Colors.red.withValues(alpha:0.1),
         colorText: Colors.red,
       );
     } finally {
@@ -94,11 +94,11 @@ class OrderRequestController extends GetxController {
     try {
       isLoading.value = true;
       final proposalData = {
-        if (amount != null) 'proposedAmount': amount,
+        'proposedAmount': ?amount,
         if (dueDate != null) 'proposedDueDate': dueDate.toIso8601String(),
-        if (remarks != null) 'remarks': remarks,
+        'remarks': ?remarks,
         if (files != null) 'proposedReferenceFiles': files.map((f) => f.toJson()).toList(),
-        if (departmentSequenceIds != null) 'departmentSequenceIds': departmentSequenceIds,
+        'departmentSequenceIds': ?departmentSequenceIds,
       };
 
       final updatedRequest = await _service.addProposal(requestId, proposalData);

@@ -20,6 +20,10 @@ class OrderModel {
   final String overallStatus;
 
   final List<OperationModel> operations;
+  final String type;
+  final String? description;
+  final String? qcMember;
+  final List<PrerequisiteDocument> requiredDocuments;
 
   OrderModel({
     required this.orderId,
@@ -36,6 +40,10 @@ class OrderModel {
     this.currency = 'Rs',
     required this.createdAt,
     required this.updatedAt,
+    required this.type,
+    this.description,
+    this.qcMember,
+    this.requiredDocuments = const [],
   });
 
   String get displayOrderId =>
@@ -122,6 +130,12 @@ class OrderModel {
       amount: num.tryParse(json['amount']?.toString() ?? '0')?.toInt() ?? 0,
       currency: json['currency'] ?? 'Rs',
       operations: operationsList,
+      type: json['type'] ?? 'OTHER',
+      description: json['description'],
+      qcMember: json['qcMember']?.toString(),
+      requiredDocuments: (json['requiredDocuments'] as List? ?? [])
+          .map((d) => PrerequisiteDocument.fromJson(d))
+          .toList(),
     );
   }
 
@@ -152,5 +166,28 @@ class OrderModel {
       }
     }
     return total == 0 ? 0 : ((done / total) * 100).round();
+  }
+}
+
+class PrerequisiteDocument {
+  final String id;
+  final String name;
+  final String? fileUrl;
+  final String status;
+
+  PrerequisiteDocument({
+    required this.id,
+    required this.name,
+    this.fileUrl,
+    required this.status,
+  });
+
+  factory PrerequisiteDocument.fromJson(Map<String, dynamic> json) {
+    return PrerequisiteDocument(
+      id: json['_id'] ?? json['id'] ?? '',
+      name: json['name'] ?? '',
+      fileUrl: json['fileUrl'] ?? json['url'],
+      status: json['status'] ?? 'PENDING',
+    );
   }
 }

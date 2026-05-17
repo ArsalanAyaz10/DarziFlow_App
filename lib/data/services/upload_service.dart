@@ -21,7 +21,7 @@ class UploadService {
         "upload/signature",
         data: {
           "contextType": contextType,
-          if (orderId != null) "orderId": orderId,
+          "orderId": ?orderId,
         },
       );
       return response.data;

@@ -1,6 +1,6 @@
 import 'package:dariziflow_app/core/network/api_client.dart';
-import 'package:dariziflow_app/features/Cilent/controllers/client_dashboard_controller.dart';
-import 'package:dariziflow_app/features/Cilent/services/client_service.dart';
+import 'package:dariziflow_app/features/Client/controllers/client_dashboard_controller.dart';
+import 'package:dariziflow_app/features/Client/services/client_service.dart';
 import 'package:dariziflow_app/features/Notifications/controllers/notification_controller.dart';
 import 'package:dariziflow_app/features/Notifications/repositories/notification_repository.dart';
 import 'package:get/get.dart';

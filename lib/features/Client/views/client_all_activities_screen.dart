@@ -1,6 +1,6 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
-import 'package:dariziflow_app/features/Cilent/controllers/client_dashboard_controller.dart';
+import 'package:dariziflow_app/features/Client/controllers/client_dashboard_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dariziflow_app/features/DepartmentHead/widgets/activity_title.dart';

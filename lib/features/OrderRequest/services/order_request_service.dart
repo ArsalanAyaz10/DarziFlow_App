@@ -1,6 +1,5 @@
 import 'package:dariziflow_app/data/models/order_request_model.dart';
 import 'package:dariziflow_app/data/services/api_service.dart';
-import 'package:dio/dio.dart';
 import 'package:get/get.dart' hide Response;
 
 class OrderRequestService extends GetxService {
@@ -84,7 +83,7 @@ class OrderRequestService extends GetxService {
     try {
       final response = await _apiService.dio.post('upload/signature', data: {
         'context': context,
-        if (requestId != null) 'requestId': requestId,
+        'requestId': ?requestId,
       });
       if (response.statusCode == 200) {
         return response.data;

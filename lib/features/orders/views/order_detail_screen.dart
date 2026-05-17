@@ -1,4 +1,3 @@
-import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/features/Orders/controllers/orderDetail_controller.dart';
 import 'package:dariziflow_app/features/Orders/widgets/order_detail_shimmer.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +37,7 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text("Order not found"),
-                const SizedBox(height: 16),
+                const SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: () => controller.refreshOrderDetails(),
                   child: const Text("Retry"),
@@ -68,7 +67,6 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // header
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -87,7 +85,69 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
                     activeStatusBadge(order.overallStatus, colors),
                   ],
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
+
+                // CLIENT DETAILS (SHIFTED TO TOP)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: colors.surfaceContainerHighest.withValues(
+                      alpha: 0.3,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: colors.outline.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 16,
+                        backgroundColor: isDark
+                            ? Colors.white24
+                            : Colors.grey.withValues(alpha: 0.2),
+                        child: const Icon(
+                          Icons.person,
+                          color: brandGreen,
+                          size: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              order.clientName,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: colors.onSurface,
+                              ),
+                            ),
+                            Text(
+                              order.clientEmail,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: colors.onSurfaceVariant,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (controller.userRole.value != 'CLIENT')
+                        IconButton(
+                          icon: const Icon(Icons.chat_outlined, size: 20),
+                          onPressed: () => _showComingSoonDialog(),
+                          constraints: const BoxConstraints(),
+                          padding: EdgeInsets.zero,
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
 
                 //  AMOUNT
                 Container(
@@ -135,127 +195,237 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
                     Expanded(
                       child: dateBox("CREATED AT", createdAtStr, colors),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 10),
                     Expanded(child: dateBox("DUE DATE", dueDateStr, colors)),
                   ],
                 ),
-                const SizedBox(height: 32),
-
-                Divider(
-                  color: colors.outline.withValues(alpha: 0.6),
-                  height: 1,
-                ),
                 const SizedBox(height: 20),
 
-                // CLIENT DETAILS
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Client Details",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: colors.onSurface,
-                      ),
-                    ),
-                    Icon(
-                      Icons.contact_mail_rounded,
-                      color: brandGreen.withValues(alpha: 0.8),
-                      size: 20,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
+                // ORDER TYPE & DESCRIPTION
                 Container(
+                  width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: colors.surfaceContainerHighest.withValues(
-                      alpha: 0.5,
+                      alpha: 0.2,
                     ),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: colors.outline.withValues(alpha: 1),
+                      color: colors.outline.withValues(alpha: 0.5),
                     ),
                   ),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundColor: isDark ? Colors.white24 : Colors.grey,
-                        child: const Icon(Icons.person, color: brandGreen),
+                      Row(
+                        children: [
+                          Text(
+                            "TYPE: ${order.type}",
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: colors.onSurface,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 16),
+                      if (order.description != null &&
+                          order.description!.isNotEmpty) ...[
+                        const SizedBox(height: 10),
+                        Text(
+                          order.description!,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: colors.onSurfaceVariant,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // REQUIRED DOCUMENTS
+                Text(
+                  "Required Documents",
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: colors.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                if (order.requiredDocuments.isNotEmpty)
+                  ...order.requiredDocuments.map(
+                    (doc) => Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.surface,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: colors.outline.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.description_outlined,
+                            size: 20,
+                            color: colors.primary,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  doc.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                Text(
+                                  doc.status,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: colors.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (doc.fileUrl != null)
+                            TextButton.icon(
+                              onPressed: () => Get.snackbar(
+                                "Info",
+                                "Opening ${doc.name}...",
+                              ),
+                              icon: const Icon(
+                                Icons.visibility_outlined,
+                                size: 16,
+                              ),
+                              label: const Text(
+                                "View",
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text(
+                      "No documents available",
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: colors.onSurfaceVariant,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 25),
+
+                // SUPPORT & QC SECTION (REFINED)
+                if (controller.userRole.value == 'CLIENT') ...[
+                  Row(
+                    children: [
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              controller.order.value!.clientName,
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: colors.onSurface,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              controller.order.value!.clientEmail,
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: colors.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
+                        child: supportActionCard(
+                          "Chat with QC",
+                          "Verified Member",
+                          Icons.verified_user_outlined,
+                          () => _showComingSoonDialog(),
+                          colors,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: supportActionCard(
+                          "Dept Head",
+                          "Support",
+                          Icons.support_agent,
+                          () => _showComingSoonDialog(),
+                          colors,
                         ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 24),
+                  const SizedBox(height: 25),
+                ] else if (order.qcMember != null) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colors.surfaceContainerHighest.withValues(
+                        alpha: 0.2,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: colors.outline.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.verified_user,
+                          size: 14,
+                          color: brandGreen.withValues(alpha: 0.8),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          "QC: ",
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: colors.onSurfaceVariant,
+                          ),
+                        ),
+                        Text(
+                          order.qcMember!,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: colors.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 25),
+                ],
 
                 CustomElevatedButton(
                   onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text('Notice'),
-                          content: const Text('Chat feature coming soon!'),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              child: const Text('OK'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                  text: "Chat",
-                  icon: Icons.chat_bubble,
-                  backgroundColor: AppColors.primaryGreen,
-                  height: 55,
-                  borderRadius: 25,
-                ),
-                const SizedBox(height: 20),
-                CustomElevatedButton(
-                  onPressed: () {
-                    Get.toNamed(
-                      Routes.workflow,
-                      arguments: {"orderId": order.orderId},
-                    );
+                    if (controller.userRole.value == 'CLIENT') {
+                      Get.toNamed(
+                        Routes.clientTracking,
+                        arguments: {"orderId": order.orderId},
+                      );
+                    } else {
+                      Get.toNamed(
+                        Routes.workflow,
+                        arguments: {"orderId": order.orderId},
+                      );
+                    }
                   },
                   text: "Open Workflow",
-
                   icon: Icons.account_tree,
                   backgroundColor: colors.surfaceContainerHighest,
                   height: 50,
                   borderRadius: 25,
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -358,6 +528,75 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget supportActionCard(
+    String title,
+    String subtitle,
+    IconData icon,
+    VoidCallback onTap,
+    ColorScheme colors,
+  ) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        decoration: BoxDecoration(
+          color: colors.surfaceContainerHighest.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: colors.outline.withValues(alpha: 0.4)),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 18, color: const Color(0xFF96E072)),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 9,
+                      color: colors.onSurfaceVariant,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showComingSoonDialog() {
+    Get.defaultDialog(
+      title: "Coming Soon",
+      titleStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      middleText:
+          "The chat/message feature is currently under development and will be available soon.",
+      middleTextStyle: const TextStyle(fontSize: 14),
+      backgroundColor: Get.theme.colorScheme.surface,
+      radius: 16,
+      textConfirm: "Got it",
+      confirmTextColor: Colors.black,
+      buttonColor: const Color(0xFF96E072),
+      onConfirm: () => Get.back(),
     );
   }
 }

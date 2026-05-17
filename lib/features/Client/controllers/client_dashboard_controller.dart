@@ -2,7 +2,7 @@ import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:dariziflow_app/data/models/orderCard_model.dart';
 import 'package:dariziflow_app/data/models/qc_history_model.dart';
 import 'package:dariziflow_app/data/models/carousel_model.dart';
-import 'package:dariziflow_app/features/Cilent/services/client_service.dart';
+import 'package:dariziflow_app/features/Client/services/client_service.dart';
 import 'package:dariziflow_app/app/routes/app_pages.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -70,7 +70,7 @@ class ClientDashboardController extends GetxController {
         'Error',
         'Failed to fetch dashboard data: ${e.toString()}',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.1),
+        backgroundColor: Colors.red.withValues(alpha:0.1),
         colorText: Colors.red,
       );
     } finally {

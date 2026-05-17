@@ -25,4 +25,5 @@ abstract class Routes {
   static const orderRequests = '/order-requests';
   static const createOrderRequest = '/create-order-request';
   static const clientActivities = '/client-activities';
+  static const clientTracking = '/client-tracking';
 }
