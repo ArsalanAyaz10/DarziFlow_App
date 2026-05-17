@@ -1,6 +1,7 @@
 import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:dariziflow_app/data/models/orderCard_model.dart';
 import 'package:dariziflow_app/features/Orders/repository/order_repository.dart';
+import 'package:dariziflow_app/features/Client/services/client_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -13,6 +14,7 @@ class AllOrdersController extends GetxController {
 
   var isLoading = false.obs;
   var errorMessage = ''.obs;
+  var userRole = ''.obs;
 
   var selectedFilter = 'All'.obs;
   final List<String> filterOptions = ['All', 'Active', 'Completed'];
@@ -23,7 +25,22 @@ class AllOrdersController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchOrders();
+    if (Get.arguments != null && Get.arguments is List) {
+      loadArguments(Get.arguments as List);
+    } else {
+      fetchOrders();
+    }
+  }
+
+  void loadArguments(List rawData) async {
+    try {
+      final role = await AppStorage.getUserRole() ?? "";
+      userRole.value = role.toUpperCase();
+
+      orders.value = rawData.map((json) => OrderModel.fromJson(json)).toList();
+    } catch (e) {
+      fetchOrders();
+    }
   }
 
   @override
@@ -32,21 +49,51 @@ class AllOrdersController extends GetxController {
     super.onClose();
   }
 
+  Future<String?> getDepartmentId() async {
+    try {
+      final user = await AppStorage.getAuthUser();
+      return user?.department;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  void updateSearchQuery(String query) {
+    searchQuery.value = query;
+  }
+
+  void clearSearch() {
+    searchController.clear();
+    searchQuery.value = '';
+  }
+
   Future<void> fetchOrders() async {
     isLoading.value = true;
     errorMessage.value = '';
 
     try {
-      final user = await AppStorage.getAuthUser();
-      final deptId = user?.department;
+      final role = await AppStorage.getUserRole() ?? "";
+      userRole.value = role.toUpperCase();
+      final isQC = userRole.value == "QC_MEMBER";
 
-      if (deptId == null) {
-        errorMessage.value = "Department not found.";
+      List data;
+      if (userRole.value == "CLIENT") {
+        final clientService = Get.find<ClientService>();
+        final result = await clientService.getAllOrders();
+        orders.value = result['orders'];
         return;
+      } else if (isQC) {
+        data = await repository.fetchAllOrders();
+      } else {
+        final deptId = await getDepartmentId();
+        if (deptId == null) {
+          errorMessage.value = "Department not found.";
+          return;
+        }
+        data = await repository.fetchActiveWorkflows(deptId);
       }
 
-      final response = await repository.fetchAllWorkflows(deptId);
-      orders.value = (response).map((json) => OrderModel.fromJson(json)).toList();
+      orders.value = data.map((json) => OrderModel.fromJson(json)).toList();
     } catch (e) {
       errorMessage.value = "Failed to load orders.";
     } finally {
@@ -54,31 +101,28 @@ class AllOrdersController extends GetxController {
     }
   }
 
-  void updateSearchBar(String query) => searchQuery.value = query;
-
-  void clearSearch() {
-    searchController.clear();
-    searchQuery.value = '';
-  }
-
   List<OrderModel> get filteredOrders {
-    var list = [...orders];
+    var list = orders;
 
-    if (searchQuery.isNotEmpty) {
+    if (searchQuery.value.isNotEmpty) {
       final q = searchQuery.value.toLowerCase();
-      list = list.where((o) => 
-        o.orderName.toLowerCase().contains(q) ||
-        o.uniqueId.toLowerCase().contains(q) ||
-        o.orderId.toLowerCase().contains(q)
-      ).toList();
+      list = list
+          .where((o) {
+            return o.orderName.toLowerCase().contains(q) ||
+                o.orderId.toLowerCase().contains(q);
+          })
+          .toList()
+          .obs;
     }
 
-    if (selectedFilter.value == 'Active') {
-      return list.where((o) => o.progress < 100).toList();
-    } else if (selectedFilter.value == 'Completed') {
-      return list.where((o) => o.progress >= 100).toList();
+    switch (selectedFilter.value) {
+      case 'Active':
+        return list.where((o) => o.progress < 100).toList();
+      case 'Completed':
+        return list.where((o) => o.progress >= 100).toList();
+      default:
+        return list;
     }
-    
-    return list;
   }
 }
+

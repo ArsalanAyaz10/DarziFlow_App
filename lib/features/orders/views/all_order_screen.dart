@@ -2,7 +2,7 @@ import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/widgets/bottom_nav_bar.dart';
 import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
 import 'package:dariziflow_app/data/models/orderCard_model.dart';
-import 'package:dariziflow_app/features/Orders/controllers/order_controller.dart';
+import 'package:dariziflow_app/features/Orders/controllers/all_orders_controller.dart';
 import 'package:dariziflow_app/features/Orders/widgets/order_card.dart';
 import 'package:dariziflow_app/features/Orders/widgets/order_filter_chips.dart';
 import 'package:dariziflow_app/features/Orders/widgets/order_list_shimmer.dart';
@@ -10,9 +10,10 @@ import 'package:dariziflow_app/features/Orders/widgets/order_search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dariziflow_app/app/routes/app_pages.dart';
-import 'package:dariziflow_app/features/Notifications/controllers/notification_controller.dart' as darizi_notifications;
+import 'package:dariziflow_app/features/Notifications/controllers/notification_controller.dart'
+    as darizi_notifications;
 
-class AllOrderScreen extends GetView<OrderController> {
+class AllOrderScreen extends GetView<AllOrdersController> {
   const AllOrderScreen({super.key});
 
   @override
@@ -117,9 +118,11 @@ class AllOrderScreen extends GetView<OrderController> {
                 const SizedBox(height: 8),
                 Center(
                   child: Text(
-                    controller.userRole.value == "QC_MEMBER" 
+                    controller.userRole.value == "QC_MEMBER"
                         ? 'There are no orders currently in production'
-                        : 'There are no active orders in your department',
+                        : controller.userRole.value == "CLIENT"
+                            ? 'You have no orders yet'
+                            : 'There are no active orders in your department',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                       fontSize: 14,

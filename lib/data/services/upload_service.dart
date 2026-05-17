@@ -18,7 +18,7 @@ class UploadService {
   }) async {
     try {
       final response = await apiClient.post(
-        "/upload/signature",
+        "upload/signature",
         data: {
           "contextType": contextType,
           "orderId": ?orderId,
@@ -90,7 +90,7 @@ class UploadService {
   ) async {
     try {
       await apiClient.put(
-        "/profile/avatar",
+        "profile/avatar",
         data: {"url": url, "publicId": publicId, "resourceType": resourceType},
       );
 
@@ -129,7 +129,7 @@ class UploadService {
 
       dev.log("Requesting Signature with Body: $body");
 
-      final response = await apiClient.post("/upload/signature", data: body);
+      final response = await apiClient.post("upload/signature", data: body);
       return response.data;
     } catch (e) {
       throw Exception("Failed to get checkpoint signature: $e");

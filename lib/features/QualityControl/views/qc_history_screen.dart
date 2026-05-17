@@ -3,6 +3,7 @@ import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/widgets/bottom_nav_bar.dart';
 import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
 import 'package:dariziflow_app/features/QualityControl/controllers/qc_history_controller.dart';
+import 'package:dariziflow_app/features/QualityControl/widgets/qc_history_shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -25,7 +26,7 @@ class QcHistoryScreen extends GetView<QcHistoryController> {
       ),
       body: Obx(() {
         if (controller.isLoading.value && controller.historyLogs.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
+          return const QCHistoryShimmer();
         }
 
         if (controller.historyLogs.isEmpty) {

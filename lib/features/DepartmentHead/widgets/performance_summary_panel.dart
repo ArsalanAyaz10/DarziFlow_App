@@ -1,6 +1,6 @@
 import 'package:dariziflow_app/app/routes/app_pages.dart';
 import 'package:dariziflow_app/core/utils/colors.dart';
-import 'package:dariziflow_app/features/DepartmentHead/controllers/deptHeadController.dart';
+import 'package:dariziflow_app/features/DepartmentHead/controllers/deptHead_controller.dart';
 import 'package:dariziflow_app/features/DepartmentHead/widgets/Efficiency_Score_Card.dart';
 import 'package:dariziflow_app/features/DepartmentHead/widgets/stat_tile.dart';
 import 'package:flutter/material.dart';

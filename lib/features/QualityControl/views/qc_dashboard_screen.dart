@@ -7,7 +7,7 @@ import 'package:dariziflow_app/features/QualityControl/widgets/review_queue_item
 import 'package:dariziflow_app/features/Notifications/controllers/notification_controller.dart'
     as darizi_notifications;
 import 'package:dariziflow_app/core/utils/colors.dart';
-import 'package:dariziflow_app/features/DepartmentHead/widgets/dashboard_shimmer.dart';
+import 'package:dariziflow_app/features/QualityControl/widgets/qc_dashboard_shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -63,7 +63,7 @@ class QCDashboardScreen extends GetView<QcDashboardController> {
       body: Obx(() {
         if (controller.isLoading.value &&
             controller.pendingSubmissions.isEmpty) {
-          return const DashboardShimmer();
+          return const QCDashboardShimmer();
         }
         return Column(
           children: [
@@ -234,6 +234,11 @@ class QCDashboardScreen extends GetView<QcDashboardController> {
           ],
         );
       }),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Get.toNamed(Routes.createOrderRequest),
+        backgroundColor: AppColors.atelierSilkGreen,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
     );
   }
 
@@ -260,9 +265,7 @@ class QCDashboardScreen extends GetView<QcDashboardController> {
           itemCount: controller.activeOrders.length,
           itemBuilder: (context, index) {
             final order = controller.activeOrders[index];
-            final displayId = order.uniqueId.length > 6
-                ? order.uniqueId.substring(0, 6)
-                : order.uniqueId;
+            final displayId = order.displayOrderId;
 
             final statusText = order.overallStatus.replaceAll('_', ' ');
 

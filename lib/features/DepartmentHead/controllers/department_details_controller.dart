@@ -99,14 +99,13 @@ class DepartmentDetailsController extends GetxController {
 
     for (var order in _recentActivity) {
       final orderName = order['orderName'] ?? 'Unknown Order';
-      final orderUniqueId = order['orderUniqueId'] ?? '';
       final orderId = order['_id'] ?? '';
       final ops = order['operations'] as List? ?? [];
       final updatedAt = order['updatedAt'] ?? order['createdAt'];
 
-      String displayId = orderUniqueId.length > 6
-          ? orderUniqueId.substring(0, 6)
-          : orderUniqueId;
+      String displayId = orderId.length > 6
+          ? orderId.substring(orderId.length - 6)
+          : orderId;
 
       processed.add({
         "id": "${orderId}_movement",

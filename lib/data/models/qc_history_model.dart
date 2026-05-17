@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 class QcHistoryModel {
   final String id;
   final String orderName;
-  final String orderUniqueId;
+  final String orderId;
   final String departmentName;
   final String operationName;
   final String checkpointName;
@@ -14,7 +14,7 @@ class QcHistoryModel {
   QcHistoryModel({
     required this.id,
     required this.orderName,
-    required this.orderUniqueId,
+    required this.orderId,
     required this.departmentName,
     required this.operationName,
     required this.checkpointName,
@@ -41,7 +41,7 @@ class QcHistoryModel {
     return QcHistoryModel(
       id: parsedId,
       orderName: json['orderName'] ?? 'Unknown Order',
-      orderUniqueId: json['orderUniqueId'] ?? '',
+      orderId: json['orderId'] ?? '',
       departmentName: json['departmentName'] ?? '',
       operationName: json['operationName'] ?? '',
       checkpointName: json['checkpointName'] ?? '',

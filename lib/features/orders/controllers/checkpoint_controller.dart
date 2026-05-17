@@ -3,6 +3,7 @@ import 'package:dariziflow_app/data/models/checkpointModel.dart';
 import 'package:dariziflow_app/data/models/operationModel.dart';
 import 'package:dariziflow_app/data/services/upload_service.dart';
 import 'package:dariziflow_app/features/Orders/controllers/orderDetail_controller.dart';
+import 'package:dariziflow_app/features/Orders/controllers/order_workflow_controller.dart';
 import 'package:dariziflow_app/features/Orders/repository/order_repository.dart';
 import 'package:dariziflow_app/features/QualityControl/repositories/qc_repository.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,6 @@ import 'package:get/get.dart';
 import 'dart:developer' as dev;
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'dart:io';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -24,7 +24,6 @@ class CheckpointController extends GetxController {
   CheckpointController(
     this.orderRepository,
     this.uploadService,
-    OrderDetailController find,
   );
 
   late final OperationModel op;
@@ -257,6 +256,7 @@ class CheckpointController extends GetxController {
       );
 
       if (success) {
+        _refreshRelatedControllers();
         Get.back();
         Get.snackbar(
           "Success",
@@ -273,6 +273,15 @@ class CheckpointController extends GetxController {
     }
   }
 
+  void _refreshRelatedControllers() {
+    if (Get.isRegistered<OrderDetailController>()) {
+      Get.find<OrderDetailController>().refreshOrderDetails();
+    }
+    if (Get.isRegistered<OrderWorkflowController>()) {
+      Get.find<OrderWorkflowController>().refreshOrderDetails();
+    }
+  }
+
   Future<void> approveCheckpoint() async {
     isActionLoading.value = true;
     try {
@@ -283,6 +292,7 @@ class CheckpointController extends GetxController {
       );
 
       if (success) {
+        _refreshRelatedControllers();
         Get.back();
         Get.snackbar(
           "Success",
@@ -318,6 +328,7 @@ class CheckpointController extends GetxController {
       );
 
       if (success) {
+        _refreshRelatedControllers();
         Get.back();
         Get.snackbar(
           "Rejected",
