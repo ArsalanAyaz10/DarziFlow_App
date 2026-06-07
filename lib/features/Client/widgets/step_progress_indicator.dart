@@ -55,13 +55,14 @@ class _StepProgressIndicatorState extends State<StepProgressIndicator>
       builder: (context, constraints) {
         final double width = constraints.maxWidth;
         final int n = widget.stepNames.length;
-        
-        final double dotSize = 16.0;
-        final double trackHeight = 6.0;
-        
-        final double usableWidth = width - dotSize; // Leave half dot size on each edge
+
+        final double dotSize = 15;
+        final double trackHeight = 5;
+
+        final double usableWidth =
+            width - dotSize; // Leave half dot size on each edge
         final double stepDistance = n > 1 ? usableWidth / (n - 1) : 0;
-        
+
         // Clamp progress
         final double p = widget.progress.clamp(0.0, 1.0);
         final double activeWidth = p * usableWidth;
@@ -77,6 +78,45 @@ class _StepProgressIndicatorState extends State<StepProgressIndicator>
             nearestStepIndex = i;
           }
         }
+
+        // Tooltip positioned exactly on the progress value
+        final double progressTipX = dotSize / 2 + activeWidth;
+        final double bubbleWidth = 100.0;
+        
+        double bubbleLeft = progressTipX - (bubbleWidth / 2);
+        bubbleLeft = bubbleLeft.clamp(0.0, width - bubbleWidth);
+
+        final double relativeTipX = progressTipX - bubbleLeft;
+
+        final Widget tooltipWidget = Positioned(
+          bottom: 80 - 40 + dotSize / 2 + 4,
+          left: bubbleLeft,
+          width: bubbleWidth,
+          child: CustomPaint(
+            painter: _BubblePainter(
+              color: widget.activeColor,
+              tailCenterX: relativeTipX,
+            ),
+            child: Container(
+              padding: const EdgeInsets.only(
+                left: 8,
+                right: 8,
+                top: 6,
+                bottom: 12,
+              ),
+              child: Text(
+                "${(p * 100).round()}% Completed",
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ),
+          ),
+        );
 
         return SizedBox(
           width: double.infinity,
@@ -98,7 +138,7 @@ class _StepProgressIndicatorState extends State<StepProgressIndicator>
                   ),
                 ),
               ),
-              
+
               // Active Glow Track
               Positioned(
                 left: dotSize / 2,
@@ -114,7 +154,9 @@ class _StepProgressIndicatorState extends State<StepProgressIndicator>
                         borderRadius: BorderRadius.circular(trackHeight / 2),
                         boxShadow: [
                           BoxShadow(
-                            color: widget.activeLineColor.withValues(alpha: _glowAnimation.value),
+                            color: widget.activeLineColor.withValues(
+                              alpha: _glowAnimation.value,
+                            ),
                             blurRadius: 10,
                             spreadRadius: 1,
                           ),
@@ -127,11 +169,13 @@ class _StepProgressIndicatorState extends State<StepProgressIndicator>
 
               // Dots
               ...List.generate(n, (index) {
-                final double leftPos = n > 1 ? index * stepDistance : usableWidth / 2;
+                final double leftPos = n > 1
+                    ? index * stepDistance
+                    : usableWidth / 2;
                 final double stepProg = n > 1 ? index / (n - 1) : 0.5;
                 final bool isCompleted = p >= stepProg;
                 final bool isNearest = index == nearestStepIndex;
-                
+
                 return Positioned(
                   left: leftPos,
                   top: 0,
@@ -141,18 +185,21 @@ class _StepProgressIndicatorState extends State<StepProgressIndicator>
                     clipBehavior: Clip.none,
                     alignment: Alignment.center,
                     children: [
-                      // Percentage label for all dots
-                      Positioned(
-                        top: 40 + dotSize,
-                        child: Text(
-                          "${(stepProg * 100).round()}%",
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: isCompleted ? widget.activeColor : widget.inactiveColor.withValues(alpha: 0.6),
-                            fontWeight: FontWeight.w600,
+                      // Percentage label for dots
+                      if (n <= 5 || index == 0 || index == n - 1)
+                        Positioned(
+                          top: 40 + dotSize,
+                          child: Text(
+                            "${(stepProg * 100).round()}%",
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: isCompleted
+                                  ? widget.activeColor
+                                  : widget.inactiveColor.withValues(alpha: 0.9),
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
-                      ),
 
                       // The Dot
                       AnimatedContainer(
@@ -161,7 +208,9 @@ class _StepProgressIndicatorState extends State<StepProgressIndicator>
                         height: isNearest ? dotSize + 6 : dotSize,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: isCompleted ? widget.activeColor : widget.inactiveColor,
+                          color: isCompleted
+                              ? widget.activeColor
+                              : widget.inactiveColor,
                           border: Border.all(
                             color: Theme.of(context).colorScheme.surface,
                             width: 2,
@@ -169,10 +218,12 @@ class _StepProgressIndicatorState extends State<StepProgressIndicator>
                           boxShadow: isCompleted
                               ? [
                                   BoxShadow(
-                                    color: widget.activeColor.withValues(alpha: 0.4),
+                                    color: widget.activeColor.withValues(
+                                      alpha: 0.4,
+                                    ),
                                     blurRadius: 8,
                                     spreadRadius: 1,
-                                  )
+                                  ),
                                 ]
                               : [],
                         ),
@@ -182,57 +233,8 @@ class _StepProgressIndicatorState extends State<StepProgressIndicator>
                 );
               }),
 
-              // Tooltips for nearest step (rendered last to be on top)
-              ...List.generate(n, (index) {
-                final double leftPos = n > 1 ? index * stepDistance : usableWidth / 2;
-                final bool isNearest = index == nearestStepIndex;
-                if (!isNearest) return const SizedBox.shrink();
-                
-                double? left;
-                double? right;
-                Offset translation = Offset.zero;
-
-                final bool isFirst = index == 0 && n > 1;
-                final bool isLast = index == n - 1 && n > 1;
-
-                if (isFirst) {
-                  left = 0.0;
-                } else if (isLast) {
-                  right = 0.0;
-                } else {
-                  left = leftPos + dotSize / 2;
-                  translation = const Offset(-0.5, 0.0);
-                }
-
-                return Positioned(
-                  bottom: 80 - 40 + dotSize / 2 + 4,
-                  left: left,
-                  right: right,
-                  child: FractionalTranslation(
-                    translation: translation,
-                    child: CustomPaint(
-                      painter: _BubblePainter(
-                        color: widget.activeColor,
-                        isFirst: isFirst,
-                        isLast: isLast,
-                      ),
-                      child: Container(
-                        padding: const EdgeInsets.only(left: 12, right: 12, top: 6, bottom: 12),
-                        child: const Text(
-                          "We're here!",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.black, 
-                            fontSize: 12,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.3,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }),
+              // Tooltip positioned exactly on the progress value
+              tooltipWidget,
             ],
           ),
         );
@@ -243,13 +245,11 @@ class _StepProgressIndicatorState extends State<StepProgressIndicator>
 
 class _BubblePainter extends CustomPainter {
   final Color color;
-  final bool isFirst;
-  final bool isLast;
+  final double tailCenterX;
 
   _BubblePainter({
     required this.color,
-    this.isFirst = false,
-    this.isLast = false,
+    required this.tailCenterX,
   });
 
   @override
@@ -257,7 +257,7 @@ class _BubblePainter extends CustomPainter {
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.fill;
-      
+
     final path = Path();
     final radius = 8.0;
     final tailWidth = 10.0;
@@ -271,21 +271,18 @@ class _BubblePainter extends CustomPainter {
     path.addRRect(rect);
 
     // Draw tail
-    double tailCenterX = size.width / 2;
-    if (isFirst) {
-      tailCenterX = 8.0; // Pointing to the first dot
-    } else if (isLast) {
-      tailCenterX = size.width - 8.0; // Pointing to the last dot
-    }
+    // Clamp the tail to be within the bubble boundaries so it doesn't draw outside the bubble
+    final double clampedTailCenterX = tailCenterX.clamp(tailWidth / 2 + radius, size.width - tailWidth / 2 - radius);
 
-    path.moveTo(tailCenterX - tailWidth / 2, size.height - tailHeight);
-    path.lineTo(tailCenterX, size.height);
-    path.lineTo(tailCenterX + tailWidth / 2, size.height - tailHeight);
+    path.moveTo(clampedTailCenterX - tailWidth / 2, size.height - tailHeight);
+    path.lineTo(clampedTailCenterX, size.height);
+    path.lineTo(clampedTailCenterX + tailWidth / 2, size.height - tailHeight);
     path.close();
 
     canvas.drawPath(path, paint);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _BubblePainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.tailCenterX != tailCenterX;
 }

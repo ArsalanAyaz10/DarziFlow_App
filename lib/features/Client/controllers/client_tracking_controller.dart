@@ -1,4 +1,5 @@
 import 'package:dariziflow_app/data/models/orderCard_model.dart';
+import 'package:dariziflow_app/features/Client/services/client_service.dart';
 import 'package:dariziflow_app/features/Orders/repository/order_repository.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -24,13 +25,17 @@ class TrackingEvent {
 }
 
 class ClientTrackingController extends GetxController {
+  
   final OrderRepository repository;
+  final ClientService _clientService = Get.find<ClientService>();
+
   ClientTrackingController(this.repository);
 
   var orderId = ''.obs;
   var order = Rxn<OrderModel>();
   var isLoading = true.obs;
   var events = <TrackingEvent>[].obs;
+  var progressPercentage = 0.0.obs;
 
   int get totalSteps => order.value?.operations.length ?? 0;
 
@@ -49,8 +54,8 @@ class ClientTrackingController extends GetxController {
   }
 
   int get displayTotalSteps => totalSteps > 0 ? totalSteps : 1;
-  double get progressValue => totalSteps > 0 ? currentStep / totalSteps : 0.0;
-  String get displayProgress => "${(progressValue * 100).round()}%";
+  double get progressValue => progressPercentage.value / 100.0;
+  String get displayProgress => "${progressPercentage.value.round()}%";
 
   List<String> get stepNames {
     final o = order.value;
@@ -72,6 +77,7 @@ class ClientTrackingController extends GetxController {
       isLoading.value = true;
       if (orderId.value.isEmpty) return;
 
+      // 1. Fetch main order details
       final response = await repository.fetchOrderById(orderId.value);
       if (response != null) {
         final data = (response as Map<String, dynamic>).containsKey('order')
@@ -79,16 +85,80 @@ class ClientTrackingController extends GetxController {
             : response;
 
         order.value = OrderModel.fromJson(data);
-        _generateEvents();
       }
+
+      // 2. Fetch precise progress
+      try {
+        final progressData = await _clientService.getOrderProgress(orderId.value);
+        if (progressData['progress'] != null) {
+          progressPercentage.value = (progressData['progress'] as num).toDouble();
+        } else {
+          _calculateFallbackProgress();
+        }
+      } catch (e) {
+        debugPrint("Error fetching precise order progress: $e");
+        _calculateFallbackProgress();
+      }
+
+      // 3. Fetch unified timeline history
+      try {
+        final timelineData = await _clientService.getOrderTimeline(orderId.value);
+        if (timelineData.isNotEmpty) {
+          _parseTimelineEvents(timelineData);
+        } else {
+          _generateFallbackEvents();
+        }
+      } catch (e) {
+        debugPrint("Error fetching order timeline: $e");
+        _generateFallbackEvents();
+      }
+
     } catch (e) {
-      debugPrint("Error fetching order tracking: $e");
+      debugPrint("Error fetching order tracking details: $e");
     } finally {
       isLoading.value = false;
     }
   }
 
-  void _generateEvents() {
+  void _calculateFallbackProgress() {
+    if (totalSteps > 0) {
+      progressPercentage.value = (currentStep / totalSteps) * 100.0;
+    } else {
+      progressPercentage.value = 0.0;
+    }
+  }
+
+  TrackingEventType _mapActionToType(String action) {
+    final act = action.toUpperCase();
+    if (act.contains('REJECT')) {
+      return TrackingEventType.rejected;
+    }
+    return TrackingEventType.completed;
+  }
+
+  void _parseTimelineEvents(List<dynamic> timelineData) {
+    List<TrackingEvent> tempEvents = [];
+    for (var item in timelineData) {
+      if (item is Map<String, dynamic>) {
+        final dateStr = item['createdAt'] ?? '';
+        final date = DateTime.tryParse(dateStr) ?? DateTime.now();
+        final action = item['action'] ?? '';
+
+        tempEvents.add(
+          TrackingEvent(
+            title: item['displayTitle'] ?? 'Update',
+            description: item['displayDescription'] ?? item['comment'],
+            date: date,
+            type: _mapActionToType(action),
+          ),
+        );
+      }
+    }
+    tempEvents.sort((a, b) => b.date.compareTo(a.date));
+    events.assignAll(tempEvents);
+  }
+
+  void _generateFallbackEvents() {
     final o = order.value;
     if (o == null) return;
 
@@ -167,3 +237,4 @@ class ClientTrackingController extends GetxController {
     events.assignAll(tempEvents);
   }
 }
+

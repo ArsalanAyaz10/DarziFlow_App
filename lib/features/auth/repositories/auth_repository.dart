@@ -6,6 +6,7 @@ import 'package:cookie_jar/cookie_jar.dart';
 import '../../../core/storage/storage.dart';
 import 'dart:developer' as dev;
 import 'package:dariziflow_app/data/services/notifications_service.dart';
+import 'package:dariziflow_app/data/services/socket_service.dart';
 import 'package:get/get.dart' hide Response;
 
 enum UserRole { qcMember, client, departmenthead }
@@ -83,6 +84,13 @@ class AuthRepository {
 
   Future<void> logout(PersistCookieJar cookieJar) async {
     try {
+      // Disconnect socket cleanly on logout
+      try {
+        Get.find<SocketService>().disconnect();
+      } catch (e) {
+        dev.log("Socket disconnect error on logout: $e");
+      }
+
       String? fcmToken;
       try {
         fcmToken = await Get.find<NotificationService>().getDeviceToken();

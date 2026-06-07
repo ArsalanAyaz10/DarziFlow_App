@@ -135,4 +135,23 @@ class UploadService {
       throw Exception("Failed to get checkpoint signature: $e");
     }
   }
+
+  /// Requests a Cloudinary upload signature for a chat message attachment.
+  Future<Map<String, dynamic>> getChatUploadSignature({
+    required String chatRoomId,
+  }) async {
+    try {
+      final Map<String, dynamic> body = {
+        "contextType": "chat",
+        "chatRoomId": chatRoomId,
+      };
+
+      dev.log("Requesting chat upload signature: $body");
+
+      final response = await apiClient.post("upload/signature", data: body);
+      return response.data;
+    } catch (e) {
+      throw Exception("Failed to get chat upload signature: $e");
+    }
+  }
 }

@@ -10,13 +10,30 @@ class ApiService {
   late Dio dio;
   late PersistCookieJar cookieJar;
   DateTime? _azureLastFailTime;
+  late String primaryUrl;
+  late String backupUrl;
+
+  String get currentBaseUrl {
+    final now = DateTime.now();
+    if (_azureLastFailTime != null &&
+        now.difference(_azureLastFailTime!).inSeconds < 30) {
+      return backupUrl;
+    } else {
+      return primaryUrl;
+    }
+  }
+
+  void triggerFallback() {
+    _azureLastFailTime = DateTime.now();
+    debugPrint("Azure fallback triggered manually (e.g. from Socket). Using Backup: $backupUrl");
+  }
 
   Future<void> init(Future<void> Function() onLogout) async {
     final String rawPrimary = dotenv.env['AZURE_BASE_URL'] ?? '';
     final String rawBackup = dotenv.env['LOCAL_BASE_URL'] ?? rawPrimary;
 
-    final primaryUrl = rawPrimary.endsWith('/') ? rawPrimary : '$rawPrimary/';
-    final backupUrl = rawBackup.endsWith('/') ? rawBackup : '$rawBackup/';
+    primaryUrl = rawPrimary.endsWith('/') ? rawPrimary : '$rawPrimary/';
+    backupUrl = rawBackup.endsWith('/') ? rawBackup : '$rawBackup/';
 
     dio = Dio(
       BaseOptions(

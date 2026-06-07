@@ -32,23 +32,23 @@ class ClientTrackingScreen extends GetView<ClientTrackingController> {
         if (controller.isLoading.value) return const OrderWorkflowShimmer();
 
         final order = controller.order.value;
-        if (order == null)
-          return EmptyState(
+        if (order == null) {
+          return updateEmptyState(
             theme,
             "Order Not Found",
             Icons.inventory_2_outlined,
           );
+        }
 
         return RefreshIndicator(
           onRefresh: () => controller.fetchOrderDetails(),
           color: AppColors.atelierSilkGreen,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.zero,
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 10),
                 TrackingHeader(
                   order: order,
                   stepNames: controller.stepNames,
@@ -56,26 +56,27 @@ class ClientTrackingScreen extends GetView<ClientTrackingController> {
                   progressValue: controller.progressValue,
                   displayProgress: controller.displayProgress,
                 ),
-                Divider(color: theme.colorScheme.outlineVariant, height: 10),
-                const SizedBox(height: 10),
+                const SizedBox(height: 5),
+                Divider(color: theme.colorScheme.outlineVariant, height: 5),
+                const SizedBox(height: 5),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Text(
                     "LATEST UPDATES",
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 13,
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
+                      letterSpacing: 1.1,
                       color: theme.hintColor,
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 if (controller.events.isEmpty)
-                  EmptyState(theme, "No Updates Yet.", null)
+                  updateEmptyState(theme, "No Updates Yet.", null)
                 else
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
@@ -96,13 +97,13 @@ class ClientTrackingScreen extends GetView<ClientTrackingController> {
     );
   }
 
-  Widget EmptyState(ThemeData theme, String msg, IconData? icon) {
+  Widget updateEmptyState(ThemeData theme, String msg, IconData? icon) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          if (icon != null) Icon(icon, size: 40, color: theme.disabledColor),
-          const SizedBox(height: 10),
+          if (icon != null) Icon(icon, size: 30, color: theme.disabledColor),
+          const SizedBox(height: 8),
           Text(msg, style: const TextStyle(fontSize: 14, color: Colors.grey)),
         ],
       ),

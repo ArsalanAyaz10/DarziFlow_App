@@ -1,6 +1,7 @@
 import 'package:dariziflow_app/app/routes/app_pages.dart';
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
+import 'package:dariziflow_app/core/widgets/status_badge.dart';
 import 'package:dariziflow_app/features/DepartmentHead/controllers/department_details_controller.dart';
 import 'package:dariziflow_app/features/DepartmentHead/widgets/stat_tile.dart';
 import 'package:flutter/material.dart';
@@ -48,39 +49,14 @@ class DepartmentDetailsScreen extends GetView<DepartmentDetailsController> {
                       ),
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryGreen.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: AppColors.primaryGreen.withValues(alpha: 0.5),
+                  Obx(
+                    () => StatusBadge(
+                      status: controller.status.value,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
                       ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: AppColors.primaryGreen,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          controller.status.value,
-                          style: const TextStyle(
-                            color: AppColors.primaryGreen,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 10,
-                          ),
-                        ),
-                      ],
+                      borderRadius: BorderRadius.circular(20),
                     ),
                   ),
                 ],

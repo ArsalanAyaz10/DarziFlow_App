@@ -1,3 +1,4 @@
+// ignore_for_file: constant_identifier_names
 
 class AttachedFileModel {
   final String fileName;
@@ -62,22 +63,26 @@ class ProposalModel {
     return ProposalModel(
       id: json['_id'],
       proposedByRole: json['proposedByRole'] ?? 'CLIENT',
-      proposedAmount: json['proposedAmount'] != null 
-          ? (json['proposedAmount'] as num).toInt() 
+      proposedAmount: json['proposedAmount'] != null
+          ? (json['proposedAmount'] as num).toInt()
           : null,
       proposedCurrency: json['proposedCurrency'] ?? 'Rs.',
-      proposedDueDate: json['proposedDueDate'] != null 
-          ? DateTime.tryParse(json['proposedDueDate'].toString()) 
+      proposedDueDate: json['proposedDueDate'] != null
+          ? DateTime.tryParse(json['proposedDueDate'].toString())
           : null,
-      proposedRequiredDocs: List<String>.from(json['proposedRequiredDocs'] ?? []),
-      departmentSequenceIds: List<String>.from(json['departmentSequenceIds'] ?? []),
+      proposedRequiredDocs: List<String>.from(
+        json['proposedRequiredDocs'] ?? [],
+      ),
+      departmentSequenceIds: List<String>.from(
+        json['departmentSequenceIds'] ?? [],
+      ),
       qcMemberId: json['qcMemberId']?.toString(),
       proposedReferenceFiles: (json['proposedReferenceFiles'] as List? ?? [])
           .map((f) => AttachedFileModel.fromJson(f))
           .toList(),
       remarks: json['remarks'],
-      createdAt: json['createdAt'] != null 
-          ? DateTime.tryParse(json['createdAt'].toString()) 
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'].toString())
           : null,
     );
   }
@@ -88,23 +93,21 @@ class ProposalModel {
       'proposedByRole': proposedByRole,
       if (proposedAmount != null) 'proposedAmount': proposedAmount,
       'proposedCurrency': proposedCurrency,
-      if (proposedDueDate != null) 'proposedDueDate': proposedDueDate?.toIso8601String(),
+      if (proposedDueDate != null)
+        'proposedDueDate': proposedDueDate?.toIso8601String(),
       'proposedRequiredDocs': proposedRequiredDocs,
       'departmentSequenceIds': departmentSequenceIds,
       if (qcMemberId != null) 'qcMemberId': qcMemberId,
-      'proposedReferenceFiles': proposedReferenceFiles.map((f) => f.toJson()).toList(),
+      'proposedReferenceFiles': proposedReferenceFiles
+          .map((f) => f.toJson())
+          .toList(),
       if (remarks != null) 'remarks': remarks,
       if (createdAt != null) 'createdAt': createdAt?.toIso8601String(),
     };
   }
 }
 
-enum OrderRequestStatus {
-  PENDING_ADMIN,
-  PENDING_CLIENT,
-  CONVERTED,
-  CANCELED
-}
+enum OrderRequestStatus { PENDING_ADMIN, PENDING_CLIENT, CONVERTED, CANCELED }
 
 class OrderRequestModel {
   final String id;
@@ -113,7 +116,7 @@ class OrderRequestModel {
   final String description;
   final DateTime targetDueDate;
   final List<AttachedFileModel> originalReferenceFiles;
-  
+
   // Client Info (Encrypted on backend, but decrypted for client usage)
   final String clientName;
   final String clientEmail;
@@ -148,7 +151,9 @@ class OrderRequestModel {
       name: json['name'] ?? '',
       type: json['type'] ?? '',
       description: json['description'] ?? '',
-      targetDueDate: DateTime.tryParse(json['targetDueDate']?.toString() ?? '') ?? DateTime.now(),
+      targetDueDate:
+          DateTime.tryParse(json['targetDueDate']?.toString() ?? '') ??
+          DateTime.now(),
       originalReferenceFiles: (json['originalReferenceFiles'] as List? ?? [])
           .map((f) => AttachedFileModel.fromJson(f))
           .toList(),
@@ -160,11 +165,11 @@ class OrderRequestModel {
           .toList(),
       finalOrderId: json['finalOrderId']?.toString(),
       status: _parseStatus(json['status']),
-      createdAt: json['createdAt'] != null 
-          ? DateTime.tryParse(json['createdAt'].toString()) 
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'].toString())
           : null,
-      updatedAt: json['updatedAt'] != null 
-          ? DateTime.tryParse(json['updatedAt'].toString()) 
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.tryParse(json['updatedAt'].toString())
           : null,
     );
   }
@@ -189,7 +194,9 @@ class OrderRequestModel {
       'type': type,
       'description': description,
       'targetDueDate': targetDueDate.toIso8601String(),
-      'originalReferenceFiles': originalReferenceFiles.map((f) => f.toJson()).toList(),
+      'originalReferenceFiles': originalReferenceFiles
+          .map((f) => f.toJson())
+          .toList(),
       'clientName': clientName,
       'clientEmail': clientEmail,
       'clientId': clientId,

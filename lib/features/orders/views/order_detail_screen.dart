@@ -1,5 +1,8 @@
 import 'package:dariziflow_app/features/Orders/controllers/orderDetail_controller.dart';
 import 'package:dariziflow_app/features/Orders/widgets/order_detail_shimmer.dart';
+import 'package:dariziflow_app/features/Client/views/client_operation_review_screen.dart';
+import 'package:dariziflow_app/features/Client/controllers/client_department_review_controller.dart';
+import 'package:dariziflow_app/core/widgets/status_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
@@ -82,7 +85,7 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    activeStatusBadge(order.overallStatus, colors),
+                    StatusBadge(status: order.workflowStatus),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -140,14 +143,14 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
                       if (controller.userRole.value != 'CLIENT')
                         IconButton(
                           icon: const Icon(Icons.chat_outlined, size: 20),
-                          onPressed: () => _showComingSoonDialog(),
+                          onPressed: () => Get.toNamed(Routes.messages),
                           constraints: const BoxConstraints(),
                           padding: EdgeInsets.zero,
                         ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
 
                 //  AMOUNT
                 Container(
@@ -188,8 +191,7 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
-
+                const SizedBox(height: 10),
                 Row(
                   children: [
                     Expanded(
@@ -199,7 +201,7 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
                     Expanded(child: dateBox("DUE DATE", dueDateStr, colors)),
                   ],
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
 
                 // ORDER TYPE & DESCRIPTION
                 Container(
@@ -341,8 +343,7 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
                         child: supportActionCard(
                           "Chat with QC",
                           "Verified Member",
-                          Icons.verified_user_outlined,
-                          () => _showComingSoonDialog(),
+                          () => Get.toNamed(Routes.messages),
                           colors,
                         ),
                       ),
@@ -351,81 +352,97 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
                         child: supportActionCard(
                           "Dept Head",
                           "Support",
-                          Icons.support_agent,
-                          () => _showComingSoonDialog(),
+                          () => Get.toNamed(Routes.messages),
                           colors,
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 25),
-                ] else if (order.qcMember != null) ...[
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colors.surfaceContainerHighest.withValues(
-                        alpha: 0.2,
+                ] else ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: supportActionCard(
+                          "Chat with QC",
+                          order.qcMember ?? "Verified Member",
+                          () => Get.toNamed(Routes.messages),
+                          colors,
+                        ),
                       ),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: colors.outline.withValues(alpha: 0.3),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: supportActionCard(
+                          "Chat with Client",
+                          order.clientName,
+                          () => Get.toNamed(Routes.messages),
+                          colors,
+                        ),
                       ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.verified_user,
-                          size: 14,
-                          color: brandGreen.withValues(alpha: 0.8),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          "QC: ",
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: colors.onSurfaceVariant,
-                          ),
-                        ),
-                        Text(
-                          order.qcMember!,
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: colors.onSurface,
-                          ),
-                        ),
-                      ],
-                    ),
+                    ],
                   ),
                   const SizedBox(height: 25),
                 ],
 
-                CustomElevatedButton(
-                  onPressed: () {
-                    if (controller.userRole.value == 'CLIENT') {
+                if (controller.userRole.value == 'CLIENT') ...[
+                  CustomElevatedButton(
+                    onPressed: () {
+                      if (order.operations.isEmpty) {
+                        Get.snackbar('Info', 'No operations to review');
+                        return;
+                      }
+                      if (Get.isRegistered<
+                        ClientDepartmentReviewController
+                      >()) {
+                        Get.delete<ClientDepartmentReviewController>();
+                      }
+                      Get.put(
+                        ClientDepartmentReviewController(
+                          orderId: order.orderId,
+                          workflowStatus: order.workflowStatus,
+                          operations: order.operations,
+                        ),
+                      );
+                      Get.to(() => const ClientOperationReviewScreen());
+                    },
+                    text: "Open Workflow",
+                    icon: Icons.account_tree,
+                    backgroundColor: brandGreen,
+                    foregroundColor: Colors.black,
+                    height: 50,
+                    borderRadius: 25,
+                  ),
+                  const SizedBox(height: 12),
+                  CustomElevatedButton(
+                    onPressed: () {
                       Get.toNamed(
                         Routes.clientTracking,
                         arguments: {"orderId": order.orderId},
                       );
-                    } else {
+                    },
+                    text: "Show Progress",
+                    icon: Icons.trending_up,
+                    backgroundColor: colors.surfaceContainerHighest,
+                    height: 50,
+                    borderRadius: 25,
+                  ),
+                  const SizedBox(height: 20),
+                ] else ...[
+                  CustomElevatedButton(
+                    onPressed: () {
                       Get.toNamed(
                         Routes.workflow,
                         arguments: {"orderId": order.orderId},
                       );
-                    }
-                  },
-                  text: "Open Workflow",
-                  icon: Icons.account_tree,
-                  backgroundColor: colors.surfaceContainerHighest,
-                  height: 50,
-                  borderRadius: 25,
-                ),
-                const SizedBox(height: 20),
+                    },
+                    text: "Open Workflow",
+                    icon: Icons.account_tree,
+                    backgroundColor: colors.surfaceContainerHighest,
+                    height: 50,
+                    borderRadius: 25,
+                  ),
+                  const SizedBox(height: 20),
+                ],
               ],
             ),
           ),
@@ -436,66 +453,6 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
   }
 
   //mthds
-
-  Widget activeStatusBadge(String status, ColorScheme colors) {
-    if (status == 'null' || status.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: colors.surfaceContainerHighest.withValues(alpha: 0.4),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          "Loading...",
-          style: TextStyle(
-            color: colors.onSurfaceVariant,
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 1.2,
-          ),
-        ),
-      );
-    }
-
-    Color activeColor = const Color(0xFF96E072);
-    if (status == "IN_PROGRESS") {
-      activeColor = Colors.redAccent;
-    } else if (status == "COMPLETED") {
-      activeColor = colors.primary;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: activeColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: activeColor.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              color: activeColor,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            status,
-            style: TextStyle(
-              color: activeColor,
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.2,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget dateBox(String label, String date, ColorScheme colors) {
     return Container(
@@ -534,49 +491,43 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
   Widget supportActionCard(
     String title,
     String subtitle,
-    IconData icon,
     VoidCallback onTap,
     ColorScheme colors,
   ) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
         decoration: BoxDecoration(
           color: colors.surfaceContainerHighest.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: colors.outline.withValues(alpha: 0.4)),
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 18, color: const Color(0xFF96E072)),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 9,
-                      color: colors.onSurfaceVariant,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 10,
+                color: colors.onSurfaceVariant,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -584,19 +535,4 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
     );
   }
 
-  void _showComingSoonDialog() {
-    Get.defaultDialog(
-      title: "Coming Soon",
-      titleStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-      middleText:
-          "The chat/message feature is currently under development and will be available soon.",
-      middleTextStyle: const TextStyle(fontSize: 14),
-      backgroundColor: Get.theme.colorScheme.surface,
-      radius: 16,
-      textConfirm: "Got it",
-      confirmTextColor: Colors.black,
-      buttonColor: const Color(0xFF96E072),
-      onConfirm: () => Get.back(),
-    );
-  }
 }

@@ -3,7 +3,6 @@ import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:dariziflow_app/features/DepartmentHead/controllers/deptHead_controller.dart';
 import 'package:dariziflow_app/features/DepartmentHead/controllers/department_details_controller.dart';
 import 'package:dariziflow_app/features/DepartmentHead/views/department_details_screen.dart';
-import 'package:dariziflow_app/features/Messages/views/messages_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -174,7 +173,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
         break;
 
       case 3: // Messages
-        Get.to(() => const MessagesComingSoonScreen());
+        Get.toNamed(Routes.messages);
         break;
     }
   }

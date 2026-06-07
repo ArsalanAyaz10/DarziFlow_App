@@ -21,5 +21,6 @@ class AppColors {
   static const Color atelierBackgroundLight = Color(0xFFF6F8F6);
   static const Color atelierSurfaceLight = Color(0xFFFFFFFF);
   static const Color atelierSilkGreen = Color(0xFF83DC63);
+  static const Color atelierAmber = Color(0xFFFACC15);
   static const Color atelierTonalGrey = Color(0xFFBFCAB6);
 }

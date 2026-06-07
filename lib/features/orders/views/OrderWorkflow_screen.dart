@@ -41,47 +41,68 @@ class OrderWorkflowScreen extends GetView<OrderWorkflowController> {
             padding: const EdgeInsets.all(20),
             child: Column(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: theme.dividerColor.withValues(alpha: 1),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            "Production Progress",
-                            style: TextStyle(fontWeight: FontWeight.w600),
-                          ),
                           Text(
-                            "${controller.progress.value}%",
-                            style: const TextStyle(
-                              color: AppColors.primaryGreen,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
+                            "Production Progress",
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
+                          ),
+                          const SizedBox(height: 6),
+                          LinearProgressIndicator(
+                            value: controller.progress.value / 100,
+                            backgroundColor: AppColors.primaryGreen.withValues(alpha: 0.15),
+                            color: AppColors.primaryGreen,
+                            borderRadius: BorderRadius.circular(10),
+                            minHeight: 6,
                           ),
                         ],
                       ),
-                      const SizedBox(height: 15),
-                      LinearProgressIndicator(
-                        value: controller.progress.value / 100,
-                        backgroundColor: AppColors.primaryGreen.withValues(
-                          alpha: 0.1,
-                        ),
+                    ),
+                    const SizedBox(width: 16),
+                    Text(
+                      "${controller.progress.value}%",
+                      style: const TextStyle(
                         color: AppColors.primaryGreen,
-                        borderRadius: BorderRadius.circular(10),
-                        minHeight: 8,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+                if (controller.userRole.value.toUpperCase() != 'QC_MEMBER' && 
+                    controller.userRole.value.toUpperCase() != 'CLIENT') ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.lock_outline,
+                        size: 14,
+                        color: AppColors.atelierAmber,
+                      ),
+                      const SizedBox(width: 6),
+                      const Expanded(
+                        child: Text(
+                          "Operations must be completed sequentially. Future steps remain locked until previous ones are finished.",
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AppColors.atelierAmber,
+                            height: 1.2,
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                ),
+                ],
                 const SizedBox(height: 20),
                 OrderTimeline(
                   operations: controller.order.value?.operations ?? [],

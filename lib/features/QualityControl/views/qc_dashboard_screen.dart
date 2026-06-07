@@ -1,5 +1,6 @@
 import 'package:dariziflow_app/core/widgets/bottom_nav_bar.dart';
 import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
+import 'package:dariziflow_app/core/widgets/status_badge.dart';
 import 'package:dariziflow_app/app/routes/app_pages.dart';
 import 'package:dariziflow_app/features/QualityControl/controllers/qc_dashboard_controller.dart';
 import 'package:dariziflow_app/features/QualityControl/widgets/qc_stat_card.dart';
@@ -267,8 +268,6 @@ class QCDashboardScreen extends GetView<QcDashboardController> {
             final order = controller.activeOrders[index];
             final displayId = order.displayOrderId;
 
-            final statusText = order.overallStatus.replaceAll('_', ' ');
-
             return InkWell(
               onTap: () => Get.toNamed(Routes.orderDetails, arguments: order),
               borderRadius: BorderRadius.circular(16),
@@ -304,24 +303,7 @@ class QCDashboardScreen extends GetView<QcDashboardController> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            statusText,
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue,
-                            ),
-                          ),
-                        ),
+                        StatusBadge(status: order.overallStatus),
                       ],
                     ),
                   ],

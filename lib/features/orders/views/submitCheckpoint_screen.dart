@@ -1,6 +1,7 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
 import 'package:dariziflow_app/core/widgets/custom_elevated_button.dart';
+import 'package:dariziflow_app/core/widgets/status_badge.dart';
 import 'package:dariziflow_app/features/Orders/controllers/checkpoint_controller.dart';
 import 'package:dariziflow_app/features/Orders/widgets/checkpoint_history_sheet.dart';
 import 'package:dariziflow_app/data/models/checkpointModel.dart';
@@ -63,37 +64,11 @@ class SubmitcheckpointScreen extends GetView<CheckpointController> {
                         ),
                         tooltip: 'View History',
                       ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryGreen.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: AppColors.grey.withValues(alpha: 0.5),
-                          width: 1,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const CircleAvatar(
-                            radius: 4,
-                            backgroundColor: AppColors.primaryGreen,
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            controller.ck.status.replaceAll('_', ' '),
-                            style: const TextStyle(
-                              color: AppColors.primaryGreen,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
+                    StatusBadge(
+                      status: controller.ck.status,
+                      fontSize: 12,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                   ],
                 ),

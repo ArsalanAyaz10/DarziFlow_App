@@ -1,15 +1,139 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
+import 'package:dariziflow_app/core/widgets/status_badge.dart';
 import 'package:dariziflow_app/data/models/checkpointModel.dart';
+import 'package:dariziflow_app/features/Client/views/client_checkpoint_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class CheckpointItem extends StatelessWidget {
   final CheckpointModel cp;
+  final String? orderId;
+  final bool isClientView;
+  final bool showActions;
+  final bool? isDark;
 
-  const CheckpointItem({super.key, required this.cp});
+  const CheckpointItem({
+    super.key,
+    required this.cp,
+    this.orderId,
+    this.isClientView = false,
+    this.showActions = false,
+    this.isDark,
+  });
+
+  Color _resolveStatusColor(CheckpointModel cp, ColorScheme colors) {
+    if (cp.isApproved ||
+        cp.isCompleted ||
+        cp.status == 'QC_APPROVED' ||
+        cp.status == 'APPROVED') {
+      return AppColors.atelierSilkGreen;
+    }
+    if (cp.isRejected ||
+        cp.status == 'QC_REJECTED' ||
+        cp.status == 'REJECTED') {
+      return AppColors.error;
+    }
+    if (cp.isQcPending ||
+        cp.status == 'SUBMITTED' ||
+        cp.status == 'QC_PENDING' ||
+        cp.status == 'PENDING') {
+      return AppColors.atelierAmber;
+    }
+    if (cp.toBeSubmitted ||
+        cp.status == 'IN_PROGRESS' ||
+        cp.status == 'PRODUCTION') {
+      return AppColors.primaryBlue;
+    }
+    return AppColors.grey;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    if (isClientView) {
+      final statusColor = _resolveStatusColor(cp, colorScheme);
+
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Get.to(() => ClientCheckpointDetailScreen(checkpoint: cp));
+          },
+          child: Row(
+            children: [
+              // Status dot
+              Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: statusColor,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: statusColor.withValues(alpha: 0.4),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+
+              // Content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          cp.name,
+                          style: TextStyle(
+                            color: colorScheme.onSurface,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const Spacer(),
+
+                        // Status badge
+                        StatusBadge(
+                          status: cp.status,
+                          fontSize: 9,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 3),
+
+                    if (cp.description.isNotEmpty) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        cp.description,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: colorScheme.onSurfaceVariant.withValues(
+                            alpha: 0.7,
+                          ),
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     IconData stateIcon;
     Color stateColor;
 
@@ -32,130 +156,49 @@ class CheckpointItem extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        splashColor: Colors.transparent,
-        onTap: () => _showHistory(context, cp),
-        child: Row(
-          children: [
-            Icon(stateIcon, color: stateColor, size: 22),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    cp.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 13,
-                    ),
-                  ),
-                  if (cp.isRejected || cp.status == 'QC_REJECTED')
-                    const Text(
-                      "Rejected: View feedback",
-                      style: TextStyle(color: Colors.red, fontSize: 11),
-                    )
-                  else if (cp.isApproved || cp.status == 'QC_APPROVED')
-                    const Text(
-                      "Approved: Check Remarks",
-                      style: TextStyle(
-                        color: AppColors.primaryGreen,
-                        fontSize: 11,
-                      ),
-                    )
-                  else if (cp.isQcPending || cp.status == 'SUBMITTED')
-                    const Text(
-                      "Awaiting Approval",
-                      style: TextStyle(color: Colors.orange, fontSize: 11),
-                    )
-                  else
-                    const Text(
-                      "View history",
-                      style: TextStyle(color: Colors.grey, fontSize: 11),
-                    ),
-                ],
-              ),
-            ),
-            if (cp.history.isNotEmpty)
-              IconButton(
-                icon: Icon(
-                  Icons.history,
-                  size: 22,
-                  color: Theme.of(context).colorScheme.outline,
-                ),
-                onPressed: () => _showHistory(context, cp),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showHistory(BuildContext context, CheckpointModel cp) {
-    Get.bottomSheet(
-      Container(
-        height: MediaQuery.of(context).size.height * 0.4,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(12),
+      child: Row(
+        children: [
+          Icon(stateIcon, color: stateColor, size: 22),
+          const SizedBox(width: 10),
+          Expanded(
             child: Column(
-              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
                 Text(
-                  "History: ${cp.name}",
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+                  cp.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 13,
                   ),
                 ),
-                const Divider(),
-                Expanded(
-                  child: ListView(
-                    children: cp.history.reversed
-                        .map(
-                          (h) => ListTile(
-                            title: Text(
-                              h.action,
-                              style: TextStyle(
-                                color:
-                                    h.action.toLowerCase().contains("approve")
-                                        ? AppColors.primaryGreen
-                                        : (h.action.toLowerCase().contains("reject")
-                                            ? Colors.red
-                                            : Theme.of(context).colorScheme.onSurface),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            subtitle: Text(h.comment ?? "No comment"),
-                            trailing: Text(
-                              "${h.actedAt.hour.toString().padLeft(2, '0')}:${h.actedAt.minute.toString().padLeft(2, '0')}",
-                            ),
-                          ),
-                        )
-                        .toList(),
+                if (cp.isRejected || cp.status == 'QC_REJECTED')
+                  const Text(
+                    "Rejected: View feedback",
+                    style: TextStyle(color: Colors.red, fontSize: 11),
+                  )
+                else if (cp.isApproved || cp.status == 'QC_APPROVED')
+                  const Text(
+                    "Approved: Check Remarks",
+                    style: TextStyle(
+                      color: AppColors.primaryGreen,
+                      fontSize: 11,
+                    ),
+                  )
+                else if (cp.isQcPending || cp.status == 'SUBMITTED')
+                  const Text(
+                    "Awaiting Approval",
+                    style: TextStyle(color: Colors.orange, fontSize: 11),
+                  )
+                else
+                  const Text(
+                    "View history",
+                    style: TextStyle(color: Colors.grey, fontSize: 11),
                   ),
-                ),
               ],
             ),
           ),
-        ),
+        ],
       ),
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      ignoreSafeArea: false,
     );
   }
 }

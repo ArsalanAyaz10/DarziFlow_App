@@ -49,7 +49,14 @@ class ClientDashboardController extends GetxController {
       activeOrdersCount.value = stats['activeOrders'];
       completedOrdersCount.value = stats['completedOrders'];
       totalOrdersCount.value = stats['totalOrders'];
-      orders.assignAll(stats['orders']);
+      List<OrderModel> fetchedOrders = List<OrderModel>.from(stats['orders']);
+      fetchedOrders.sort((a, b) {
+        if (a.createdAt == null && b.createdAt == null) return 0;
+        if (a.createdAt == null) return 1;
+        if (b.createdAt == null) return -1;
+        return b.createdAt!.compareTo(a.createdAt!);
+      });
+      orders.assignAll(fetchedOrders);
 
       // Calculate total spent (just as an example logic)
       double spent = 0;

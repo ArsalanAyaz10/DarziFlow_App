@@ -62,7 +62,6 @@ class NotificationService extends GetxService {
           "/auth/update-fcm-token",
           data: {"token": token},
         );
-        dev.log("FCM Token synced with backend: $token");
       }
     } catch (e) {
       dev.log("FCM Sync Error: $e");
