@@ -32,7 +32,12 @@ class OperationDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currentCP = op.checkpoints.isNotEmpty ? op.checkpoints.last : null;
+    final currentCP = op.checkpoints.isNotEmpty 
+        ? op.checkpoints.firstWhere(
+            (cp) => !(cp.status == 'COMPLETED' || cp.status == 'QC_APPROVED' || cp.status == 'APPROVED'),
+            orElse: () => op.checkpoints.last,
+          ) 
+        : null;
     if (currentCP == null) return const SizedBox.shrink();
 
     // Role-based config
@@ -85,7 +90,7 @@ class OperationDetails extends StatelessWidget {
         buttonLabel = "Already Submitted";
         isBtnDisabled = true;
         btnColor = Colors.orange;
-      } else if (currentCP.status == 'QC_APPROVED' || currentCP.isApproved) {
+      } else if (currentCP.status == 'QC_APPROVED' || currentCP.isApproved || currentCP.status == 'COMPLETED' || currentCP.status == 'APPROVED') {
         buttonLabel = "Checkpoint Approved";
         isBtnDisabled = true;
         btnColor = Colors.grey.shade400;

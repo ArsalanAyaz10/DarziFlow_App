@@ -33,7 +33,7 @@ class PerformanceSummaryPanel extends StatelessWidget {
             StatTile(
               label: "Active Orders",
               value: controller.inProgressOrders.value.toString(),
-              subText: "In progress now",
+              subText: "In Progress Now",
               color: Colors.orange,
               icon: Icons.pending_actions,
               showTrend: false,

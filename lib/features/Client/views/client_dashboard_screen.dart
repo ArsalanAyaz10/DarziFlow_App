@@ -196,7 +196,7 @@ class ClientDashboardScreen extends GetView<ClientDashboardController> {
       bottomNavigationBar: const BottomNavBar(currentIndex: 0),
       floatingActionButton: FloatingActionButton(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-        onPressed: () => Get.toNamed(Routes.createOrderRequest),
+        onPressed: () => Get.snackbar('Coming Soon', 'This feature is due in next phase'),
         backgroundColor: AppColors.atelierSilkGreen,
         child: const Icon(Icons.add, color: Colors.black),
       ),

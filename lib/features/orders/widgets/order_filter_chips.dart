@@ -18,7 +18,7 @@ class OrderFilterChips extends StatelessWidget {
     final theme = Theme.of(context);
     
     return Container(
-      height: 50,
+      height: 40,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -28,15 +28,19 @@ class OrderFilterChips extends StatelessWidget {
           final isSelected = selectedFilter == filter;
 
           return Padding(
-            padding: const EdgeInsets.only(right: 12),
+            padding: const EdgeInsets.only(right: 8),
             child: FilterChip(
+              visualDensity: const VisualDensity(horizontal: -2, vertical: -4),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+              labelPadding: EdgeInsets.zero,
               label: Text(
                 filter,
                 style: TextStyle(
+                  fontSize: 13,
                   color: isSelected
                       ? Colors.white
                       : theme.colorScheme.onSurface,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 ),
               ),
               selected: isSelected,
@@ -47,7 +51,11 @@ class OrderFilterChips extends StatelessWidget {
               selectedColor: AppColors.primaryGreen,
               showCheckmark: false,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(18),
+                side: BorderSide(
+                  color: isSelected ? AppColors.primaryGreen : Colors.transparent,
+                  width: 1,
+                ),
               ),
             ),
           );

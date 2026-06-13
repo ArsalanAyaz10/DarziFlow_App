@@ -60,7 +60,9 @@ class _BottomNavBarState extends State<BottomNavBar> {
         type: BottomNavigationBarType.fixed,
         elevation: 2,
         showSelectedLabels: true,
-        selectedFontSize: 15,
+        showUnselectedLabels: true,
+        selectedFontSize: 12,
+        unselectedFontSize: 10,
         selectedItemColor: Colors.green,
         unselectedItemColor: Colors.grey,
         currentIndex: widget.currentIndex,
@@ -137,7 +139,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
         if (isQC) {
           Get.offNamed(Routes.qcHistory);
         } else if (role == "CLIENT") {
-          Get.offNamed(Routes.orderRequests);
+          Get.snackbar('Coming Soon', 'This feature is due in next phase');
         } else {
           try {
             String? deptId;

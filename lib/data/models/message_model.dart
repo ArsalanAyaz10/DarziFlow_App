@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class UserPreviewModel {
   final String id;
   final String name;
@@ -12,11 +14,31 @@ class UserPreviewModel {
   });
 
   factory UserPreviewModel.fromJson(Map<String, dynamic> json) {
+    String? parsedAvatar;
+    if (json['avatar'] != null) {
+      if (json['avatar'] is Map) {
+        parsedAvatar = json['avatar']['url']?.toString();
+      } else if (json['avatar'] is String) {
+        try {
+          // In case the backend sends stringified JSON
+          final decoded = jsonDecode(json['avatar']);
+          if (decoded is Map) {
+            parsedAvatar = decoded['url']?.toString();
+          } else {
+            parsedAvatar = json['avatar'];
+          }
+        } catch (e) {
+          // If it's just a normal string URL
+          parsedAvatar = json['avatar'];
+        }
+      }
+    }
+
     return UserPreviewModel(
       id: json['_id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
       role: json['role']?.toString() ?? '',
-      avatar: json['avatar']?.toString(),
+      avatar: parsedAvatar,
     );
   }
 

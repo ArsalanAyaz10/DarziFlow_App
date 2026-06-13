@@ -182,7 +182,7 @@ class QcDashboardController extends GetxController {
   }
 
   String formatTimeAgo(String? dateStr) {
-    if (dateStr == null || dateStr.isEmpty) return 'Just now';
+    if (dateStr == null || dateStr.isEmpty) return '';
     try {
       final date = DateTime.parse(dateStr).toLocal();
       final now = DateTime.now();

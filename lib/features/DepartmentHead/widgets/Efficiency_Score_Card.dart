@@ -85,46 +85,56 @@ class EfficiencyScoreCard extends StatelessWidget {
                   ),
                 ],
               ),
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  SizedBox(
-                    height: 70,
-                    width: 70,
-                    child: CircularProgressIndicator(
-                      value: controller.efficiencyScore.value / 100,
-                      strokeWidth: 6,
-                      backgroundColor:
-                          (isDark ? colors.onPrimaryContainer : AppColors.white)
-                              .withValues(alpha: 0.2),
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        isDark ? colors.onPrimaryContainer : Colors.white,
-                      ),
-                    ),
-                  ),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
+              TweenAnimationBuilder<double>(
+                tween: Tween<double>(
+                  begin: 0.0,
+                  end: controller.efficiencyScore.value / 100,
+                ),
+                duration: const Duration(milliseconds: 1500),
+                curve: Curves.easeOutCubic,
+                builder: (context, value, child) {
+                  return Stack(
+                    alignment: Alignment.center,
                     children: [
-                      Text(
-                        "${controller.efficiencyScore.value}",
-                        style: TextStyle(
-                          color: isDark ? colors.onPrimaryContainer : AppColors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                      SizedBox(
+                        height: 70,
+                        width: 70,
+                        child: CircularProgressIndicator(
+                          value: value,
+                          strokeWidth: 6,
+                          backgroundColor:
+                              (isDark ? colors.onPrimaryContainer : AppColors.white)
+                                  .withValues(alpha: 0.2),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            isDark ? colors.onPrimaryContainer : Colors.white,
+                          ),
                         ),
                       ),
-                      Text(
-                        "%",
-                        style: TextStyle(
-                          color: isDark
-                              ? colors.onPrimaryContainer.withValues(alpha: 0.7)
-                              : Colors.white70,
-                          fontSize: 10,
-                        ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "${(value * 100).toInt()}",
+                            style: TextStyle(
+                              color: isDark ? colors.onPrimaryContainer : AppColors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            "%",
+                            style: TextStyle(
+                              color: isDark
+                                  ? colors.onPrimaryContainer.withValues(alpha: 0.7)
+                                  : Colors.white70,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
-                  ),
-                ],
+                  );
+                },
               ),
             ],
           ),

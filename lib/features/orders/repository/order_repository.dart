@@ -86,7 +86,7 @@ class OrderRepository {
       return true;
     } catch (e) {
       dev.log("Repo Error submitting checkpoint: $e");
-      return false;
+      rethrow;
     }
   }
 }

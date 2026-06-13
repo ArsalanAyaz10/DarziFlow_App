@@ -235,11 +235,16 @@ class QCDashboardScreen extends GetView<QcDashboardController> {
           ],
         );
       }),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed(Routes.createOrderRequest),
-        backgroundColor: AppColors.atelierSilkGreen,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+      floatingActionButton: Obx(() {
+        if (controller.userRole.value.toUpperCase() == 'CLIENT') {
+          return FloatingActionButton(
+            onPressed: () => Get.toNamed(Routes.createOrderRequest),
+            backgroundColor: AppColors.atelierSilkGreen,
+            child: const Icon(Icons.add, color: Colors.white),
+          );
+        }
+        return const SizedBox.shrink();
+      }),
     );
   }
 

@@ -71,17 +71,44 @@ class ReviewQueueItem extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const SizedBox(width: 5),
-                    Text(
-                      time,
-                      style: GoogleFonts.manrope(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        color: isDark
-                            ? AppColors.atelierTonalGrey
-                            : Colors.grey.shade500,
+                    if (time.isNotEmpty) ...[
+                      const SizedBox(width: 5),
+                      Text(
+                        time,
+                        style: GoogleFonts.manrope(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: isDark
+                              ? AppColors.atelierTonalGrey
+                              : Colors.grey.shade500,
+                        ),
                       ),
-                    ),
+                    ] else ...[
+                      const SizedBox(width: 5),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: Colors.orange.withValues(alpha: 0.3),
+                            width: 0.5,
+                          ),
+                        ),
+                        child: Text(
+                          "PENDING",
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                            color: Colors.orange,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
 

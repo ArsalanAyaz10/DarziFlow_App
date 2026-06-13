@@ -3,10 +3,10 @@ import 'package:dariziflow_app/core/widgets/bottom_nav_bar.dart';
 import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
 import 'package:dariziflow_app/features/Messages/controllers/chat_list_controller.dart';
 import 'package:dariziflow_app/features/Messages/widgets/chat_tile.dart';
+import 'package:dariziflow_app/features/Messages/widgets/messages_shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dariziflow_app/app/routes/app_pages.dart';
-import 'package:shimmer_animation/shimmer_animation.dart';
 
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
@@ -64,7 +64,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
           Expanded(
             child: Obx(() {
               if (_controller.currentUserId.value.isEmpty || _controller.isLoading.value) {
-                return _buildShimmer(colors);
+                return const MessagesShimmer();
               }
 
               if (_controller.errorMessage.value.isNotEmpty) {
@@ -103,47 +103,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
         ],
       ),
       bottomNavigationBar: const BottomNavBar(currentIndex: 3),
-    );
-  }
-
-  Widget _buildShimmer(ColorScheme colors) {
-    return ListView.builder(
-      itemCount: 7,
-      itemBuilder: (context, index) => Shimmer(
-        duration: const Duration(seconds: 1),
-        color: colors.surfaceContainerHighest,
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Row(
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: colors.surface,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                        height: 14,
-                        width: 120,
-                        color: colors.surface),
-                    const SizedBox(height: 6),
-                    Container(
-                        height: 12,
-                        width: 200,
-                        color: colors.surface),
-                  ],
-                ),
-              ),            ],
-          ),
-        ),
-      ),
     );
   }
 

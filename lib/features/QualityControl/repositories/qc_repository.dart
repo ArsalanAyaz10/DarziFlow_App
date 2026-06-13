@@ -37,7 +37,7 @@ class QcRepository {
       return true;
     } catch (e) {
       if (kDebugMode) dev.log("Error approving submission: $e");
-      return false;
+      rethrow;
     }
   }
 
@@ -52,7 +52,7 @@ class QcRepository {
       return true;
     } catch (e) {
       if (kDebugMode) dev.log("Error rejecting submission: $e");
-      return false;
+      rethrow;
     }
   }
 

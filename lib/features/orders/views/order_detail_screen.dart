@@ -29,7 +29,7 @@ class OrderDetailScreen extends GetView<OrderDetailController> {
         showBackButton: true,
       ),
       body: Obx(() {
-        if (controller.isLoading.value && controller.order.value == null) {
+        if (controller.isInitialLoading.value) {
           return const OrderDetailShimmer();
         }
 

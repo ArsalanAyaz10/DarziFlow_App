@@ -11,6 +11,7 @@ class OrderDetailController extends GetxController {
 
   final order = Rxn<OrderModel>();
   final isLoading = false.obs;
+  final isInitialLoading = true.obs;
   final progress = 0.obs;
   final currentPhase = 'N/A'.obs;
   final userRole = ''.obs;
@@ -47,7 +48,9 @@ class OrderDetailController extends GetxController {
     }
 
     AppStorage.getUserRole().then((role) => userRole.value = role?.toUpperCase() ?? '');
-    refreshOrderDetails();
+    refreshOrderDetails().then((_) {
+      isInitialLoading.value = false;
+    });
   }
 
   Future<void> refreshOrderDetails() async {

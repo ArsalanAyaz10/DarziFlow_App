@@ -1,3 +1,4 @@
+import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:flutter/material.dart';
 
 class CustomElevatedButton extends StatelessWidget {
@@ -54,7 +55,7 @@ class CustomElevatedButton extends StatelessWidget {
               height: 24,
               width: 24,
               child: CircularProgressIndicator(
-                color: effectiveForegroundColor,
+                color: AppColors.primaryGreen,
                 strokeWidth: 2,
               ),
             )

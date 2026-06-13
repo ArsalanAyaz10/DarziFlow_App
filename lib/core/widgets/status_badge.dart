@@ -24,7 +24,8 @@ class StatusBadge extends StatelessWidget {
     if (cleanStatus == 'COMPLETED' ||
         cleanStatus == 'APPROVED' ||
         cleanStatus == 'DELIVERED' ||
-        cleanStatus == 'QC_APPROVED') {
+        cleanStatus == 'QC_APPROVED' ||
+        cleanStatus == 'ACTIVE') {
       baseColor = const HSLColor.fromAHSL(1.0, 142, 0.70, 0.45).toColor(); // Premium Success Green
     } else if (cleanStatus == 'IN_PROGRESS' || cleanStatus == 'PRODUCTION') {
       baseColor = const HSLColor.fromAHSL(1.0, 211, 1.0, 0.50).toColor(); // Premium Blue

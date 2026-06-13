@@ -5,13 +5,22 @@ import 'package:dariziflow_app/features/Notifications/controllers/notification_c
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'dart:developer' as dev;
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  dev.log("Handling a background message: ${message.messageId}");
+}
 
 class NotificationService extends GetxService {
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
   final _localNotif = FlutterLocalNotificationsPlugin();
 
   Future<NotificationService> init() async {
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
     await _fcm.requestPermission(alert: true, badge: true, sound: true);
 
     const androidSettings = AndroidInitializationSettings(

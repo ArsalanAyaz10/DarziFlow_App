@@ -2,8 +2,10 @@ import 'package:dariziflow_app/app/routes/app_pages.dart';
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
 import 'package:dariziflow_app/core/widgets/status_badge.dart';
+import 'package:dariziflow_app/core/widgets/bottom_nav_bar.dart';
 import 'package:dariziflow_app/features/DepartmentHead/controllers/department_details_controller.dart';
 import 'package:dariziflow_app/features/DepartmentHead/widgets/stat_tile.dart';
+import 'package:dariziflow_app/features/DepartmentHead/widgets/department_details_shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -21,11 +23,10 @@ class DepartmentDetailsScreen extends GetView<DepartmentDetailsController> {
         title: "Department Details",
         centerTitle: true,
       ),
+      bottomNavigationBar: const BottomNavBar(currentIndex: 2),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(
-            child: CircularProgressIndicator(color: AppColors.primaryGreen),
-          );
+          return const DepartmentDetailsShimmer();
         }
 
         return SingleChildScrollView(
@@ -91,7 +92,7 @@ class DepartmentDetailsScreen extends GetView<DepartmentDetailsController> {
                   StatTile(
                     label: "Active Orders",
                     value: controller.activeOrders.value.toString(),
-                    subText: "In progress now",
+                    subText: "In Progress Now",
                     color: Colors.orange,
                     icon: Icons.pending_actions,
                     showTrend: false,
