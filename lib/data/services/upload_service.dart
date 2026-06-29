@@ -37,6 +37,7 @@ class UploadService {
     required String timestamp,
     required String signature,
     required String folder,
+    String resourceType = 'auto',
   }) async {
     try {
       final formData = FormData.fromMap({
@@ -48,7 +49,7 @@ class UploadService {
       });
 
       final response = await _dio.post(
-        "https://api.cloudinary.com/v1_1/$cloudName/auto/upload",
+        "https://api.cloudinary.com/v1_1/$cloudName/$resourceType/upload",
         data: formData,
       );
 

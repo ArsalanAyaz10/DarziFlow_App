@@ -190,7 +190,11 @@ class ChatController extends GetxController {
   // ─── Send Message ─────────────────────────────────────────────────────────
 
   Future<void> sendMessage(String text) async {
+    dev.log('[Voice] sendMessage called. isSendingMedia: ${isSendingMedia.value}');
+    if (isSendingMedia.value) return;
+    
     final trimmedText = text.trim();
+    dev.log('[Voice] Text: "$trimmedText", PendingMedia: ${pendingMediaFile.value?.path}');
     if (trimmedText.isEmpty && pendingMediaFile.value == null) return;
 
     List<Map<String, dynamic>> mediaPayload = [];
@@ -199,9 +203,12 @@ class ChatController extends GetxController {
     if (pendingMediaFile.value != null) {
       isSendingMedia.value = true;
       try {
+        final isAudio = pendingMediaType.value == 'audio';
+        dev.log('[Voice] Requesting upload signature for room ${room.id}...');
         final signatureData = await uploadService.getChatUploadSignature(
           chatRoomId: room.id,
         );
+        dev.log('[Voice] Signature received. Uploading to Cloudinary as ${isAudio ? 'video' : 'auto'}...');
         final uploadResult = await uploadService.uploadToCloudinary(
           file: pendingMediaFile.value!,
           cloudName: signatureData['cloudName'],
@@ -209,9 +216,16 @@ class ChatController extends GetxController {
           timestamp: signatureData['timestamp'].toString(),
           signature: signatureData['signature'],
           folder: signatureData['folder'],
+          resourceType: isAudio ? 'video' : 'auto',
         );
+        dev.log('[Voice] Cloudinary upload success: ${uploadResult['secure_url']}');
+        final backendType = isAudio ? 'document' : pendingMediaType.value;
+        final finalUrl = isAudio 
+            ? '${uploadResult['secure_url']}?isVoice=true' 
+            : uploadResult['secure_url'];
+            
         mediaPayload = [
-          {'url': uploadResult['secure_url'], 'type': pendingMediaType.value}
+          {'url': finalUrl, 'type': backendType}
         ];
       } catch (e) {
         dev.log('[ChatController] Media upload failed: $e');
@@ -233,7 +247,7 @@ class ChatController extends GetxController {
       'replyTo': replyToMessage.value?.id,
       'mentions': [],
     };
-
+    dev.log('[Voice] Emitting socket message with payload: $payload');
     socketService.emitSendMessage(payload);
 
     // Optimistic clear

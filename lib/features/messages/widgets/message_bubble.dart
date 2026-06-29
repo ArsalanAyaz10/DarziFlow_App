@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/utils/date_formatter.dart';
 import 'package:dariziflow_app/data/models/message_model.dart';
+import 'package:dariziflow_app/features/Messages/widgets/audio_player_widget.dart';
 import 'package:flutter/material.dart';
 
 class MessageBubble extends StatelessWidget {
@@ -273,6 +274,21 @@ class MessageBubble extends StatelessWidget {
                 const Icon(Icons.broken_image),
           ),
         ),
+      );
+    }
+    final isAudio = media.type == 'audio' || 
+                    media.type == 'voice' || 
+                    media.url.toLowerCase().contains('isvoice=true') ||
+                    media.url.toLowerCase().endsWith('.m4a') || 
+                    media.url.toLowerCase().endsWith('.mp3') || 
+                    media.url.toLowerCase().endsWith('.wav');
+                    
+    if (isAudio) {
+      // Strip the query parameter for the AudioPlayer to work cleanly
+      final cleanUrl = media.url.split('?').first;
+      return Container(
+        margin: const EdgeInsets.only(bottom: 4),
+        child: AudioPlayerWidget(url: cleanUrl, isMe: isMe),
       );
     }
     // Document / video fallback

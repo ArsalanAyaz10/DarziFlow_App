@@ -8,13 +8,19 @@ import 'package:dariziflow_app/data/models/message_model.dart';
 import 'package:dariziflow_app/features/Messages/controllers/chat_controller.dart';
 import 'package:dariziflow_app/features/Messages/widgets/media_preview_bar.dart';
 import 'package:dariziflow_app/features/Messages/widgets/message_bubble.dart';
+import 'dart:async';
 import 'package:dariziflow_app/features/Messages/widgets/reply_preview_banner.dart';
+import 'package:dariziflow_app/features/Messages/widgets/typing_indicator_bubble.dart';
+import 'package:dariziflow_app/features/Messages/widgets/voice_recorder_ui.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:record/record.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
+import 'dart:developer' as dev;
 
 class ChatRoomScreen extends StatefulWidget {
   const ChatRoomScreen({super.key});
@@ -29,6 +35,13 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   final RxString _inputText = ''.obs;
   final ImagePicker _imagePicker = ImagePicker();
 
+  // Voice Recording
+  final AudioRecorder _audioRecorder = AudioRecorder();
+  final RxBool _isRecording = false.obs;
+  final Rx<Duration> _recordingDuration = Duration.zero.obs;
+  Timer? _recordTimer;
+  String? _audioPath;
+
   // ─── WhatsApp-style dark-mode-aware colors ──────────────────────────────
   static const _waChatBgDark = Color(0xFF0B141A);
   static const _waChatBgLight = Color(0xFFECE5DD);
@@ -42,6 +55,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   @override
   void dispose() {
     _textController.dispose();
+    _audioRecorder.dispose();
+    _recordTimer?.cancel();
     super.dispose();
   }
 
@@ -139,6 +154,58 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     _controller.sendMessage(text);
   }
 
+  Future<void> _startRecording() async {
+    try {
+      dev.log('[Voice] Requesting to start recording...');
+      if (await _audioRecorder.hasPermission()) {
+        final dir = await getTemporaryDirectory();
+        _audioPath = '${dir.path}/audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
+        dev.log('[Voice] Starting recording at path: $_audioPath');
+        await _audioRecorder.start(
+          const RecordConfig(encoder: AudioEncoder.aacLc),
+          path: _audioPath!,
+        );
+        _isRecording.value = true;
+        _recordingDuration.value = Duration.zero;
+        _recordTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+          _recordingDuration.value = Duration(seconds: timer.tick);
+        });
+      } else {
+        Get.snackbar('Permission Denied', 'Microphone permission is required.');
+      }
+    } catch (e) {
+      dev.log('Recording error: $e');
+    }
+  }
+
+  Future<void> _stopRecording() async {
+    dev.log('[Voice] _stopRecording called. isRecording: ${_isRecording.value}');
+    if (!_isRecording.value) return;
+    _recordTimer?.cancel();
+    final path = await _audioRecorder.stop();
+    _isRecording.value = false;
+    dev.log('[Voice] Recording stopped. Result path: $path');
+    if (path != null) {
+      _controller.setPendingMedia(File(path), 'audio');
+      _sendMessage();
+    } else {
+      dev.log('[Voice] Path was null after stopping recording!');
+    }
+  }
+
+  Future<void> _cancelRecording() async {
+    if (!_isRecording.value) return;
+    _recordTimer?.cancel();
+    await _audioRecorder.stop();
+    _isRecording.value = false;
+    if (_audioPath != null) {
+      final file = File(_audioPath!);
+      if (await file.exists()) {
+        await file.delete();
+      }
+    }
+  }
+
   // ── Build ──────────────────────────────────────────────────────────────────
 
   @override
@@ -231,29 +298,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
             ),
           ),
 
-          // ── Typing Indicator ───────────────────────────────────────────
-          Obx(() {
-            final typer = _controller.typingUser.value;
-            if (typer.isEmpty) return const SizedBox.shrink();
-            return Container(
-              width: double.infinity,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              color: isDark
-                  ? _waInputBgDark
-                  : Colors.white,
-              child: Text(
-                '$typer is typing...',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.6)
-                      : Colors.grey[600],
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            );
-          }),
+          // Typing Indicator removed from here (moved to AppBar)
 
           // ── Reply Preview ──────────────────────────────────────────────
           Obx(() {
@@ -268,7 +313,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
           // ── Media Preview ──────────────────────────────────────────────
           Obx(() {
             final file = _controller.pendingMediaFile.value;
-            if (file == null) return const SizedBox.shrink();
+            if (file == null || _controller.pendingMediaType.value == 'audio') {
+              return const SizedBox.shrink();
+            }
             return MediaPreviewBar(
               file: file,
               mediaType: _controller.pendingMediaType.value,
@@ -424,8 +471,16 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       return ListView.builder(
         controller: _controller.scrollController,
         padding: const EdgeInsets.only(top: 8, bottom: 8),
-        itemCount: items.length,
+        itemCount: items.length + 1,
         itemBuilder: (_, index) {
+          if (index == items.length) {
+            return Obx(() {
+              if (_controller.typingUser.value.isNotEmpty) {
+                return TypingIndicatorBubble(isDark: isDark);
+              }
+              return const SizedBox.shrink();
+            });
+          }
           final item = items[index];
           if (item is _DateDivider) {
             return _buildDateDivider(item.label, isDark);
@@ -524,36 +579,45 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    // Text field
+                    // Text field or Voice Recorder UI
                     Expanded(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxHeight: 120),
-                        child: TextField(
-                          controller: _textController,
-                          maxLines: null,
-                          keyboardType: TextInputType.multiline,
-                          textCapitalization: TextCapitalization.sentences,
-                          style: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontSize: 16,
-                          ),
-                          onChanged: (val) {
-                            _inputText.value = val;
-                            _controller.onTextChanged(val);
-                          },
-                          decoration: InputDecoration(
-                            hintText: 'Message',
-                            hintStyle: TextStyle(
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.4)
-                                  : Colors.grey[500],
-                              fontSize: 16,
+                      child: Obx(() => _isRecording.value 
+                        ? Padding(
+                            padding: const EdgeInsets.only(left: 16, top: 12, bottom: 12),
+                            child: VoiceRecorderUi(
+                              duration: _recordingDuration.value,
+                              isDark: isDark,
                             ),
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.only(
-                                left: 16, right: 4, top: 12, bottom: 12),
+                          )
+                        : ConstrainedBox(
+                            constraints: const BoxConstraints(maxHeight: 120),
+                            child: TextField(
+                              controller: _textController,
+                              maxLines: null,
+                              keyboardType: TextInputType.multiline,
+                              textCapitalization: TextCapitalization.sentences,
+                              style: TextStyle(
+                                color: isDark ? Colors.white : Colors.black87,
+                                fontSize: 16,
+                              ),
+                              onChanged: (val) {
+                                _inputText.value = val;
+                                _controller.onTextChanged(val);
+                              },
+                              decoration: InputDecoration(
+                                hintText: 'Message',
+                                hintStyle: TextStyle(
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.4)
+                                      : Colors.grey[500],
+                                  fontSize: 16,
+                                ),
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.only(
+                                    left: 16, right: 4, top: 12, bottom: 12),
+                              ),
+                            ),
                           ),
-                        ),
                       ),
                     ),
 
@@ -629,20 +693,41 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
               final hasMedia = _controller.pendingMediaFile.value != null;
               final canSend = hasText || hasMedia;
 
-              return Container(
-                width: 48,
-                height: 48,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.primaryGreen,
-                ),
-                child: IconButton(
-                  icon: Icon(
-                    canSend ? Icons.send_rounded : Icons.mic_rounded,
-                    color: Colors.white,
-                    size: 22,
+              return GestureDetector(
+                onTap: canSend 
+                    ? _sendMessage 
+                    : () {
+                        Get.snackbar(
+                          'Hold to record',
+                          'Press and hold to record a voice message.',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: AppColors.primaryGreen,
+                          colorText: Colors.white,
+                          duration: const Duration(seconds: 2),
+                          margin: const EdgeInsets.all(16),
+                        );
+                      },
+                onLongPressStart: canSend ? null : (_) => _startRecording(),
+                onLongPressEnd: canSend ? null : (_) => _stopRecording(),
+                onHorizontalDragUpdate: canSend ? null : (details) {
+                  if (details.primaryDelta! < -5) {
+                    _cancelRecording();
+                  }
+                },
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.primaryGreen,
                   ),
-                  onPressed: canSend ? _sendMessage : null,
+                  child: Center(
+                    child: Icon(
+                      canSend ? Icons.send_rounded : Icons.mic_rounded,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                  ),
                 ),
               );
             }),

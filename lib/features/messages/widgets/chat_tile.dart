@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/utils/date_formatter.dart';
 import 'package:dariziflow_app/data/models/chat_room_model.dart';
+import 'package:dariziflow_app/features/Messages/widgets/typing_indicator_bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -9,12 +10,14 @@ class ChatTile extends StatelessWidget {
   final ChatRoomModel room;
   final String currentUserId;
   final VoidCallback onTap;
+  final bool isTyping;
 
   const ChatTile({
     super.key,
     required this.room,
     required this.currentUserId,
     required this.onTap,
+    this.isTyping = false,
   });
 
   @override
@@ -77,7 +80,7 @@ class ChatTile extends StatelessWidget {
                     Row(
                       children: [
                         // Double check for sent messages
-                        if (_isMySentMessage(lastMsg)) ...[
+                        if (_isMySentMessage(lastMsg) && !isTyping) ...[
                           Icon(
                             Icons.done_all,
                             size: 16,
@@ -88,17 +91,26 @@ class ChatTile extends StatelessWidget {
                           const SizedBox(width: 4),
                         ],
                         Expanded(
-                          child: Text(
-                            _buildPreview(lastMsg),
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.55)
-                                  : colors.onSurfaceVariant,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          child: isTyping 
+                            ? Row(
+                                children: [
+                                  TypingIndicatorBubble(
+                                    isDark: isDark,
+                                    isSmall: true,
+                                  ),
+                                ],
+                              )
+                            : Text(
+                                _buildPreview(lastMsg),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.55)
+                                      : colors.onSurfaceVariant,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                         ),
                       ],
                     ),

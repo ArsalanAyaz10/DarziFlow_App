@@ -24,9 +24,8 @@ class NotificationService extends GetxService {
     await _fcm.requestPermission(alert: true, badge: true, sound: true);
 
     const androidSettings = AndroidInitializationSettings(
-      '@mipmap/ic_launcher',
+      '@drawable/ic_notification',
     );
-    const iosSettings = DarwinInitializationSettings();
     const AndroidNotificationChannel channel = AndroidNotificationChannel(
       'high_importance_channel',
       'High Importance Notifications',
@@ -42,7 +41,6 @@ class NotificationService extends GetxService {
     await _localNotif.initialize(
       settings: const InitializationSettings(
         android: androidSettings,
-        iOS: iosSettings,
       ),
       onDidReceiveNotificationResponse: _onNotificationTap,
     );
