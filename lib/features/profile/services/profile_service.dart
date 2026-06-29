@@ -51,4 +51,10 @@ class ProfileService {
     final response = await apiClient.get("/profile/");
     return response.data;
   }
+
+  // Get user by ID (for public profile view)
+  Future<dynamic> getUserById(String id) async {
+    final response = await apiClient.get("/users/$id");
+    return response.data;
+  }
 }

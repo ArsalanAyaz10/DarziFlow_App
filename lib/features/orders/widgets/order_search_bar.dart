@@ -20,7 +20,7 @@ class OrderSearchBar extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 8),
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
       child: TextField(
         onTapOutside: (PointerDownEvent event) {

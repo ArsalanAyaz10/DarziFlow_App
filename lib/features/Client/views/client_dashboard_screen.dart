@@ -196,7 +196,7 @@ class ClientDashboardScreen extends GetView<ClientDashboardController> {
       bottomNavigationBar: const BottomNavBar(currentIndex: 0),
       floatingActionButton: FloatingActionButton(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-        onPressed: () => Get.toNamed(Routes.createOrderRequest),
+        onPressed: () => Get.snackbar('Coming Soon', 'This feature is due in next phase'),
         backgroundColor: AppColors.atelierSilkGreen,
         child: const Icon(Icons.add, color: Colors.black),
       ),
@@ -209,7 +209,6 @@ class ClientDashboardScreen extends GetView<ClientDashboardController> {
     bool isDark,
   ) {
     final order = controller.orders.first;
-    final mappedOrder = controller.mappedRecentOrders.first;
 
     return Container(
       width: double.infinity,
@@ -299,13 +298,6 @@ class ClientDashboardScreen extends GetView<ClientDashboardController> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          Text(
-                            mappedOrder['milestone'],
-                            style: TextStyle(
-                              color: colors.onSurface.withValues(alpha: 0.5),
-                              fontSize: 10,
-                            ),
-                          ),
                         ],
                       ),
                     ),
@@ -314,7 +306,7 @@ class ClientDashboardScreen extends GetView<ClientDashboardController> {
               },
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Text(
             order.orderName,
             style: TextStyle(
@@ -335,22 +327,28 @@ class ClientDashboardScreen extends GetView<ClientDashboardController> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: colors.onSurface.withValues(alpha: 0.05),
+              color: order.progress == 100 
+                  ? AppColors.atelierSilkGreen.withValues(alpha: 0.1) 
+                  : colors.onSurface.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  Icons.check_circle_outline,
-                  color: colors.onSurface.withValues(alpha: 0.7),
+                  order.progress == 100 ? Icons.check_circle : Icons.check_circle_outline,
+                  color: order.progress == 100 
+                      ? AppColors.atelierSilkGreen 
+                      : colors.onSurface.withValues(alpha: 0.7),
                   size: 14,
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  order.overallStatus,
+                  order.progress == 100 ? "COMPLETED" : order.overallStatus,
                   style: TextStyle(
-                    color: colors.onSurface.withValues(alpha: 0.7),
+                    color: order.progress == 100 
+                        ? AppColors.atelierSilkGreen 
+                        : colors.onSurface.withValues(alpha: 0.7),
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),

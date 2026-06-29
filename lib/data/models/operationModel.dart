@@ -14,5 +14,12 @@ class OperationModel {
     required this.checkpoints,
   });
 
-  bool get isCompleted => status == "COMPLETED";
+  bool get isCompleted {
+    if (status == "COMPLETED") return true;
+    if (checkpoints.isEmpty) return false;
+    return checkpoints.every((cp) =>
+        cp.status == 'COMPLETED' ||
+        cp.status == 'QC_APPROVED' ||
+        cp.status == 'APPROVED');
+  }
 }

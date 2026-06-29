@@ -1,12 +1,14 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
 import 'package:dariziflow_app/core/widgets/custom_elevated_button.dart';
+import 'package:dariziflow_app/core/widgets/status_badge.dart';
 import 'package:dariziflow_app/features/Orders/controllers/checkpoint_controller.dart';
 import 'package:dariziflow_app/features/Orders/widgets/checkpoint_history_sheet.dart';
 import 'package:dariziflow_app/data/models/checkpointModel.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SubmitcheckpointScreen extends GetView<CheckpointController> {
   const SubmitcheckpointScreen({super.key});
@@ -63,37 +65,11 @@ class SubmitcheckpointScreen extends GetView<CheckpointController> {
                         ),
                         tooltip: 'View History',
                       ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryGreen.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: AppColors.grey.withValues(alpha: 0.5),
-                          width: 1,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const CircleAvatar(
-                            radius: 4,
-                            backgroundColor: AppColors.primaryGreen,
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            controller.ck.status.replaceAll('_', ' '),
-                            style: const TextStyle(
-                              color: AppColors.primaryGreen,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
+                    StatusBadge(
+                      status: controller.ck.status,
+                      fontSize: 12,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                   ],
                 ),
@@ -218,13 +194,23 @@ class SubmitcheckpointScreen extends GetView<CheckpointController> {
                           final file = controller.ck.submissionFiles[index];
                           final isImage = file.resourceType == 'image';
 
-                          return Container(
-                            margin: const EdgeInsets.only(right: 12),
-                            width: 100,
-                            decoration: BoxDecoration(
-                              color: colors.onSurface.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                          return InkWell(
+                            onTap: () async {
+                              try {
+                                final uri = Uri.parse(file.url);
+                                await launchUrl(uri, mode: LaunchMode.externalApplication);
+                              } catch (e) {
+                                Get.snackbar('Error', 'Could not open the file.');
+                              }
+                            },
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              margin: const EdgeInsets.only(right: 12),
+                              width: 100,
+                              decoration: BoxDecoration(
+                                color: colors.onSurface.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             child: isImage
                                 ? ClipRRect(
                                     borderRadius: BorderRadius.circular(12),
@@ -259,6 +245,7 @@ class SubmitcheckpointScreen extends GetView<CheckpointController> {
                                       ],
                                     ),
                                   ),
+                            ),
                           );
                         },
                       ),
@@ -539,7 +526,7 @@ class SubmitcheckpointScreen extends GetView<CheckpointController> {
                         child: SizedBox(
                           height: 50,
                           child: ElevatedButton(
-                            onPressed: controller.isActionLoading.value
+                            onPressed: controller.isRejecting.value || controller.isApproving.value
                                 ? null
                                 : () => controller.rejectCheckpoint(),
                             style: ElevatedButton.styleFrom(
@@ -550,7 +537,7 @@ class SubmitcheckpointScreen extends GetView<CheckpointController> {
                               ),
                               elevation: 0,
                             ),
-                            child: controller.isActionLoading.value
+                            child: controller.isRejecting.value
                                 ? const SizedBox(
                                     width: 10,
                                     height: 10,
@@ -574,7 +561,7 @@ class SubmitcheckpointScreen extends GetView<CheckpointController> {
                         child: SizedBox(
                           height: 50,
                           child: ElevatedButton(
-                            onPressed: controller.isActionLoading.value
+                            onPressed: controller.isApproving.value || controller.isRejecting.value
                                 ? null
                                 : () => controller.approveCheckpoint(),
                             style: ElevatedButton.styleFrom(
@@ -585,7 +572,7 @@ class SubmitcheckpointScreen extends GetView<CheckpointController> {
                               ),
                               elevation: 0,
                             ),
-                            child: controller.isActionLoading.value
+                            child: controller.isApproving.value
                                 ? const SizedBox(
                                     width: 10,
                                     height: 10,

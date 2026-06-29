@@ -15,11 +15,11 @@ class AppColors {
   static const Color grey = Color(0xFF9E9E9E);
   static const Color error = Colors.redAccent;
 
-  // Atelier Obsidian Tokens
   static const Color atelierBackgroundDark = Color(0xFF131313);
   static const Color atelierSurfaceDark = Color(0xFF2A2A2A);
   static const Color atelierBackgroundLight = Color(0xFFF6F8F6);
   static const Color atelierSurfaceLight = Color(0xFFFFFFFF);
   static const Color atelierSilkGreen = Color(0xFF83DC63);
+  static const Color atelierAmber = Color(0xFFFACC15);
   static const Color atelierTonalGrey = Color(0xFFBFCAB6);
 }

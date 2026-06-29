@@ -16,6 +16,8 @@ import 'package:dariziflow_app/features/Profile/bindings/editprofile_binding.dar
 import 'package:dariziflow_app/features/Profile/bindings/viewprofile_binding.dart';
 import 'package:dariziflow_app/features/Profile/views/editprofile_screen.dart';
 import 'package:dariziflow_app/features/Profile/views/viewprofile_screen.dart';
+import 'package:dariziflow_app/features/Profile/bindings/profile_view_binding.dart';
+import 'package:dariziflow_app/features/Profile/views/profile_view_screen.dart';
 import 'package:dariziflow_app/features/Notifications/bindings/notification_binding.dart';
 import 'package:dariziflow_app/features/Notifications/views/notification_inbox_screen.dart';
 import 'package:dariziflow_app/features/Orders/bindings/order_binding.dart';
@@ -36,6 +38,10 @@ import 'package:dariziflow_app/features/OrderRequest/views/create_order_request_
 import 'package:dariziflow_app/features/Client/views/client_all_activities_screen.dart';
 import 'package:dariziflow_app/features/Client/views/client_tracking_screen.dart';
 import 'package:dariziflow_app/features/Client/bindings/client_tracking_binding.dart';
+import 'package:dariziflow_app/features/Messages/bindings/chat_list_binding.dart';
+import 'package:dariziflow_app/features/Messages/bindings/chat_room_binding.dart';
+import 'package:dariziflow_app/features/Messages/views/messages_screen.dart';
+import 'package:dariziflow_app/features/Messages/views/chat_room_screen.dart';
 import 'package:get/get.dart';
 part 'app_routes.dart';
 
@@ -162,6 +168,21 @@ class AppPages {
       name: Routes.clientTracking,
       page: () => const ClientTrackingScreen(),
       binding: ClientTrackingBinding(),
+    ),
+    GetPage(
+      name: Routes.messages,
+      page: () => const ChatListScreen(),
+      binding: ChatListBinding(),
+    ),
+    GetPage(
+      name: Routes.chatRoom,
+      page: () => const ChatRoomScreen(),
+      binding: ChatRoomBinding(),
+    ),
+    GetPage(
+      name: Routes.profileView,
+      page: () => const ProfileViewScreen(),
+      binding: ProfileViewBinding(),
     ),
   ];
 }

@@ -2,6 +2,8 @@ import 'package:dariziflow_app/core/network/api_client.dart';
 import 'package:dariziflow_app/data/services/api_service.dart';
 import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:dariziflow_app/data/services/deeplink_service.dart';
+import 'package:dariziflow_app/data/services/socket_service.dart';
+import 'package:dariziflow_app/data/services/upload_service.dart';
 import 'package:dariziflow_app/features/auth/repositories/auth_repository.dart';
 import 'package:dariziflow_app/features/auth/service/auth_service.dart';
 import 'package:dariziflow_app/features/Notifications/controllers/notification_controller.dart';
@@ -38,5 +40,14 @@ class InitialBinding extends Bindings {
     final notificationRepo = NotificationRepository(apiClient: apiClient);
     Get.put<NotificationRepository>(notificationRepo, permanent: true);
     Get.put<NotificationController>(NotificationController(repository: notificationRepo), permanent: true);
+
+    // UploadService (used globally for media uploads across features)
+    final uploadService = UploadService(apiClient);
+    Get.put<UploadService>(uploadService, permanent: true);
+
+    // SocketService (real-time chat)
+    final socketService = SocketService(apiClient: apiClient);
+    Get.put<SocketService>(socketService, permanent: true);
+    await socketService.connect();
   }
 }

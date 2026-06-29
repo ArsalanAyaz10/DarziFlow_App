@@ -26,4 +26,7 @@ abstract class Routes {
   static const createOrderRequest = '/create-order-request';
   static const clientActivities = '/client-activities';
   static const clientTracking = '/client-tracking';
+  static const messages = '/messages';
+  static const chatRoom = '/chat-room';
+  static const profileView = '/profile-view';
 }

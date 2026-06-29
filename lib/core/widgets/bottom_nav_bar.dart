@@ -3,7 +3,6 @@ import 'package:dariziflow_app/core/storage/storage.dart';
 import 'package:dariziflow_app/features/DepartmentHead/controllers/deptHead_controller.dart';
 import 'package:dariziflow_app/features/DepartmentHead/controllers/department_details_controller.dart';
 import 'package:dariziflow_app/features/DepartmentHead/views/department_details_screen.dart';
-import 'package:dariziflow_app/features/Messages/views/messages_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -61,7 +60,9 @@ class _BottomNavBarState extends State<BottomNavBar> {
         type: BottomNavigationBarType.fixed,
         elevation: 2,
         showSelectedLabels: true,
-        selectedFontSize: 15,
+        showUnselectedLabels: true,
+        selectedFontSize: 12,
+        unselectedFontSize: 10,
         selectedItemColor: Colors.green,
         unselectedItemColor: Colors.grey,
         currentIndex: widget.currentIndex,
@@ -138,7 +139,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
         if (isQC) {
           Get.offNamed(Routes.qcHistory);
         } else if (role == "CLIENT") {
-          Get.offNamed(Routes.orderRequests);
+          Get.snackbar('Coming Soon', 'This feature is due in next phase');
         } else {
           try {
             String? deptId;
@@ -174,7 +175,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
         break;
 
       case 3: // Messages
-        Get.to(() => const MessagesComingSoonScreen());
+        Get.toNamed(Routes.messages);
         break;
     }
   }

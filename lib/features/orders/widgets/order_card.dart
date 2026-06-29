@@ -1,4 +1,5 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
+import 'package:dariziflow_app/core/widgets/status_badge.dart';
 import 'package:dariziflow_app/data/models/orderCard_model.dart';
 import 'package:flutter/material.dart';
 
@@ -135,38 +136,6 @@ class OrderCard extends StatelessWidget {
   }
 
   Widget _buildStatusBadge(ThemeData theme, OrderModel order) {
-    final bool isCompleted = order.progress >= 100;
-    final bool isNotStarted = order.operations.isEmpty;
-
-    final String label;
-    final Color color;
-
-    if (isNotStarted) {
-      label = "NOT STARTED";
-      color = Colors.orange;
-    } else if (isCompleted) {
-      label = "COMPLETED";
-      color = theme.colorScheme.primary;
-    } else {
-      label = "ACTIVE";
-      color = AppColors.primaryGreen;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        border: Border.all(color: color.withValues(alpha: 1), width: 1),
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
+    return StatusBadge(status: order.workflowStatus);
   }
 }

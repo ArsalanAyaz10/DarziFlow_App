@@ -96,45 +96,6 @@ class AllOrderScreen extends GetView<AllOrdersController> {
           );
         }
 
-        if (controller.filteredOrders.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.inbox_outlined,
-                  size: 80,
-                  color: theme.colorScheme.onSurfaceVariant.withValues(
-                    alpha: 0.5,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Center(
-                  child: Text(
-                    'No Orders Found',
-                    style: theme.textTheme.titleMedium,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Center(
-                  child: Text(
-                    controller.userRole.value == "QC_MEMBER"
-                        ? 'There are no orders currently in production'
-                        : controller.userRole.value == "CLIENT"
-                            ? 'You have no orders yet'
-                            : 'There are no active orders in your department',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      fontSize: 14,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-
         return Column(
           children: [
             OrderSearchBar(
@@ -150,24 +111,63 @@ class AllOrderScreen extends GetView<AllOrdersController> {
                   controller.selectedFilter.value = filter,
             ),
             Expanded(
-              child: RefreshIndicator(
-                onRefresh: controller.fetchOrders,
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  shrinkWrap: true,
-                  itemCount: controller.filteredOrders.length,
-                  itemBuilder: (context, index) {
-                    final order = controller.filteredOrders[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: OrderCard(
-                        order: order,
-                        onTap: () => showOrderDetails(order),
+              child: controller.filteredOrders.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.inbox_outlined,
+                            size: 80,
+                            color: theme.colorScheme.onSurfaceVariant.withValues(
+                              alpha: 0.5,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Center(
+                            child: Text(
+                              'No Orders Found',
+                              style: theme.textTheme.titleMedium,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Center(
+                            child: Text(
+                              controller.selectedFilter.value == "Completed"
+                                  ? 'There are no completed orders'
+                                  : controller.userRole.value == "QC_MEMBER"
+                                      ? 'There are no orders currently in production'
+                                      : controller.userRole.value == "CLIENT"
+                                          ? 'You have no orders yet'
+                                          : 'There are no active orders in your department',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                                fontSize: 14,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
                       ),
-                    );
-                  },
-                ),
-              ),
+                    )
+                  : RefreshIndicator(
+                      onRefresh: controller.fetchOrders,
+                      child: ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        shrinkWrap: true,
+                        itemCount: controller.filteredOrders.length,
+                        itemBuilder: (context, index) {
+                          final order = controller.filteredOrders[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: OrderCard(
+                              order: order,
+                              onTap: () => showOrderDetails(order),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
             ),
           ],
         );

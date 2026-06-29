@@ -14,6 +14,7 @@ import 'package:path_provider/path_provider.dart' as path_provider;
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:dio/dio.dart';
 
 class CheckpointController extends GetxController {
   final TextEditingController remarksController = TextEditingController();
@@ -37,7 +38,8 @@ class CheckpointController extends GetxController {
   final userRole = ''.obs;
 
   final isSubmitting = false.obs;
-  final isActionLoading = false.obs;
+  final isApproving = false.obs;
+  final isRejecting = false.obs;
   final maxFiles = 10.obs;
 
   @override
@@ -59,6 +61,16 @@ class CheckpointController extends GetxController {
         : "No Description Provided";
     dev.log("Description: ${ck.description}");
     _loadUserRole();
+  }
+
+  String _extractErrorMessage(dynamic e) {
+    if (e is DioException && e.response?.data != null) {
+      final data = e.response!.data;
+      if (data is Map) {
+        return data['message']?.toString() ?? data['error']?.toString() ?? e.message ?? "Server error";
+      }
+    }
+    return e.toString();
   }
 
   Future<void> _loadUserRole() async {
@@ -161,7 +173,15 @@ class CheckpointController extends GetxController {
   }
 
   Future<void> submitCheckpoint() async {
-    if (pickedImages.length < minUploads.value) {
+    final allowed = ck.allowedTypes.map((e) => e.toUpperCase()).toList();
+    final isMediaAllowed = allowed.isEmpty ||
+        allowed.contains('IMAGE') ||
+        allowed.contains('VIDEO') ||
+        allowed.contains('DOCUMENT') ||
+        allowed.contains('DOC') ||
+        ck.submissionType != SubmissionType.text;
+
+    if (isMediaAllowed && pickedImages.length < minUploads.value) {
       Get.snackbar(
         "Missing Evidence",
         "This checkpoint requires at least ${minUploads.value} evidence file(s).",
@@ -177,13 +197,6 @@ class CheckpointController extends GetxController {
     }
 
     if (pickedImages.isNotEmpty) {
-      final allowed = ck.allowedTypes.map((e) => e.toUpperCase()).toList();
-      final isMediaAllowed = allowed.contains('IMAGE') ||
-          allowed.contains('VIDEO') ||
-          allowed.contains('DOCUMENT') ||
-          allowed.contains('DOC') ||
-          ck.submissionType != SubmissionType.text;
-
       if (!isMediaAllowed) {
         Get.snackbar("Error", "Media upload is not allowed for this checkpoint.");
         return;
@@ -267,7 +280,12 @@ class CheckpointController extends GetxController {
       }
     } catch (e) {
       dev.log("Submission Error", error: e);
-      Get.snackbar("Error", e.toString());
+      Get.snackbar(
+        "Error", 
+        _extractErrorMessage(e),
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
     } finally {
       isSubmitting.value = false;
     }
@@ -283,7 +301,7 @@ class CheckpointController extends GetxController {
   }
 
   Future<void> approveCheckpoint() async {
-    isActionLoading.value = true;
+    isApproving.value = true;
     try {
       final success = await Get.find<QcRepository>().approveSubmission(
         orderId: orderId,
@@ -302,9 +320,14 @@ class CheckpointController extends GetxController {
         );
       }
     } catch (e) {
-      Get.snackbar("Error", e.toString());
+      Get.snackbar(
+        "Error", 
+        _extractErrorMessage(e),
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
     } finally {
-      isActionLoading.value = false;
+      isApproving.value = false;
     }
   }
 
@@ -318,7 +341,7 @@ class CheckpointController extends GetxController {
       return;
     }
 
-    isActionLoading.value = true;
+    isRejecting.value = true;
     try {
       final success = await Get.find<QcRepository>().rejectSubmission(
         orderId: orderId,
@@ -338,9 +361,14 @@ class CheckpointController extends GetxController {
         );
       }
     } catch (e) {
-      Get.snackbar("Error", e.toString());
+      Get.snackbar(
+        "Error", 
+        _extractErrorMessage(e),
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
     } finally {
-      isActionLoading.value = false;
+      isRejecting.value = false;
     }
   }
 }

@@ -67,4 +67,17 @@ class ProfileRepository {
       throw Exception("Failed to refresh profile: $e");
     }
   }
+
+  // Get user by ID (for public profile view)
+  Future<AuthModel> getUserById(String id) async {
+    try {
+      final data = await service.getUserById(id);
+      if (data != null && data['user'] != null) {
+        return AuthModel.fromJson(Map<String, dynamic>.from(data['user']));
+      }
+      throw Exception("Invalid user data received");
+    } catch (e) {
+      throw Exception("Failed to fetch user profile: $e");
+    }
+  }
 }

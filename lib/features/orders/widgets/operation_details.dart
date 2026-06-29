@@ -8,19 +8,36 @@ class OperationDetails extends StatelessWidget {
   final OperationModel op;
   final String? orderId;
   final String userRole;
+  final int operationIndex;
+  final List<OperationModel> allOperations;
 
   const OperationDetails({
     super.key,
     required this.op,
     required this.orderId,
     this.userRole = '',
+    required this.operationIndex,
+    required this.allOperations,
   });
 
   bool get _isQC => userRole.toUpperCase() == 'QC_MEMBER';
 
+  /// Check if all previous operations are completed
+  bool get _isPreviousCompleted {
+    for (int i = 0; i < operationIndex; i++) {
+      if (!allOperations[i].isCompleted) return false;
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final currentCP = op.checkpoints.isNotEmpty ? op.checkpoints.last : null;
+    final currentCP = op.checkpoints.isNotEmpty 
+        ? op.checkpoints.firstWhere(
+            (cp) => !(cp.status == 'COMPLETED' || cp.status == 'QC_APPROVED' || cp.status == 'APPROVED'),
+            orElse: () => op.checkpoints.last,
+          ) 
+        : null;
     if (currentCP == null) return const SizedBox.shrink();
 
     // Role-based config
@@ -28,6 +45,7 @@ class OperationDetails extends StatelessWidget {
     String buttonLabel;
     bool isBtnDisabled;
     Color btnColor;
+    IconData? btnIcon;
     VoidCallback? onPressed;
 
     if (_isQC) {
@@ -60,11 +78,19 @@ class OperationDetails extends StatelessWidget {
       }
     } else {
       // DEPARTMENT HEAD / DEFAULT: existing submit logic
-      if (currentCP.status == 'SUBMITTED' || currentCP.isQcPending) {
+
+      // Gate: block submission if previous operations are not completed
+      if (!_isPreviousCompleted) {
+        buttonLabel = "Locked";
+        btnIcon = Icons.lock_outline;
+        isBtnDisabled = true;
+        btnColor = Colors.grey.shade400;
+        onPressed = null;
+      } else if (currentCP.status == 'SUBMITTED' || currentCP.isQcPending) {
         buttonLabel = "Already Submitted";
         isBtnDisabled = true;
         btnColor = Colors.orange;
-      } else if (currentCP.status == 'QC_APPROVED' || currentCP.isApproved) {
+      } else if (currentCP.status == 'QC_APPROVED' || currentCP.isApproved || currentCP.status == 'COMPLETED' || currentCP.status == 'APPROVED') {
         buttonLabel = "Checkpoint Approved";
         isBtnDisabled = true;
         btnColor = Colors.grey.shade400;
@@ -91,7 +117,7 @@ class OperationDetails extends StatelessWidget {
     }
 
     return Container(
-      margin: const EdgeInsets.only(left: 45, bottom: 20),
+      margin: const EdgeInsets.only(left: 45, bottom: 8),
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
@@ -113,18 +139,27 @@ class OperationDetails extends StatelessWidget {
                 onPressed: onPressed,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: btnColor,
-                  disabledBackgroundColor: Colors.grey.shade300,
+                  disabledBackgroundColor: btnIcon != null ? Theme.of(context).colorScheme.surfaceContainerHighest : Colors.grey.shade300,
+                  disabledForegroundColor: btnIcon != null ? Theme.of(context).colorScheme.onSurfaceVariant : Colors.white,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text(
-                  buttonLabel,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (btnIcon != null) ...[
+                      Icon(btnIcon, size: 18),
+                      const SizedBox(width: 8),
+                    ],
+                    Text(
+                      buttonLabel,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

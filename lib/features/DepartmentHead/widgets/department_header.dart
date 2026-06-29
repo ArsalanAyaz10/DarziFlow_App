@@ -1,4 +1,4 @@
-import 'package:dariziflow_app/core/utils/colors.dart';
+import 'package:dariziflow_app/core/widgets/status_badge.dart';
 import 'package:flutter/material.dart';
 
 class DepartmentHeader extends StatelessWidget {
@@ -26,31 +26,11 @@ class DepartmentHeader extends StatelessWidget {
             color: colors.onSurface,
           ),
         ),
-        Container(
+        StatusBadge(
+          status: status.isEmpty ? "Unknown" : status,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: AppColors.primaryGreen.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.black, width: 1),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const CircleAvatar(
-                radius: 4,
-                backgroundColor: AppColors.primaryGreen,
-              ),
-              const SizedBox(width: 5),
-              Text(
-                status.isEmpty ? "Unknown" : status,
-                style: const TextStyle(
-                  color: AppColors.primaryGreen,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
+          borderRadius: BorderRadius.circular(20),
+          fontSize: 12,
         ),
       ],
     );

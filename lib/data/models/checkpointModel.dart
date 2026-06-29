@@ -32,7 +32,7 @@ class CheckpointModel {
   });
 
   bool get isRejected => status == "QC_REJECTED";
-  bool get isApproved => status == "QC_APPROVED";
+  bool get isApproved => status == "QC_APPROVED" || status == "COMPLETED" || status == "APPROVED";
   bool get isCompleted => status == "COMPLETED";
   bool get toBeSubmitted => status == "TO_BE_SUBMITTED";
   bool get isQcPending => status == "QC_PENDING";

@@ -55,6 +55,20 @@ class ClientService extends GetxService {
     }
   }
 
+  /// Retrieves the complete unified timeline history for a specific order.
+  Future<List<dynamic>> getOrderTimeline(String orderId) async {
+    try {
+      final response = await _apiService.dio.get('$_baseRoute/timeline/$orderId');
+      if (response.statusCode == 200) {
+        return response.data['timeline'] ?? [];
+      }
+      throw Exception('Failed to load order timeline');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
   /// Fetches the last 10 QC activities related to the client's orders.
   Future<List<QcHistoryModel>> getRecentHistory() async {
     try {
@@ -68,4 +82,55 @@ class ClientService extends GetxService {
       rethrow;
     }
   }
+
+  /// Retrieves completed and delivered orders.
+  Future<List<OrderModel>> getCompletedOrders() async {
+    try {
+      final response = await _apiService.dio.get('$_baseRoute/getCompletedOrders');
+      if (response.statusCode == 200) {
+        final List<dynamic> ordersData = response.data['orders'] ?? [];
+        return ordersData.map((item) => OrderModel.fromJson(item)).toList();
+      }
+      return [];
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
+
+  // Approves the entire department's work for an order
+  Future<bool> approveDepartment(String orderId) async {
+    try {
+      final response = await _apiService.dio.post('$_baseRoute/$orderId/approve-department');
+      return response.statusCode == 200;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Rejects the entire department's work for an order with a mandatory comment
+  Future<bool> rejectDepartment(
+    String orderId,
+    String comment, {
+    String? operationId,
+    String? checkpointId,
+  }) async {
+    try {
+      final response = await _apiService.dio.post(
+        '$_baseRoute/$orderId/reject-department',
+        data: {
+          'comment': comment,
+          // ignore: use_null_aware_elements
+          if (operationId != null) 'operationId': operationId,
+          // ignore: use_null_aware_elements
+          if (checkpointId != null) 'checkpointId': checkpointId,
+        },
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
 }

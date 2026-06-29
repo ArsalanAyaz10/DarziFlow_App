@@ -5,19 +5,27 @@ import 'package:dariziflow_app/features/Notifications/controllers/notification_c
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'dart:developer' as dev;
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  dev.log("Handling a background message: ${message.messageId}");
+}
 
 class NotificationService extends GetxService {
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
   final _localNotif = FlutterLocalNotificationsPlugin();
 
   Future<NotificationService> init() async {
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
     await _fcm.requestPermission(alert: true, badge: true, sound: true);
 
     const androidSettings = AndroidInitializationSettings(
-      '@mipmap/ic_launcher',
+      '@drawable/ic_notification',
     );
-    const iosSettings = DarwinInitializationSettings();
     const AndroidNotificationChannel channel = AndroidNotificationChannel(
       'high_importance_channel',
       'High Importance Notifications',
@@ -33,7 +41,6 @@ class NotificationService extends GetxService {
     await _localNotif.initialize(
       settings: const InitializationSettings(
         android: androidSettings,
-        iOS: iosSettings,
       ),
       onDidReceiveNotificationResponse: _onNotificationTap,
     );
@@ -62,7 +69,6 @@ class NotificationService extends GetxService {
           "/auth/update-fcm-token",
           data: {"token": token},
         );
-        dev.log("FCM Token synced with backend: $token");
       }
     } catch (e) {
       dev.log("FCM Sync Error: $e");

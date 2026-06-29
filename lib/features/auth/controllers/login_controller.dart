@@ -1,7 +1,10 @@
+import 'dart:developer' as dev;
+
 import 'package:dariziflow_app/core/network/api_client.dart';
 import 'package:dariziflow_app/core/utils/global.dart';
 import 'package:dariziflow_app/core/utils/role_router.dart';
 import 'package:dariziflow_app/data/services/notifications_service.dart';
+import 'package:dariziflow_app/data/services/socket_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -41,14 +44,9 @@ class LoginController extends GetxController {
           "/auth/update-fcm-token",
           data: {"token": token},
         );
-        if (kDebugMode) {
-          print("FCM Token synced with backend");
-        }
       }
     } catch (e) {
-      if (kDebugMode) {
-        print("FCM Sync Error: $e");
-      }
+      dev.log("FCM Sync Error: $e");
     }
   }
 
@@ -76,13 +74,19 @@ class LoginController extends GetxController {
         print("Authenticated User: ${authUser.name} (${authUser.role})");
       }
 
-
       // Fetch notifications after login
       Get.find<NotificationController>().fetchNotifications();
 
+      // Connect SocketService for real-time messages
+      try {
+        Get.find<SocketService>().connect();
+      } catch (e) {
+        dev.log("Socket connection failed on login: $e");
+      }
+
       syncFcmToken();
 
-      // Save remember me 
+      // Save remember me
       if (rememberMe.value) {
         box.write('remember_me', true);
       } else {

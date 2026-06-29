@@ -18,6 +18,7 @@ class OrderModel {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final String overallStatus;
+  final String workflowStatus;
 
   final List<OperationModel> operations;
   final String type;
@@ -35,6 +36,7 @@ class OrderModel {
     required this.clientName,
     required this.clientEmail,
     required this.overallStatus,
+    required this.workflowStatus,
     this.clientId,
     this.amount = 0,
     this.currency = 'Rs',
@@ -109,11 +111,24 @@ class OrderModel {
       progressVal = _calculateProgressFromOperations(operationsList).toDouble();
     }
 
+    String parsedWorkflowStatus = 'PENDING';
+    if (json.containsKey('workflow') && (json['workflow'] as List).isNotEmpty) {
+      final List<dynamic> workflow = json['workflow'];
+      final activeWorkflow = workflow.firstWhere(
+        (w) => w['status'] != 'COMPLETED',
+        orElse: () => workflow.last,
+      );
+      parsedWorkflowStatus = activeWorkflow['status']?.toString() ?? 'PENDING';
+    } else {
+      parsedWorkflowStatus = json['overallStatus'] ?? 'PENDING';
+    }
+
     return OrderModel(
       orderId: json['_id'] ?? json['id'] ?? '',
       orderName: json['orderName'] ?? json['name'] ?? 'Unknown Order',
 
       overallStatus: json['overallStatus'] ?? 'PENDING',
+      workflowStatus: parsedWorkflowStatus,
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString())
           : null,
@@ -132,7 +147,9 @@ class OrderModel {
       operations: operationsList,
       type: json['type'] ?? 'OTHER',
       description: json['description'],
-      qcMember: json['qcMember']?.toString(),
+      qcMember: json['qcMember'] is Map<String, dynamic>
+          ? (json['qcMember'] as Map<String, dynamic>)['name']?.toString()
+          : json['qcMember']?.toString(),
       requiredDocuments: (json['requiredDocuments'] as List? ?? [])
           .map((d) => PrerequisiteDocument.fromJson(d))
           .toList(),
