@@ -1,5 +1,6 @@
 import 'package:dariziflow_app/app/app.dart';
 import 'package:dariziflow_app/data/services/notifications_service.dart';
+import 'package:dariziflow_app/data/services/offline_queue_service.dart';
 import 'package:dariziflow_app/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ void main() async {
   await dotenv.load(fileName: "assets/.env");
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await GetStorage.init();
+  await OfflineQueueService.init();
   await Get.putAsync(() => NotificationService().init());
   runApp(const MyApp());
 }

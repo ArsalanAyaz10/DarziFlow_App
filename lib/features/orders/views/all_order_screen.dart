@@ -98,20 +98,20 @@ class AllOrderScreen extends GetView<AllOrdersController> {
 
         return Column(
           children: [
-            OrderSearchBar(
+            Obx(() => OrderSearchBar(
               searchController: controller.searchController,
               onChanged: (value) => controller.updateSearchQuery(value),
               searchQuery: controller.searchQuery.value,
               onClear: () => controller.clearSearch(),
-            ),
-            OrderFilterChips(
+            )),
+            Obx(() => OrderFilterChips(
               filterOptions: controller.filterOptions,
               selectedFilter: controller.selectedFilter.value,
               onFilterSelected: (filter) =>
                   controller.selectedFilter.value = filter,
-            ),
+            )),
             Expanded(
-              child: controller.filteredOrders.isEmpty
+              child: Obx(() => controller.filteredOrders.isEmpty
                   ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -154,7 +154,6 @@ class AllOrderScreen extends GetView<AllOrdersController> {
                       onRefresh: controller.fetchOrders,
                       child: ListView.builder(
                         padding: const EdgeInsets.all(16),
-                        shrinkWrap: true,
                         itemCount: controller.filteredOrders.length,
                         itemBuilder: (context, index) {
                           final order = controller.filteredOrders[index];
@@ -167,7 +166,7 @@ class AllOrderScreen extends GetView<AllOrdersController> {
                           );
                         },
                       ),
-                    ),
+                    )),
             ),
           ],
         );

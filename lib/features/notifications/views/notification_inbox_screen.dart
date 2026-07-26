@@ -27,41 +27,47 @@ class NotificationInboxScreen extends GetView<NotificationController> {
           ),
         ],
       ),
-      body: Obx(() {
-        if (controller.isLoading.value && controller.notifications.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
-        }
+      body: RefreshIndicator(
+        onRefresh: () async => await controller.fetchNotifications(),
+        child: Obx(() {
+          if (controller.isLoading.value && controller.notifications.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-        if (controller.notifications.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.notifications_off_outlined,
-                  size: 80,
-                  color: theme.colorScheme.onSurfaceVariant.withValues(
-                    alpha: 0.5,
-                  ),
+          if (controller.notifications.isEmpty) {
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Container(
+                height: MediaQuery.of(context).size.height - 100,
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.notifications_off_outlined,
+                      size: 80,
+                      color: theme.colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text('No Notifications', style: theme.textTheme.titleLarge),
+                    const SizedBox(height: 8),
+                    Text(
+                      'You have no new notifications right now.',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                Text('No Notifications', style: theme.textTheme.titleLarge),
-                const SizedBox(height: 8),
-                Text(
-                  'You have no new notifications right now.',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          );
-        }
+              ),
+            );
+          }
 
-        return RefreshIndicator(
-          onRefresh: () async => await controller.fetchNotifications(),
-          child: ListView.separated(
+          return ListView.separated(
+            physics: const AlwaysScrollableScrollPhysics(),
             itemCount: controller.notifications.length,
             separatorBuilder: (context, index) => const Divider(height: 1),
             itemBuilder: (context, index) {
@@ -156,9 +162,9 @@ class NotificationInboxScreen extends GetView<NotificationController> {
                 ),
               );
             },
-          ),
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 }

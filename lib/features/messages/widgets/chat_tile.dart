@@ -173,10 +173,26 @@ class ChatTile extends StatelessWidget {
       senderPrefix = 'You: ';
     }
 
-    if (lastMsg.media.isNotEmpty && lastMsg.text.isEmpty) {
-      return '$senderPrefix📎 Media';
+    if (lastMsg.media.isNotEmpty) {
+      final media = lastMsg.media.first;
+      String mediaName = 'Media';
+      
+      if (media.type == 'document' || media.type == 'video') {
+        try {
+          mediaName = Uri.parse(media.url).pathSegments.last;
+        } catch (_) {}
+      } else if (media.type == 'image') {
+        mediaName = 'Photo';
+      } else if (media.type == 'audio' || media.type == 'voice') {
+        mediaName = 'Voice Message';
+      }
+
+      if (lastMsg.text.isEmpty || lastMsg.text == '📎 Media' || lastMsg.text == 'Document') {
+        return '$senderPrefix📎 $mediaName';
+      }
+      return '$senderPrefix📎 ${lastMsg.text}';
     }
-    if (lastMsg.media.isNotEmpty) return '$senderPrefix📎 ${lastMsg.text}';
+
     return '$senderPrefix${lastMsg.text}';
   }
 

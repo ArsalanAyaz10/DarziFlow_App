@@ -28,54 +28,59 @@ class AllReviewsScreen extends GetView<QcDashboardController> {
         showBackButton: true,
         onBackPress: () => Get.back(),
       ),
-      body: Obx(() {
-        if (controller.isLoading.value &&
-            controller.pendingSubmissions.isEmpty) {
-          return const Center(
-            child: CircularProgressIndicator(color: AppColors.atelierSilkGreen),
-          );
-        }
+      body: RefreshIndicator(
+        color: AppColors.atelierSilkGreen,
+        onRefresh: controller.refreshDashboard,
+        child: Obx(() {
+          if (controller.isLoading.value &&
+              controller.pendingSubmissions.isEmpty) {
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.atelierSilkGreen),
+            );
+          }
 
-        if (controller.pendingSubmissions.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.reviews_outlined,
-                  size: 64,
-                  color: isDark
-                      ? AppColors.atelierTonalGrey
-                      : Colors.grey.shade400,
+          if (controller.pendingSubmissions.isEmpty) {
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Container(
+                height: MediaQuery.of(context).size.height - 150,
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.reviews_outlined,
+                      size: 64,
+                      color: isDark
+                          ? AppColors.atelierTonalGrey
+                          : Colors.grey.shade400,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      "No Pending Reviews",
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : AppColors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "You're all caught up with your quality checks!",
+                      style: GoogleFonts.manrope(
+                        fontSize: 14,
+                        color: isDark
+                            ? AppColors.atelierTonalGrey
+                            : Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  "No Pending Reviews",
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : AppColors.black,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "You're all caught up with your quality checks!",
-                  style: GoogleFonts.manrope(
-                    fontSize: 14,
-                    color: isDark
-                        ? AppColors.atelierTonalGrey
-                        : Colors.grey.shade600,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
+              ),
+            );
+          }
 
-        return RefreshIndicator(
-          color: AppColors.atelierSilkGreen,
-          onRefresh: controller.refreshDashboard,
-          child: Column(
+          return Column(
             children: [
               // Header
               Container(
@@ -125,9 +130,9 @@ class AllReviewsScreen extends GetView<QcDashboardController> {
                 ),
               ),
             ],
-          ),
-        );
-      }),
+          );
+        }),
+      ),
       bottomNavigationBar: const BottomNavBar(currentIndex: 0),
     );
   }

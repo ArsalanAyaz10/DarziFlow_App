@@ -1,25 +1,25 @@
 import 'package:dariziflow_app/core/widgets/status_badge.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:dariziflow_app/features/DepartmentHead/controllers/deptHead_controller.dart';
 
 class DepartmentHeader extends StatelessWidget {
-  final String departmentName;
-  final String status;
+  final DeptHeadController controller;
 
   const DepartmentHeader({
     super.key,
-    required this.departmentName,
-    required this.status,
+    required this.controller,
   });
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
 
-    return Row(
+    return Obx(() => Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          departmentName.isEmpty ? "Department" : departmentName,
+          controller.departmentName.value.isEmpty ? "Department" : controller.departmentName.value,
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w500,
@@ -27,12 +27,12 @@ class DepartmentHeader extends StatelessWidget {
           ),
         ),
         StatusBadge(
-          status: status.isEmpty ? "Unknown" : status,
+          status: controller.deptStatus.value.isEmpty ? "Unknown" : controller.deptStatus.value,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           borderRadius: BorderRadius.circular(20),
           fontSize: 12,
         ),
       ],
-    );
+    ));
   }
 }

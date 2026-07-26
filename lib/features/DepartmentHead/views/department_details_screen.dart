@@ -24,14 +24,13 @@ class DepartmentDetailsScreen extends GetView<DepartmentDetailsController> {
         centerTitle: true,
       ),
       bottomNavigationBar: const BottomNavBar(currentIndex: 2),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return const DepartmentDetailsShimmer();
-        }
-
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Obx(() {
+          if (controller.isLoading.value) {
+            return const DepartmentDetailsShimmer();
+          }
+          return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
@@ -250,32 +249,14 @@ class DepartmentDetailsScreen extends GetView<DepartmentDetailsController> {
                         ],
                       ),
                     ),
-                    IconButton(
-                      onPressed: () {
-                        // TODO Message Screen
-                      },
-                      icon: const Icon(
-                        Icons.message,
-                        color: AppColors.primaryGreen,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        // TODO Optional WEB RTC Feature
-                      },
-                      icon: const Icon(
-                        Icons.call,
-                        color: AppColors.primaryGreen,
-                      ),
-                    ),
                   ],
                 ),
               ),
               const SizedBox(height: 40),
             ],
-          ),
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 }

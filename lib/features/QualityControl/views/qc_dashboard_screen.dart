@@ -61,15 +61,15 @@ class QCDashboardScreen extends GetView<QcDashboardController> {
           ),
         ),
       ),
-      body: Obx(() {
-        if (controller.isLoading.value &&
-            controller.pendingSubmissions.isEmpty) {
-          return const QCDashboardShimmer();
-        }
-        return Column(
-          children: [
-            Expanded(
-              child: RefreshIndicator(
+      body: Column(
+        children: [
+          Expanded(
+            child: Obx(() {
+              if (controller.isLoading.value &&
+                  controller.pendingSubmissions.isEmpty) {
+                return const QCDashboardShimmer();
+              }
+              return RefreshIndicator(
                 color: AppColors.atelierSilkGreen,
                 onRefresh: controller.refreshDashboard,
                 child: SingleChildScrollView(
@@ -230,11 +230,11 @@ class QCDashboardScreen extends GetView<QcDashboardController> {
                     ],
                   ),
                 ),
-              ),
-            ),
-          ],
-        );
-      }),
+              );
+            }),
+          ),
+        ],
+      ),
       floatingActionButton: Obx(() {
         if (controller.userRole.value.toUpperCase() == 'CLIENT') {
           return FloatingActionButton(

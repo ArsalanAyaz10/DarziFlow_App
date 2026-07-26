@@ -28,69 +28,75 @@ class ClientAllActivitiesScreen extends GetView<ClientDashboardController> {
         showBackButton: true,
         onBackPress: () => Get.back(),
       ),
-      body: Obx(() {
-        final activities = controller.mappedAllActivities;
+      body: RefreshIndicator(
+        onRefresh: controller.fetchDashboardData,
+        color: AppColors.atelierSilkGreen,
+        child: Obx(() {
+          final activities = controller.mappedAllActivities;
 
-        if (controller.isLoading.value && activities.isEmpty) {
-          return const Center(
-            child: CircularProgressIndicator(color: AppColors.atelierSilkGreen),
-          );
-        }
+          if (controller.isLoading.value && activities.isEmpty) {
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.atelierSilkGreen),
+            );
+          }
 
-        if (activities.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: colors.surfaceContainer,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.history,
-                    size: 50,
-                    color: colors.onSurfaceVariant.withValues(alpha: 0.5),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  "No Activities Yet",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: colors.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Your order activities\nwill appear here",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14, color: colors.onSurfaceVariant),
-                ),
-                const SizedBox(height: 30),
-                ElevatedButton(
-                  onPressed: () => controller.fetchDashboardData(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.atelierSilkGreen,
-                    foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+          if (activities.isEmpty) {
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Container(
+                height: MediaQuery.of(context).size.height - 200,
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: colors.surfaceContainer,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.history,
+                        size: 50,
+                        color: colors.onSurfaceVariant.withValues(alpha: 0.5),
+                      ),
                     ),
-                  ),
-                  child: const Text("Refresh", style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 20),
+                    Text(
+                      "No Activities Yet",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: colors.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Your order activities\nwill appear here",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14, color: colors.onSurfaceVariant),
+                    ),
+                    const SizedBox(height: 30),
+                    ElevatedButton(
+                      onPressed: () => controller.fetchDashboardData(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.atelierSilkGreen,
+                        foregroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text("Refresh", style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          );
-        }
+              ),
+            );
+          }
 
-        return RefreshIndicator(
-          onRefresh: controller.fetchDashboardData,
-          color: AppColors.atelierSilkGreen,
-          child: ListView.builder(
+          return ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(16),
             itemCount: activities.length,
             itemBuilder: (context, index) {
@@ -103,9 +109,9 @@ class ClientAllActivitiesScreen extends GetView<ClientDashboardController> {
                 ),
               );
             },
-          ),
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 

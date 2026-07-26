@@ -1,6 +1,7 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/features/DepartmentHead/controllers/deptHead_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class EfficiencyScoreCard extends StatelessWidget {
   final DeptHeadController controller;
@@ -75,17 +76,17 @@ class EfficiencyScoreCard extends StatelessWidget {
                           : AppColors.black.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(
+                    child: Obx(() => Text(
                       "Quality: ${controller.qualityScore.value}%",
                       style: TextStyle(
                         color: isDark ? colors.onPrimaryContainer : AppColors.white,
                         fontSize: 11,
                       ),
-                    ),
+                    )),
                   ),
                 ],
               ),
-              TweenAnimationBuilder<double>(
+              Obx(() => TweenAnimationBuilder<double>(
                 tween: Tween<double>(
                   begin: 0.0,
                   end: controller.efficiencyScore.value / 100,
@@ -135,7 +136,7 @@ class EfficiencyScoreCard extends StatelessWidget {
                     ],
                   );
                 },
-              ),
+              )),
             ],
           ),
           const SizedBox(height: 15),
@@ -153,14 +154,14 @@ class EfficiencyScoreCard extends StatelessWidget {
                     size: 16,
                   ),
                   const SizedBox(height: 4),
-                  Text(
+                  Obx(() => Text(
                     "${controller.completedOps.value}/${controller.totalOperationsHandled.value}",
                     style: TextStyle(
                       color: isDark ? colors.onPrimaryContainer : AppColors.white,
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
-                  ),
+                  )),
                   Text(
                     "Operations",
                     style: TextStyle(
@@ -183,14 +184,14 @@ class EfficiencyScoreCard extends StatelessWidget {
                     size: 16,
                   ),
                   const SizedBox(height: 4),
-                  Text(
+                  Obx(() => Text(
                     "${controller.completedCheckpoints.value}/${controller.totalCheckpoints.value}",
                     style: TextStyle(
                       color: isDark ? colors.onPrimaryContainer : AppColors.white,
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
-                  ),
+                  )),
                   Text(
                     "Checkpoints",
                     style: TextStyle(

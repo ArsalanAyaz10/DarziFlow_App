@@ -54,15 +54,15 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
           ),
         ),
       ),
-      body: Obx(() {
-        if (controller.isLoading.value &&
-            controller.processedActivities.isEmpty) {
-          return const DashboardShimmer();
-        }
-        return Column(
-          children: [
-            Expanded(
-              child: RefreshIndicator(
+      body: Column(
+        children: [
+          Expanded(
+            child: Obx(() {
+              if (controller.isLoading.value &&
+                  controller.processedActivities.isEmpty) {
+                return const DashboardShimmer();
+              }
+              return RefreshIndicator(
                 onRefresh: controller.refreshDashboard,
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -73,27 +73,24 @@ class DeptHeadDashboardScreen extends GetView<DeptHeadController> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      DepartmentHeader(
-                        departmentName: controller.departmentName.value,
-                        status: controller.deptStatus.value,
-                      ),
+                      DepartmentHeader(controller: controller),
                       const SizedBox(height: 20),
                       PerformanceSummaryPanel(controller: controller),
                       const SizedBox(height: 20),
-                      RecentActivityPanel(
-                        activities: controller.processedActivities,
+                      Obx(() => RecentActivityPanel(
+                        activities: controller.processedActivities.toList(),
                         onViewAll: controller.navigateToFullActivityList,
-                      ),
+                      )),
                       const SizedBox(height: 20),
                     ],
                   ),
                 ),
-              ),
-            ),
-            const BottomNavBar(currentIndex: 0),
-          ],
-        );
-      }),
+              );
+            }),
+          ),
+          const BottomNavBar(currentIndex: 0),
+        ],
+      ),
     );
   }
 }

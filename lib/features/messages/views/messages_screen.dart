@@ -6,6 +6,7 @@ import 'package:dariziflow_app/features/Messages/widgets/chat_tile.dart';
 import 'package:dariziflow_app/features/Messages/widgets/messages_shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dariziflow_app/app/routes/app_pages.dart';
 
 class ChatListScreen extends StatefulWidget {
@@ -175,7 +176,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           leading: CircleAvatar(
             radius: 24,
-            backgroundImage: user.avatarUrl.isNotEmpty ? NetworkImage(user.avatarUrl) : null,
+            backgroundImage: user.avatarUrl.isNotEmpty ? CachedNetworkImageProvider(user.avatarUrl) : null,
             child: user.avatarUrl.isEmpty ? Text(user.name.isNotEmpty ? user.name[0].toUpperCase() : '?') : null,
           ),
           title: Text(

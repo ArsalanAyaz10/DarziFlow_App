@@ -20,7 +20,7 @@ class PerformanceSummaryPanel extends StatelessWidget {
       children: [
         Row(
           children: [
-            StatTile(
+            Obx(() => StatTile(
               label: "Total Orders",
               value: controller.totalOrders.value.toString(),
               subText: "Orders Assigned",
@@ -28,9 +28,9 @@ class PerformanceSummaryPanel extends StatelessWidget {
               icon: Icons.shopping_bag_outlined,
               showTrend: true,
               onTap: () => Get.toNamed(Routes.orders),
-            ),
+            )),
             const SizedBox(width: 15),
-            StatTile(
+            Obx(() => StatTile(
               label: "Active Orders",
               value: controller.inProgressOrders.value.toString(),
               subText: "In Progress Now",
@@ -38,7 +38,7 @@ class PerformanceSummaryPanel extends StatelessWidget {
               icon: Icons.pending_actions,
               showTrend: false,
               onTap: () => Get.toNamed(Routes.orders),
-            ),
+            )),
           ],
         ),
         const SizedBox(height: 20),

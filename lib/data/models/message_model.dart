@@ -121,6 +121,7 @@ class MessageModel {
   final ReplyToModel? replyTo;
   final List<Map<String, dynamic>> mentions;
   final DateTime createdAt;
+  final bool isPending;
 
   const MessageModel({
     required this.id,
@@ -131,6 +132,7 @@ class MessageModel {
     this.replyTo,
     required this.mentions,
     required this.createdAt,
+    this.isPending = false,
   });
 
   factory MessageModel.fromJson(Map<String, dynamic> json) {
@@ -160,6 +162,7 @@ class MessageModel {
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now()
           : DateTime.now(),
+      isPending: json['isPending'] ?? false,
     );
   }
 
@@ -172,5 +175,6 @@ class MessageModel {
         if (replyTo != null) 'replyTo': replyTo!.toJson(),
         'mentions': mentions,
         'createdAt': createdAt.toIso8601String(),
+        'isPending': isPending,
       };
 }

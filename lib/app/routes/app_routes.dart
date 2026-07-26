@@ -29,4 +29,5 @@ abstract class Routes {
   static const messages = '/messages';
   static const chatRoom = '/chat-room';
   static const profileView = '/profile-view';
+  static const orderRequestDetails = '/order-request-details';
 }

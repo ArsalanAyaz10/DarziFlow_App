@@ -40,8 +40,7 @@ class EditProfileScreen extends GetView<EditProfileController> {
           ),
         ),
       ),
-      body: Obx(
-        () => Stack(
+      body: Stack(
           children: [
             SingleChildScrollView(
               padding: const EdgeInsets.all(20),
@@ -147,11 +146,11 @@ class EditProfileScreen extends GetView<EditProfileController> {
                         "Alert for production messages",
                         style: TextStyle(color: colors.onSurfaceVariant, fontSize: 10),
                       ),
-                      trailing: Switch(
+                      trailing: Obx(() => Switch(
                         value: controller.notificationsEnabled.value,
                         activeThumbColor: AppColors.primaryGreen,
                         onChanged: controller.toggleNotifications,
-                      ),
+                      )),
                     ),
                   ),
                   const SizedBox(height: 30),
@@ -206,48 +205,51 @@ class EditProfileScreen extends GetView<EditProfileController> {
                 ],
               ),
             ),
-            if (controller.isUploading.value || controller.isLoading.value)
-              Container(
-                color: colors.onSurface.withValues(alpha: 0.3),
-                child: Center(
-                  child: Shimmer(
-                    duration: const Duration(seconds: 2),
-                    color: Colors.white,
-                    colorOpacity: 0.3,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 20,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colors.surface,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const CircularProgressIndicator(
-                            color: AppColors.primaryGreen,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            controller.isUploading.value
-                                ? "Uploading..."
-                                : "Saving...",
-                            style: TextStyle(
-                              color: colors.onSurface,
-                              fontWeight: FontWeight.w600,
+            Obx(() {
+              if (controller.isUploading.value || controller.isLoading.value) {
+                return Container(
+                  color: colors.onSurface.withValues(alpha: 0.3),
+                  child: Center(
+                    child: Shimmer(
+                      duration: const Duration(seconds: 2),
+                      color: Colors.white,
+                      colorOpacity: 0.3,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 20,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colors.surface,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const CircularProgressIndicator(
+                              color: AppColors.primaryGreen,
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 16),
+                            Text(
+                              controller.isUploading.value
+                                  ? "Uploading..."
+                                  : "Saving...",
+                              style: TextStyle(
+                                color: colors.onSurface,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
+                );
+              }
+              return const SizedBox.shrink();
+            }),
           ],
         ),
-      ),
     );
   }
 

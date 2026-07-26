@@ -26,15 +26,14 @@ class ClientOperationReviewScreen extends GetView<ClientDepartmentReviewControll
           isDashboard: false,
         ),
       ),
-      body: Obx(() {
-        if (controller.isSubmitting.value) {
-          return const OrderWorkflowShimmer();
-        }
-
-        return SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
-          child: Column(
+      body: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        child: Obx(() {
+          if (controller.isSubmitting.value) {
+            return const OrderWorkflowShimmer();
+          }
+          return Column(
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
@@ -80,9 +79,9 @@ class ClientOperationReviewScreen extends GetView<ClientDepartmentReviewControll
                 orderId: controller.orderId,
               ),
             ],
-          ),
-        );
-      }),
+          );
+        }),
+      ),
 
       bottomNavigationBar: Builder(builder: (context) {
         if (controller.isRejected) {

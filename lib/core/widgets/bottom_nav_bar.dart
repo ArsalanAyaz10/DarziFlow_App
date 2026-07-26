@@ -139,7 +139,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
         if (isQC) {
           Get.offNamed(Routes.qcHistory);
         } else if (role == "CLIENT") {
-          Get.snackbar('Coming Soon', 'This feature is due in next phase');
+          Get.offNamed(Routes.orderRequests);
         } else {
           try {
             String? deptId;

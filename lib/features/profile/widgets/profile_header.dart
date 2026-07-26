@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/utils/fonts.dart';
 import 'package:dariziflow_app/features/Profile/controllers/viewProfile_controller.dart';
@@ -23,7 +24,7 @@ class ProfileHeader extends GetView<ViewprofileController> {
                 radius: 60,
                 backgroundColor: colors.onSurfaceVariant.withValues(alpha: 0.2),
                 backgroundImage: controller.userAvatar.value.isNotEmpty
-                    ? NetworkImage(controller.userAvatar.value)
+                    ? CachedNetworkImageProvider(controller.userAvatar.value)
                     : null,
                 child: controller.userAvatar.value.isEmpty
                     ? const Icon(

@@ -30,11 +30,11 @@ class SubmitcheckpointScreen extends GetView<CheckpointController> {
         ),
       ),
       backgroundColor: theme.scaffoldBackgroundColor,
-      body: Obx(
-        () => SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(15),
-            child: Column(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(15),
+          child: Obx(
+            () => Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(

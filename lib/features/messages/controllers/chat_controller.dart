@@ -7,6 +7,8 @@ import 'package:dariziflow_app/data/models/chat_room_model.dart';
 import 'package:dariziflow_app/data/models/message_model.dart';
 import 'package:dariziflow_app/data/services/socket_service.dart';
 import 'package:dariziflow_app/data/services/upload_service.dart';
+import 'package:dariziflow_app/data/services/offline_queue_service.dart';
+import 'package:dariziflow_app/data/models/pending_message.dart';
 import 'package:dariziflow_app/features/Messages/repositories/chat_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -76,6 +78,20 @@ class ChatController extends GetxController {
 
     _fetchInitialMessages();
 
+    // Process offline queue when socket reconnects
+    ever(socketService.isConnected, (connected) {
+      if (connected) {
+        socketService.joinRoom(room.id);
+        _processOfflineQueue();
+        _syncMissedMessages();
+      }
+    });
+
+    // Also process immediately if socket is already connected
+    if (socketService.isConnected.value) {
+      _processOfflineQueue();
+    }
+
     scrollController.addListener(_onScroll);
   }
 
@@ -105,6 +121,8 @@ class ChatController extends GetxController {
       if (newMessage.chatRoomId == room.id) {
         // Prevent duplicate messages
         if (!messages.any((m) => m.id == newMessage.id)) {
+          // Remove corresponding pending message if it exists
+          messages.removeWhere((m) => m.isPending && m.text == newMessage.text);
           messages.add(newMessage);
           _scrollToBottomIfNearBottom();
         }
@@ -123,6 +141,46 @@ class ChatController extends GetxController {
     });
   }
 
+  Future<void> _processOfflineQueue() async {
+    final allPending = OfflineQueueService.getAllPending();
+    // Only process messages for the current room
+    final roomPending = allPending.where((msg) => msg.chatRoomId == room.id).toList();
+    if (roomPending.isEmpty) return;
+    
+    dev.log('[ChatController] Processing ${roomPending.length} offline messages for room ${room.id}...');
+    for (var pendingMsg in roomPending) {
+      final payload = {
+        'chatRoomId': pendingMsg.chatRoomId,
+        'senderId': pendingMsg.senderId,
+        'text': pendingMsg.text,
+        'media': [],
+        'replyTo': pendingMsg.replyToId,
+        'mentions': [],
+      };
+      
+      socketService.emitSendMessage(payload);
+      await OfflineQueueService.dequeue(pendingMsg.id);
+      dev.log('[ChatController] Sent and dequeued offline message: ${pendingMsg.id}');
+    }
+    // Note: pending messages in the UI will be replaced when the server 
+    // echoes back receive_message (handled in _setupSocketListeners via 
+    // the isPending text-match removal logic)
+  }
+
+  void _syncMissedMessages() {
+    if (messages.isNotEmpty) {
+      // Get the last real (non-pending) message ID to sync from
+      final lastRealMsg = messages.lastWhere((m) => !m.isPending, orElse: () => messages.last);
+      if (!lastRealMsg.isPending) {
+        dev.log('[ChatController] Syncing missed messages since ${lastRealMsg.id}');
+        socketService.socket?.emit('sync_messages', {
+          'roomId': room.id,
+          'lastMessageId': lastRealMsg.id,
+        });
+      }
+    }
+  }
+
   // ─── Pagination & Fetch ───────────────────────────────────────────────────
 
   Future<void> _fetchInitialMessages() async {
@@ -138,11 +196,62 @@ class ChatController extends GetxController {
       messages.assignAll(fetched);
       hasMoreMessages.value = fetched.length >= _pageLimit;
 
+      // Inject any pending messages from the offline queue back into the UI
+      try {
+        final pending = OfflineQueueService.getAllPending()
+            .where((msg) => msg.chatRoomId == room.id);
+        
+        for (var pendingMsg in pending) {
+          final optimisticMessage = MessageModel(
+            id: pendingMsg.id,
+            chatRoomId: pendingMsg.chatRoomId,
+            sender: UserPreviewModel(
+              id: pendingMsg.senderId,
+              name: 'Me',
+              role: 'CLIENT',
+            ),
+            text: pendingMsg.text,
+            media: pendingMsg.mediaPath != null ? [MediaItemModel(url: pendingMsg.mediaPath!, type: pendingMsg.mediaType ?? 'image')] : [],
+            mentions: [],
+            createdAt: pendingMsg.createdAt,
+            isPending: true,
+          );
+          messages.add(optimisticMessage);
+        }
+      } catch (e) {
+        dev.log('[ChatController] Error loading pending messages: $e');
+      }
+
       // Scroll to bottom after first load
       WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
     } catch (e) {
       dev.log('[ChatController] fetchInitialMessages error: $e');
       errorMessage.value = 'Failed to load messages.';
+      
+      // If we failed to load from network, STILL try to show pending messages
+      try {
+        final pending = OfflineQueueService.getAllPending()
+            .where((msg) => msg.chatRoomId == room.id);
+        
+        for (var pendingMsg in pending) {
+          final optimisticMessage = MessageModel(
+            id: pendingMsg.id,
+            chatRoomId: pendingMsg.chatRoomId,
+            sender: UserPreviewModel(
+              id: pendingMsg.senderId,
+              name: 'Me',
+              role: 'CLIENT',
+            ),
+            text: pendingMsg.text,
+            media: pendingMsg.mediaPath != null ? [MediaItemModel(url: pendingMsg.mediaPath!, type: pendingMsg.mediaType ?? 'image')] : [],
+            mentions: [],
+            createdAt: pendingMsg.createdAt,
+            isPending: true,
+          );
+          messages.add(optimisticMessage);
+        }
+        WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+      } catch (_) {}
     } finally {
       isLoading.value = false;
     }
@@ -208,7 +317,15 @@ class ChatController extends GetxController {
         final signatureData = await uploadService.getChatUploadSignature(
           chatRoomId: room.id,
         );
-        dev.log('[Voice] Signature received. Uploading to Cloudinary as ${isAudio ? 'video' : 'auto'}...');
+        
+        String cloudinaryResourceType = 'auto';
+        if (pendingMediaType.value == 'document') {
+          cloudinaryResourceType = 'raw';
+        } else if (isAudio) {
+          cloudinaryResourceType = 'video';
+        }
+
+        dev.log('[Voice] Signature received. Uploading to Cloudinary as $cloudinaryResourceType...');
         final uploadResult = await uploadService.uploadToCloudinary(
           file: pendingMediaFile.value!,
           cloudName: signatureData['cloudName'],
@@ -216,7 +333,7 @@ class ChatController extends GetxController {
           timestamp: signatureData['timestamp'].toString(),
           signature: signatureData['signature'],
           folder: signatureData['folder'],
-          resourceType: isAudio ? 'video' : 'auto',
+          resourceType: cloudinaryResourceType,
         );
         dev.log('[Voice] Cloudinary upload success: ${uploadResult['secure_url']}');
         final backendType = isAudio ? 'document' : pendingMediaType.value;
@@ -238,21 +355,92 @@ class ChatController extends GetxController {
     }
 
     final user = await AppStorage.getAuthUser();
+    final senderId = user?.id ?? currentUserId.value;
+    final textToSend = trimmedText.isEmpty && mediaPayload.isNotEmpty ? "📎 Media" : trimmedText;
 
     final payload = {
       'chatRoomId': room.id,
-      'senderId': user?.id ?? currentUserId.value,
-      'text': trimmedText,
+      'senderId': senderId,
+      'text': textToSend,
       'media': mediaPayload.isEmpty ? [] : mediaPayload,
       'replyTo': replyToMessage.value?.id,
       'mentions': [],
     };
-    dev.log('[Voice] Emitting socket message with payload: $payload');
-    socketService.emitSendMessage(payload);
+
+    final isSocketConnected = socketService.socket?.connected ?? false;
+
+    if (isSocketConnected) {
+      dev.log('[Voice] Emitting socket message with payload: $payload');
+      socketService.emitSendMessage(payload);
+    } else {
+      dev.log('[Voice] Socket disconnected, queueing message offline');
+      final localId = 'pending_${DateTime.now().millisecondsSinceEpoch}';
+      
+      // Save to Hive
+      final pendingMsg = PendingMessage(
+        id: localId,
+        chatRoomId: room.id,
+        senderId: senderId,
+        text: textToSend,
+        mediaPath: pendingMediaFile.value?.path,
+        mediaType: pendingMediaType.value,
+        replyToId: replyToMessage.value?.id,
+        createdAt: DateTime.now(),
+      );
+      await OfflineQueueService.enqueue(pendingMsg);
+
+      // Optimistic UI
+      final optimisticMessage = MessageModel(
+        id: localId,
+        chatRoomId: room.id,
+        sender: UserPreviewModel(
+          id: senderId,
+          name: user?.name ?? 'Me',
+          role: user?.role ?? 'CLIENT',
+        ),
+        text: textToSend,
+        media: mediaPayload.map((m) => MediaItemModel(url: m['url'] ?? '', type: m['type'] ?? '')).toList(),
+        mentions: [],
+        createdAt: DateTime.now(),
+        isPending: true,
+      );
+      messages.add(optimisticMessage);
+      _scrollToBottomIfNearBottom();
+    }
 
     // Optimistic clear
     clearReply();
     clearPendingMedia();
+  }
+
+  Future<void> resendMessage(MessageModel message) async {
+    if (!message.isPending) return;
+
+    final isSocketConnected = socketService.socket?.connected ?? false;
+    if (!isSocketConnected) {
+      // Force a full reconnect (reinitializes the socket if disposed)
+      dev.log('[ChatController] Socket not connected, forcing reconnect...');
+      await socketService.connect();
+      // The ever() listener on isConnected will auto-flush the queue
+      // once the connection succeeds, so just return here
+      return;
+    }
+
+    dev.log('[Voice] Resending pending message: ${message.id}');
+    
+    final payload = {
+      'chatRoomId': message.chatRoomId,
+      'senderId': message.sender.id,
+      'text': message.text,
+      'media': message.media.map((m) => {'url': m.url, 'type': m.type}).toList(),
+      'replyTo': message.replyTo?.id,
+      'mentions': [],
+    };
+
+    socketService.emitSendMessage(payload);
+    
+    // Dequeue from Hive so _processOfflineQueue won't re-send
+    await OfflineQueueService.dequeue(message.id);
   }
 
   // ─── Typing ───────────────────────────────────────────────────────────────

@@ -491,6 +491,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
             isMe: entry.isMe,
             isFirstInGroup: entry.isFirstInGroup,
             onSwipeReply: () => _controller.setReplyTo(entry.message),
+            onTap: entry.message.isPending 
+                ? () => _controller.resendMessage(entry.message) 
+                : null,
           );
         },
       );

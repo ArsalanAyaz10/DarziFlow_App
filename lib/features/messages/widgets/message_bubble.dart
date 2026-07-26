@@ -1,15 +1,18 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/utils/date_formatter.dart';
 import 'package:dariziflow_app/data/models/message_model.dart';
 import 'package:dariziflow_app/features/Messages/widgets/audio_player_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class MessageBubble extends StatelessWidget {
   final MessageModel message;
   final bool isMe;
   final VoidCallback onSwipeReply;
   final bool isFirstInGroup;
+  final VoidCallback? onTap;
 
   const MessageBubble({
     super.key,
@@ -17,6 +20,7 @@ class MessageBubble extends StatelessWidget {
     required this.isMe,
     required this.onSwipeReply,
     this.isFirstInGroup = false,
+    this.onTap,
   });
 
   // ─── WhatsApp-style dark-mode-aware colors ──────────────────────────────
@@ -73,6 +77,7 @@ class MessageBubble extends StatelessWidget {
           onSwipeReply();
         }
       },
+      onTap: onTap,
       child: Align(
         alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
@@ -156,11 +161,13 @@ class MessageBubble extends StatelessWidget {
               if (isMe) ...[
                 const SizedBox(width: 3),
                 Icon(
-                  Icons.done_all,
+                  message.isPending ? Icons.access_time : Icons.done_all,
                   size: 16,
-                  color: brightness == Brightness.dark
-                      ? const Color(0xFF53BDEB)
-                      : const Color(0xFF53BDEB),
+                  color: message.isPending
+                      ? metaCol
+                      : (brightness == Brightness.dark
+                          ? const Color(0xFF53BDEB)
+                          : const Color(0xFF53BDEB)),
                 ),
               ],
             ],
@@ -183,11 +190,13 @@ class MessageBubble extends StatelessWidget {
         if (isMe) ...[
           const SizedBox(width: 3),
           Icon(
-            Icons.done_all,
+            message.isPending ? Icons.access_time : Icons.done_all,
             size: 16,
-            color: brightness == Brightness.dark
-                ? const Color(0xFF53BDEB)
-                : const Color(0xFF53BDEB),
+            color: message.isPending
+                ? metaCol
+                : (brightness == Brightness.dark
+                    ? const Color(0xFF53BDEB)
+                    : const Color(0xFF53BDEB)),
           ),
         ],
       ],
@@ -292,7 +301,17 @@ class MessageBubble extends StatelessWidget {
       );
     }
     // Document / video fallback
-    return Container(
+    return GestureDetector(
+      onTap: () async {
+        final uri = Uri.parse(media.url);
+        if (await canLaunchUrl(uri)) {
+          Get.snackbar("Info", "Viewing in browser...");
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        } else {
+          Get.snackbar("Error", "Could not open document");
+        }
+      },
+      child: Container(
       margin: const EdgeInsets.only(bottom: 4),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
@@ -310,13 +329,26 @@ class MessageBubble extends StatelessWidget {
             color: AppColors.primaryGreen,
           ),
           const SizedBox(width: 8),
-          Text(
-            media.type == 'video' ? 'Video' : 'Document',
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+          Flexible(
+            child: Text(
+              media.type == 'video' ? 'Video' : _getFileName(media.url),
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),
-    );
+    ));
+  }
+
+  String _getFileName(String url) {
+    try {
+      final name = Uri.parse(url).pathSegments.last;
+      return name.isNotEmpty ? name : 'Document';
+    } catch (_) {
+      return 'Document';
+    }
   }
 
   /// Assigns a consistent WhatsApp-style color to each sender name

@@ -28,25 +28,25 @@ class ClientTrackingScreen extends GetView<ClientTrackingController> {
         ),
       ),
       bottomNavigationBar: const BottomNavBar(currentIndex: 0),
-      body: Obx(() {
-        if (controller.isLoading.value) return const OrderWorkflowShimmer();
+      body: RefreshIndicator(
+        onRefresh: () => controller.fetchOrderDetails(),
+        color: AppColors.atelierSilkGreen,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          child: Obx(() {
+            if (controller.isLoading.value) return const OrderWorkflowShimmer();
 
-        final order = controller.order.value;
-        if (order == null) {
-          return updateEmptyState(
-            theme,
-            "Order Not Found",
-            Icons.inventory_2_outlined,
-          );
-        }
+            final order = controller.order.value;
+            if (order == null) {
+              return updateEmptyState(
+                theme,
+                "Order Not Found",
+                Icons.inventory_2_outlined,
+              );
+            }
 
-        return RefreshIndicator(
-          onRefresh: () => controller.fetchOrderDetails(),
-          color: AppColors.atelierSilkGreen,
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            child: Column(
+            return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 TrackingHeader(
@@ -90,10 +90,10 @@ class ClientTrackingScreen extends GetView<ClientTrackingController> {
                   ),
                 const SizedBox(height: 100),
               ],
-            ),
-          ),
-        );
-      }),
+            );
+          }),
+        ),
+      ),
     );
   }
 

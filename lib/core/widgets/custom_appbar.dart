@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
@@ -85,7 +86,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return CircleAvatar(
       radius: 20,
       backgroundColor: colors.onSurface.withValues(alpha: 0.1),
-      backgroundImage: hasImage ? NetworkImage(userAvatarUrl!) : null,
+      backgroundImage: hasImage ? CachedNetworkImageProvider(userAvatarUrl!) : null,
       child: !hasImage
           ? Icon(Icons.person, size: 20, color: colors.primary)
           : null,

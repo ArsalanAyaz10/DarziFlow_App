@@ -1,15 +1,16 @@
 import 'package:dariziflow_app/data/models/order_request_model.dart';
 import 'package:dariziflow_app/data/services/api_service.dart';
-import 'package:get/get.dart' hide Response;
+import 'package:get/get.dart' hide Response, FormData, MultipartFile;
+import 'package:dio/dio.dart';
 
 class OrderRequestService extends GetxService {
   final ApiService _apiService = Get.find<ApiService>();
   final String _baseRoute = 'requests';
 
   /// Fetch all order requests
-  Future<List<OrderRequestModel>> getAllRequests() async {
+  Future<List<OrderRequestModel>> getAllRequests({Map<String, dynamic>? queryParameters}) async {
     try {
-      final response = await _apiService.dio.get(_baseRoute);
+      final response = await _apiService.dio.get(_baseRoute, queryParameters: queryParameters);
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'] ?? [];
         return data.map((item) => OrderRequestModel.fromJson(item)).toList();
@@ -82,7 +83,7 @@ class OrderRequestService extends GetxService {
   }) async {
     try {
       final response = await _apiService.dio.post('upload/signature', data: {
-        'context': context,
+        'contextType': context,
         'requestId': ?requestId,
       });
       if (response.statusCode == 200) {
@@ -91,6 +92,37 @@ class OrderRequestService extends GetxService {
       throw Exception('Failed to get upload signature');
     } catch (e) {
       rethrow;
+    }
+  }
+
+  /// Upload a file to Cloudinary
+  Future<Map<String, dynamic>> uploadToCloudinary({
+    required String filePath,
+    required String cloudName,
+    required String apiKey,
+    required String timestamp,
+    required String signature,
+    required String folder,
+    String resourceType = 'auto',
+  }) async {
+    try {
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(filePath),
+        'api_key': apiKey,
+        'timestamp': timestamp,
+        'signature': signature,
+        'folder': folder,
+      });
+
+      // Create a fresh Dio instance for Cloudinary to avoid any interceptors from ApiService
+      final response = await Dio().post(
+        "https://api.cloudinary.com/v1_1/$cloudName/$resourceType/upload",
+        data: formData,
+      );
+
+      return response.data;
+    } catch (e) {
+      throw Exception("Failed to upload to Cloudinary: $e");
     }
   }
 }

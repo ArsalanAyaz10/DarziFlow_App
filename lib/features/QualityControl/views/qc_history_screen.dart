@@ -24,31 +24,37 @@ class QcHistoryScreen extends GetView<QcHistoryController> {
         isTransparent: false,
         showBackButton: false,
       ),
-      body: Obx(() {
-        if (controller.isLoading.value && controller.historyLogs.isEmpty) {
-          return const QCHistoryShimmer();
-        }
+      body: RefreshIndicator(
+        onRefresh: controller.fetchHistory,
+        color: AppColors.atelierSilkGreen,
+        child: Obx(() {
+          if (controller.isLoading.value && controller.historyLogs.isEmpty) {
+            return const QCHistoryShimmer();
+          }
 
-        if (controller.historyLogs.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.history_toggle_off, size: 64, color: Colors.grey.shade400),
-                const SizedBox(height: 16),
-                Text(
-                  "No history logs found.",
-                  style: TextStyle(color: Colors.grey.shade500),
+          if (controller.historyLogs.isEmpty) {
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Container(
+                height: MediaQuery.of(context).size.height - 200,
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.history_toggle_off, size: 64, color: Colors.grey.shade400),
+                    const SizedBox(height: 16),
+                    Text(
+                      "No history logs found.",
+                      style: TextStyle(color: Colors.grey.shade500),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          );
-        }
+              ),
+            );
+          }
 
-        return RefreshIndicator(
-          onRefresh: controller.fetchHistory,
-          color: AppColors.atelierSilkGreen,
-          child: ListView.separated(
+          return ListView.separated(
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(20),
             itemCount: controller.historyLogs.length,
             separatorBuilder: (context, index) => const SizedBox(height: 12),
@@ -56,9 +62,9 @@ class QcHistoryScreen extends GetView<QcHistoryController> {
               final log = controller.historyLogs[index];
               return _historyCard(log, isDark);
             },
-          ),
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 

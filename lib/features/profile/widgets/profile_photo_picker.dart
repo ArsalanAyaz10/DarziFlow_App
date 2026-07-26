@@ -1,6 +1,7 @@
 import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/features/Profile/controllers/editProfile_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
 
 class ProfilePhotoPicker extends GetView<EditProfileController> {
@@ -22,7 +23,7 @@ class ProfilePhotoPicker extends GetView<EditProfileController> {
                   radius: 55,
                   backgroundColor: AppColors.primaryGreen.withValues(alpha: 0.1),
                   backgroundImage: controller.userAvatar.value.isNotEmpty
-                      ? NetworkImage(controller.userAvatar.value)
+                      ? CachedNetworkImageProvider(controller.userAvatar.value)
                       : null,
                   child: controller.userAvatar.value.isEmpty
                       ? const Icon(

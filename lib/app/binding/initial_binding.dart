@@ -46,8 +46,16 @@ class InitialBinding extends Bindings {
     Get.put<UploadService>(uploadService, permanent: true);
 
     // SocketService (real-time chat)
-    final socketService = SocketService(apiClient: apiClient);
-    Get.put<SocketService>(socketService, permanent: true);
-    await socketService.connect();
+    SocketService socketService;
+    if (Get.isRegistered<SocketService>()) {
+      socketService = Get.find<SocketService>();
+    } else {
+      socketService = SocketService(apiClient: apiClient);
+      Get.put<SocketService>(socketService, permanent: true);
+    }
+    
+    if (socketService.socket?.connected != true) {
+      await socketService.connect();
+    }
   }
 }

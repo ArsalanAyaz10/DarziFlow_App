@@ -19,6 +19,9 @@ class SocketService extends GetxService {
   /// The roomId currently open on screen. Set by ChatController.
   final RxnString activeRoomId = RxnString(null);
 
+  /// Connection state observable for other controllers to react to.
+  final RxBool isConnected = false.obs;
+
   /// Stream that ChatController subscribes to for incoming messages.
   final _messageController = StreamController<MessageModel>.broadcast();
   Stream<MessageModel> get messageStream => _messageController.stream;
@@ -79,6 +82,10 @@ class SocketService extends GetxService {
       io.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
+          .enableReconnection()
+          .setReconnectionAttempts(double.maxFinite.toInt())
+          .setReconnectionDelay(2000)
+          .setReconnectionDelayMax(10000)
           .setAuth({'token': token})
           .build(),
     );
@@ -88,6 +95,12 @@ class SocketService extends GetxService {
       dev.log('✅ [FLUTTER SOCKET] Successfully connected to server! ID: ${_socket!.id}');
       dev.log('[SocketService] ✅ Connected: ${_socket!.id}');
       _isConnecting = false;
+      isConnected.value = true;
+      
+      // Re-join the active room upon connection/reconnection
+      if (activeRoomId.value != null) {
+        joinRoom(activeRoomId.value!);
+      }
     });
 
     _socket!.onConnectError((err) {
@@ -102,10 +115,15 @@ class SocketService extends GetxService {
     _socket!.onDisconnect((_) {
       dev.log('🛑 [FLUTTER SOCKET] Disconnected from server.');
       dev.log('[SocketService] Disconnected.');
+      isConnected.value = false;
     });
 
     _socket!.on('receive_message', (data) {
       _handleIncomingMessage(data);
+    });
+
+    _socket!.on('missed_messages', (data) {
+      _handleMissedMessages(data);
     });
 
     _socket!.on('user_typing', (data) {
@@ -218,6 +236,20 @@ class SocketService extends GetxService {
     }
   }
 
+  void _handleMissedMessages(dynamic data) {
+    try {
+      final List<dynamic> list = List<dynamic>.from(data);
+      dev.log('[SocketService] missed_messages received: ${list.length} messages');
+      for (var item in list) {
+        final json = Map<String, dynamic>.from(item);
+        final message = MessageModel.fromJson(json);
+        _messageController.add(message);
+      }
+    } catch (e) {
+      dev.log('[SocketService] Error parsing missed_messages: $e');
+    }
+  }
+
   void _triggerLocalNotification(MessageModel message) {
     // Uses the existing NotificationController / flutter_local_notifications
     // The notification service is already wired globally — just log for now
@@ -231,6 +263,7 @@ class SocketService extends GetxService {
   void disconnect() {
     _socket?.dispose();
     _socket = null;
+    isConnected.value = false;
     dev.log('[SocketService] Socket disposed.');
   }
 

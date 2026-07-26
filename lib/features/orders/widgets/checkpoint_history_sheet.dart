@@ -73,7 +73,6 @@ class CheckpointHistorySheet extends StatelessWidget {
           else
             Flexible(
               child: ListView.builder(
-                shrinkWrap: true,
                 itemCount: sortedHistory.length,
                 itemBuilder: (context, index) {
                   final item = sortedHistory[index];

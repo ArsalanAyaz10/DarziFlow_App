@@ -29,17 +29,17 @@ class OrderWorkflowScreen extends GetView<OrderWorkflowController> {
         }),
       ),
       bottomNavigationBar: const BottomNavBar(),
-      body: Obx(() {
-        if (controller.isLoading.value || controller.order.value == null) {
-          return const OrderWorkflowShimmer();
-        }
-        return RefreshIndicator(
-          onRefresh: () => controller.refreshOrderDetails(),
-          color: AppColors.primaryGreen,
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(20),
-            child: Column(
+      body: RefreshIndicator(
+        onRefresh: () => controller.refreshOrderDetails(),
+        color: AppColors.primaryGreen,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(20),
+          child: Obx(() {
+            if (controller.isLoading.value || controller.order.value == null) {
+              return const OrderWorkflowShimmer();
+            }
+            return Column(
               children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -110,10 +110,10 @@ class OrderWorkflowScreen extends GetView<OrderWorkflowController> {
                   userRole: controller.userRole.value,
                 ),
               ],
-            ),
-          ),
-        );
-      }),
+            );
+          }),
+        ),
+      ),
     );
   }
 }

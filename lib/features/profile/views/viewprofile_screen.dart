@@ -40,14 +40,14 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
           ),
         ],
       ),
-      body: Obx(() {
-        if (controller.userName.value.isEmpty &&
-            controller.userEmail.value.isEmpty) {
-          return const ProfileShimmer();
-        }
-        return SingleChildScrollView(
-          child: SafeArea(
-            child: Column(
+      body: SingleChildScrollView(
+        child: SafeArea(
+          child: Obx(() {
+            if (controller.userName.value.isEmpty &&
+                controller.userEmail.value.isEmpty) {
+              return const ProfileShimmer();
+            }
+            return Column(
               children: [
                 const SizedBox(height: 20),
                 const ProfileHeader(),
@@ -73,10 +73,9 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
                 ),
                 const SizedBox(height: 10),
 
-                Obx(
-                  () => Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
                       children: [
                         Container(
                           decoration: BoxDecoration(
@@ -119,7 +118,6 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
                       ],
                     ),
                   ),
-                ),
                 const SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(
@@ -190,10 +188,10 @@ class ViewProfileScreen extends GetView<ViewprofileController> {
                 ),
                 const SizedBox(height: 20),
               ],
-            ),
-          ),
-        );
-      }),
+            );
+          }),
+        ),
+      ),
     );
   }
 }

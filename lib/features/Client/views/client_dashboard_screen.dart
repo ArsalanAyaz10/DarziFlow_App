@@ -2,12 +2,12 @@ import 'package:dariziflow_app/core/utils/colors.dart';
 import 'package:dariziflow_app/core/widgets/bottom_nav_bar.dart';
 import 'package:dariziflow_app/core/widgets/custom_appbar.dart';
 import 'package:dariziflow_app/features/Client/controllers/client_dashboard_controller.dart';
-import 'package:dariziflow_app/app/routes/app_pages.dart';
 import 'package:dariziflow_app/features/Notifications/controllers/notification_controller.dart';
 import 'package:dariziflow_app/features/DepartmentHead/widgets/stat_tile.dart';
 import 'package:dariziflow_app/features/DepartmentHead/widgets/recent_activity_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dariziflow_app/features/Client/widgets/client_dashboard_shimmer.dart';
 import 'dart:math' as math;
@@ -63,26 +63,29 @@ class ClientDashboardScreen extends GetView<ClientDashboardController> {
           ),
         ),
       ),
-      body: Obx(() {
-        if (controller.isLoading.value &&
-            controller.orders.isEmpty &&
-            controller.carouselItems.isEmpty) {
-          return const ClientDashboardShimmer();
-        }
+      body: Column(
+        children: [
+          Expanded(
+            child: Obx(() {
+              if (controller.isLoading.value &&
+                  controller.orders.isEmpty &&
+                  controller.carouselItems.isEmpty) {
+                return const ClientDashboardShimmer();
+              }
 
-        return RefreshIndicator(
-          onRefresh: () => controller.fetchDashboardData(),
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 20),
+              return RefreshIndicator(
+                onRefresh: () => controller.fetchDashboardData(),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 20),
 
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                     Row(
                       children: [
                         Text(
@@ -93,7 +96,7 @@ class ClientDashboardScreen extends GetView<ClientDashboardController> {
                             letterSpacing: 0.5,
                           ),
                         ),
-                        Text(
+                        Obx(() => Text(
                           controller.userName.value,
                           style: TextStyle(
                             color: colors.onSurface,
@@ -101,7 +104,7 @@ class ClientDashboardScreen extends GetView<ClientDashboardController> {
                             fontWeight: FontWeight.bold,
                             letterSpacing: -0.5,
                           ),
-                        ),
+                        )),
                       ],
                     ),
                     const SizedBox(height: 5),
@@ -123,23 +126,23 @@ class ClientDashboardScreen extends GetView<ClientDashboardController> {
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    StatTile(
+                    Obx(() => StatTile(
                       label: "Total Orders",
                       value: controller.totalOrdersCount.value.toString(),
                       subText: "Orders Placed",
                       color: colors.primary,
                       icon: Icons.shopping_bag_outlined,
                       showTrend: false,
-                    ),
+                    )),
                     const SizedBox(width: 10),
-                    StatTile(
+                    Obx(() => StatTile(
                       label: "Active Orders",
                       value: controller.activeOrdersCount.value.toString(),
                       subText: "In progress now",
                       color: AppColors.atelierSilkGreen,
                       icon: Icons.pending_actions,
                       showTrend: false,
-                    ),
+                    )),
                   ],
                 ),
 
@@ -147,52 +150,69 @@ class ClientDashboardScreen extends GetView<ClientDashboardController> {
                 Divider(color: colors.outlineVariant, height: 1),
                 const SizedBox(height: 10),
 
-                if (controller.orders.isNotEmpty) ...[
-                  Text(
-                    "ORDER PROGRESS",
-                    style: TextStyle(
-                      color: colors.onSurface.withValues(alpha: 0.6),
-                      fontSize: 12,
-                      letterSpacing: 1.2,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
+                Obx(() {
+                  if (controller.orders.isNotEmpty) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "ORDER PROGRESS",
+                          style: TextStyle(
+                            color: colors.onSurface.withValues(alpha: 0.6),
+                            fontSize: 12,
+                            letterSpacing: 1.2,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        _buildLatestOrderCard(cardColor, colors, isDark),
+                        const SizedBox(height: 10),
+                        Divider(color: colors.outlineVariant, height: 1),
+                        const SizedBox(height: 10),
+                      ],
+                    );
+                  }
+                  return const SizedBox.shrink();
+                }),
 
-                  _buildLatestOrderCard(cardColor, colors, isDark),
+                Obx(() {
+                  if (controller.carouselItems.isNotEmpty) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "EXPLORE COLLECTIONS",
+                          style: TextStyle(
+                            color: colors.onSurface.withValues(alpha: 0.6),
+                            fontSize: 12,
+                            letterSpacing: 1.2,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        _buildCarousel(colors),
+                        const SizedBox(height: 10),
+                        Divider(color: colors.outlineVariant, height: 1),
+                        const SizedBox(height: 10),
+                      ],
+                    );
+                  }
+                  return const SizedBox.shrink();
+                }),
 
-                  const SizedBox(height: 10),
-                  Divider(color: colors.outlineVariant, height: 1),
-                  const SizedBox(height: 10),
-                ],
-
-                if (controller.carouselItems.isNotEmpty) ...[
-                  Text(
-                    "EXPLORE COLLECTIONS",
-                    style: TextStyle(
-                      color: colors.onSurface.withValues(alpha: 0.6),
-                      fontSize: 12,
-                      letterSpacing: 1.2,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  _buildCarousel(colors),
-                  const SizedBox(height: 10),
-                  Divider(color: colors.outlineVariant, height: 1),
-                  const SizedBox(height: 10),
-                ],
-
-                RecentActivityPanel(
+                Obx(() => RecentActivityPanel(
                   activities: controller.mappedActivities,
                   onViewAll: controller.navigateToFullActivityList,
-                ),
+                )),
                 const SizedBox(height: 10),
               ],
             ),
           ),
         );
       }),
+    ),
+  ],
+),
       bottomNavigationBar: const BottomNavBar(currentIndex: 0),
       floatingActionButton: FloatingActionButton(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
@@ -384,7 +404,7 @@ class ClientDashboardScreen extends GetView<ClientDashboardController> {
                 borderRadius: BorderRadius.circular(16),
                 image: item.imageUrl.isNotEmpty
                     ? DecorationImage(
-                        image: NetworkImage(item.imageUrl),
+                        image: CachedNetworkImageProvider(item.imageUrl),
                         fit: BoxFit.cover,
                       )
                     : null,

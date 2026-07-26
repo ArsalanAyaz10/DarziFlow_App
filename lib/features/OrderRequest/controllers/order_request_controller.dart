@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:dariziflow_app/data/models/order_request_model.dart';
 import 'package:dariziflow_app/features/OrderRequest/services/order_request_service.dart';
 import 'package:get/get.dart';
@@ -11,6 +13,7 @@ class OrderRequestController extends GetxController {
   final Rx<OrderRequestModel?> currentRequest = Rx<OrderRequestModel?>(null);
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
+  final RxList<File> pickedFiles = <File>[].obs;
 
   @override
   void onInit() {
@@ -18,12 +21,38 @@ class OrderRequestController extends GetxController {
     fetchRequests();
   }
 
+  /// Pick files for order request
+  Future<void> pickFiles() async {
+    try {
+      final result = await FilePicker.pickFiles(
+        allowMultiple: true,
+        type: FileType.any,
+      );
+      if (result != null) {
+        for (var path in result.paths) {
+          if (path != null) {
+            pickedFiles.add(File(path));
+          }
+        }
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to pick files');
+    }
+  }
+
+  /// Remove a picked file
+  void removeFile(int index) {
+    if (index >= 0 && index < pickedFiles.length) {
+      pickedFiles.removeAt(index);
+    }
+  }
+
   /// Fetch all requests for the current user
-  Future<void> fetchRequests() async {
+  Future<void> fetchRequests({Map<String, dynamic>? queryParameters}) async {
     try {
       isLoading.value = true;
       errorMessage.value = '';
-      final fetchedRequests = await _service.getAllRequests();
+      final fetchedRequests = await _service.getAllRequests(queryParameters: queryParameters);
       requests.assignAll(fetchedRequests);
     } catch (e) {
       errorMessage.value = e.toString();
@@ -58,20 +87,43 @@ class OrderRequestController extends GetxController {
     required String type,
     required String description,
     required DateTime targetDueDate,
-    required List<AttachedFileModel> files,
   }) async {
     try {
       isLoading.value = true;
+      
+      // Upload files first
+      List<AttachedFileModel> uploadedFiles = [];
+      if (pickedFiles.isNotEmpty) {
+        final sigData = await _service.getUploadSignature(context: 'order_request');
+        for (var file in pickedFiles) {
+          final uploadResult = await _service.uploadToCloudinary(
+            filePath: file.path,
+            cloudName: sigData['cloudName'],
+            apiKey: sigData['apiKey'],
+            timestamp: sigData['timestamp'].toString(),
+            signature: sigData['signature'],
+            folder: sigData['folder'],
+          );
+          uploadedFiles.add(AttachedFileModel(
+            fileName: file.path.split(Platform.pathSeparator).last,
+            fileUrl: uploadResult['secure_url'],
+            publicId: uploadResult['public_id'],
+            resourceType: uploadResult['resource_type'],
+          ));
+        }
+      }
+
       final data = {
         'name': name,
         'type': type,
         'description': description,
         'targetDueDate': targetDueDate.toIso8601String(),
-        'originalReferenceFiles': files.map((f) => f.toJson()).toList(),
+        'originalReferenceFiles': uploadedFiles.map((f) => f.toJson()).toList(),
       };
 
       await _service.createRequest(data);
       await fetchRequests(); // Refresh list
+      pickedFiles.clear(); // Clear picked files on success
       Get.snackbar('Success', 'Order request submitted successfully');
       return true;
     } catch (e) {
@@ -95,9 +147,9 @@ class OrderRequestController extends GetxController {
       isLoading.value = true;
       final proposalData = {
         'proposedAmount': ?amount,
-        if (dueDate != null) 'proposedDueDate': dueDate.toIso8601String(),
+        'proposedDueDate': ?dueDate?.toIso8601String(),
         'remarks': ?remarks,
-        if (files != null) 'proposedReferenceFiles': files.map((f) => f.toJson()).toList(),
+        'proposedReferenceFiles': ?files?.map((f) => f.toJson()).toList(),
         'departmentSequenceIds': ?departmentSequenceIds,
       };
 
